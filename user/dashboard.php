@@ -18,7 +18,7 @@ if (!isset($_SESSION['usuario']) || $_SESSION['rol'] != 'Usuario') {
     <div class="container">
         <h1>Dashboard - Usuario</h1>
         <ul>
-            <li><a href="seleccionar_viandas.php">Seleccionar Viandas</a></li>
+            <li><a href="seleccionar_vianda.php">Seleccionar Viandas</a></li>
             <li><a href="historial_pedidos.php">Historial de Pedidos</a></li>
             <li><a href="cancelar_vianda.php">Cancelar Vianda</a></li>
             <li><a href="../logout.php">Cerrar Sesión</a></li>
