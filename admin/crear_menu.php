@@ -16,11 +16,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $fecha = $_POST['fecha'];
     $promocion = $_POST['promocion'];
 
-    $query = "INSERT INTO menu (nombre, precio, fecha, promocion) VALUES ('$nombre', '$precio', '$fecha', '$promocion')";
-    if (mysqli_query($conn, $query)) {
-        echo "Menú creado con éxito.";
+    // Validación de datos
+    if (empty($nombre) || empty($precio) || empty($fecha) || empty($promocion)) {
+        echo "Todos los campos son obligatorios.";
     } else {
-        echo "Error: " . $query . "<br>" . mysqli_error($conn);
+        // Preparación de la consulta SQL
+        $query = "INSERT INTO menu (nombre, precio, fecha, promocion) VALUES ('$nombre', '$precio', '$fecha', '$promocion')";
+        if (mysqli_query($conn, $query)) {
+            echo "Menú creado con éxito.";
+        } else {
+            echo "Error: " . $query . "<br>" . mysqli_error($conn);
+        }
     }
 }
 ?>
