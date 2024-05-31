@@ -11,9 +11,13 @@ ini_set('display_errors', 1);
 include '../includes/db_connect.php';
 
 // Obtener los hijos del usuario
-$usuario_id = $_SESSION['usuario_id'];
-$query = "SELECT * FROM hijos WHERE usuario_id = '$usuario_id'";
-$hijos_result = mysqli_query($conn, $query);
+if (isset($_SESSION['usuario_id'])) {
+    $usuario_id = $_SESSION['usuario_id'];
+    $query = "SELECT * FROM hijos WHERE usuario_id = '$usuario_id'";
+    $hijos_result = mysqli_query($conn, $query);
+} else {
+    $mensaje = "Error: No se pudo encontrar el usuario.";
+}
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Procesar la compra de viandas
@@ -35,33 +39,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     // Verificar si el usuario tiene saldo suficiente
-    $query = "SELECT saldo FROM usuarios WHERE id = '$usuario_id'";
-    $saldo_result = mysqli_query($conn, $query);
-    $saldo = mysqli_fetch_assoc($saldo_result)['saldo'];
+    if (isset($_SESSION['usuario_id'])) {
+        $usuario_id = $_SESSION['usuario_id'];
+        $query = "SELECT saldo FROM usuarios WHERE id = '$usuario_id'";
+        $saldo_result = mysqli_query($conn, $query);
+        $saldo = mysqli_fetch_assoc($saldo_result)['saldo'];
 
-    // Comprobar si se seleccionó una vianda
-    if (isset($_POST['vianda_id'])) {
-        $vianda_id = $_POST['vianda_id'];
-        $query = "SELECT precio FROM viandas WHERE id = '$vianda_id'";
-        $precio_result = mysqli_query($conn, $query);
-        $precio = mysqli_fetch_assoc($precio_result)['precio'];
+        // Comprobar si se seleccionó una vianda
+        if (isset($_POST['vianda_id'])) {
+            $vianda_id = $_POST['vianda_id'];
+            $query = "SELECT precio FROM viandas WHERE id = '$vianda_id'";
+            $precio_result = mysqli_query($conn, $query);
+            $precio = mysqli_fetch_assoc($precio_result)['precio'];
 
-        if ($saldo >= $precio) {
-            // Deduct saldo
-            $nuevo_saldo = $saldo - $precio;
-            $query = "UPDATE usuarios SET saldo = '$nuevo_saldo' WHERE id = '$usuario_id'";
-            mysqli_query($conn, $query);
+            if ($saldo >= $precio) {
+                // Deduct saldo
+                $nuevo_saldo = $saldo - $precio;
+                $query = "UPDATE usuarios SET saldo = '$nuevo_saldo' WHERE id = '$usuario_id'";
+                mysqli_query($conn, $query);
 
-            // Insertar en la tabla de pedidos
-            $query = "INSERT INTO pedidos (usuario_id, hijo_id, vianda_id, fecha) VALUES ('$usuario_id', '$hijo_id', '$vianda_id', '$fecha')";
-            if (mysqli_query($conn, $query)) {
-                $mensaje = "Vianda seleccionada con éxito.";
+                // Insertar en la tabla de pedidos
+                $query = "INSERT INTO pedidos (usuario_id, hijo_id, vianda_id, fecha) VALUES ('$usuario_id', '$hijo_id', '$vianda_id', '$fecha')";
+                if (mysqli_query($conn, $query)) {
+                    $mensaje = "Vianda seleccionada con éxito.";
+                } else {
+                    $mensaje = "Error: " . mysqli_error($conn);
+                }
             } else {
-                $mensaje = "Error: " . mysqli_error($conn);
+                $mensaje = "Saldo insuficiente.";
             }
-        } else {
-            $mensaje = "Saldo insuficiente.";
         }
+    } else {
+        $mensaje = "Error: No se pudo encontrar el usuario.";
     }
 }
 ?>
@@ -84,10 +93,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <div class="form-group">
                 <label for="hijo_id">Seleccionar Hijo</label>
                 <select id="hijo_id" name="hijo_id" required>
-                    <?php while ($row = mysqli_fetch_assoc($hijos_result)) : ?>
-                        <option value="<?= $row['id'] ?>"><?= $row['nombre'] ?> - <?= $row['curso'] ?></option>
-                    <?php endwhile; ?>
+                    <?php if (isset($hijos_result)) : ?>
+                        <?php while ($row = mysqli_fetch_assoc($hijos_result)) : ?>
+                            <option value="<?= $row['id'] ?>"><?= $row['nombre'] ?> - <?= $row['curso'] ?></option>
+                        <?php endwhile; ?>
+                    <?php else : ?>
+                        <option value="">No se encontraron hijos</option>
+                    <?php endif; ?>
                 </select>
+            </div>
+            <div class="form-group">
+                <label for="fecha">Fecha</label>
+                <input type="date" id="fecha" name="fecha" required>
             </div>
             <?php if (isset($viandas_disponibles)) : ?>
                 <div class="form-group">
@@ -99,10 +116,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     </select>
                 </div>
             <?php endif; ?>
-            <div class="form-group">
-                <label for="fecha">Fecha</label>
-                <input type="date" id="fecha" name="fecha" required>
-            </div>
             <button type="submit">Seleccionar Vianda</button>
         </form>
         <a href="dashboard.php">Volver al Dashboard</a>
