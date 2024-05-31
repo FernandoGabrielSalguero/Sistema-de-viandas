@@ -5,6 +5,9 @@ if (!isset($_SESSION['usuario']) || $_SESSION['rol'] != 'Administrador') {
     exit;
 }
 
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 include '../includes/db_connect.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
