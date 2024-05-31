@@ -14,6 +14,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $_SESSION['usuario'] = $user['usuario'];
         $_SESSION['rol'] = $user['rol'];
 
+        // Obtener el ID del usuario y establecer $_SESSION['usuario_id']
+        $usuario_id = $user['id'];
+        $_SESSION['usuario_id'] = $usuario_id;
+
         if ($user['rol'] == 'Administrador') {
             header('Location: admin/dashboard.php');
         } else {
