@@ -1,26 +1,25 @@
-<?php
-session_start();
-include 'includes/db_connect.php';
-
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $username = $_POST['username'];
-    $password = $_POST['password'];
-
-    $query = "SELECT * FROM usuarios WHERE usuario = '$username' AND contrasena = '$password'";
-    $result = mysqli_query($conn, $query);
-
-    if (mysqli_num_rows($result) == 1) {
-        $user = mysqli_fetch_assoc($result);
-        $_SESSION['usuario'] = $user['usuario'];
-        $_SESSION['rol'] = $user['rol'];
-
-        if ($user['rol'] == 'Administrador') {
-            header('Location: admin/dashboard.php');
-        } else {
-            header('Location: user/dashboard.php');
-        }
-        exit;
-    } else {
-        echo "Usuario o contraseña incorrectos.";
-    }
-}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Gestión de Viandas</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+    <div class="login-container">
+        <h1>Login</h1>
+        <form action="login.php" method="post">
+            <div class="form-group">
+                <label for="username">Usuario</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit">Ingresar</button>
+        </form>
+    </div>
+</body>
+</html>
