@@ -17,8 +17,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $telefono = $_POST['telefono'];
         $correo = $_POST['correo'];
         $rol = $_POST['rol'];
+        $notas = $_POST['notas'];
+        $sucursal = $_POST['sucursal'];
 
-        $query = "INSERT INTO usuarios (nombre, apellido, usuario, contrasena, telefono, correo, rol) VALUES ('$nombre', '$apellido', '$usuario', '$contrasena', '$telefono', '$correo', '$rol')";
+        $query = "INSERT INTO usuarios (nombre, apellido, usuario, contrasena, telefono, correo, rol, notas, sucursal) VALUES ('$nombre', '$apellido', '$usuario', '$contrasena', '$telefono', '$correo', '$rol', '$notas', '$sucursal')";
         if (mysqli_query($conn, $query)) {
             $usuario_id = mysqli_insert_id($conn);
 
@@ -54,8 +56,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $telefono = $_POST['telefono'];
         $correo = $_POST['correo'];
         $rol = $_POST['rol'];
+        $notas = $_POST['notas'];
+        $sucursal = $_POST['sucursal'];
 
-        $query = "UPDATE usuarios SET nombre='$nombre', apellido='$apellido', usuario='$usuario', contrasena='$contrasena', telefono='$telefono', correo='$correo', rol='$rol' WHERE id='$id'";
+        $query = "UPDATE usuarios SET nombre='$nombre', apellido='$apellido', usuario='$usuario', contrasena='$contrasena', telefono='$telefono', correo='$correo', rol='$rol', notas='$notas', sucursal='$sucursal' WHERE id='$id'";
         if (mysqli_query($conn, $query)) {
             echo "Usuario modificado con éxito.";
         } else {
@@ -114,6 +118,14 @@ $result = mysqli_query($conn, $query);
                     <option value="Administrador">Administrador</option>
                 </select>
             </div>
+            <div class="form-group">
+                <label for="notas">Notas</label>
+                <textarea id="notas" name="notas"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="sucursal">Sucursal</label>
+                <input type="text" id="sucursal" name="sucursal" required>
+            </div>
 
             <!-- Campos para agregar hijos -->
             <div id="hijos-container">
@@ -141,6 +153,8 @@ $result = mysqli_query($conn, $query);
                     <th>Teléfono</th>
                     <th>Correo</th>
                     <th>Rol</th>
+                    <th>Notas</th>
+                    <th>Sucursal</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -154,6 +168,8 @@ $result = mysqli_query($conn, $query);
                         <td><?= $row['telefono'] ?></td>
                         <td><?= $row['correo'] ?></td>
                         <td><?= $row['rol'] ?></td>
+                        <td><?= $row['notas'] ?></td>
+                        <td><?= $row['sucursal'] ?></td>
                         <td>
                             <form action="gestionar_usuarios.php" method="post" style="display:inline-block;">
                                 <input type="hidden" name="modificar_usuario" value="1">
@@ -165,6 +181,8 @@ $result = mysqli_query($conn, $query);
                                 <input type="hidden" name="telefono" value="<?= $row['telefono'] ?>">
                                 <input type="hidden" name="correo" value="<?= $row['correo'] ?>">
                                 <input type="hidden" name="rol" value="<?= $row['rol'] ?>">
+                                <input type="hidden" name="notas" value="<?= $row['notas'] ?>">
+                                <input type="hidden" name="sucursal" value="<?= $row['sucursal'] ?>">
                                 <button type="submit">Modificar</button>
                             </form>
                         </td>
@@ -174,20 +192,32 @@ $result = mysqli_query($conn, $query);
         </table>
         <a href="dashboard.php">Volver al Dashboard</a>
     </div>
-
+    
     <script>
         document.getElementById('agregar-hijo').addEventListener('click', function() {
-            const hijosContainer = document.getElementById('hijos-container');
-            const hijoCount = hijosContainer.getElementsByClassName('hijo-form').length + 1;
-            const newHijoForm = document.createElement('div');
-            newHijoForm.classList.add('hijo-form');
-            newHijoForm.innerHTML = `
-                <label for="hijo_nombre_${hijoCount}">Nombre del Hijo</label>
-                <input type="text" id="hijo_nombre_${hijoCount}" name="hijo_nombre[]">
-                <label for="hijo_curso_${hijoCount}">Curso</label>
-                <input type="text" id="hijo_curso_${hijoCount}" name="hijo_curso[]">
-            `;
-            hijosContainer.appendChild(newHijoForm);
+            var container = document.getElementById('hijos-container');
+            var hijoForm = document.createElement('div');
+            hijoForm.classList.add('hijo-form');
+
+            var nombreLabel = document.createElement('label');
+            nombreLabel.innerText = 'Nombre del Hijo';
+            hijoForm.appendChild(nombreLabel);
+
+            var nombreInput = document.createElement('input');
+            nombreInput.type = 'text';
+            nombreInput.name = 'hijo_nombre[]';
+            hijoForm.appendChild(nombreInput);
+
+            var cursoLabel = document.createElement('label');
+            cursoLabel.innerText = 'Curso';
+            hijoForm.appendChild(cursoLabel);
+
+            var cursoInput = document.createElement('input');
+            cursoInput.type = 'text';
+            cursoInput.name = 'hijo_curso[]';
+            hijoForm.appendChild(cursoInput);
+
+            container.appendChild(hijoForm);
         });
     </script>
 </body>
