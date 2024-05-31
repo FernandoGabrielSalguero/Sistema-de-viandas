@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $fecha = $_POST['fecha'];
 
     // Obtener viandas disponibles para la fecha seleccionada
-    $query = "SELECT * FROM viandas WHERE fecha = '$fecha'";
+    $query = "SELECT * FROM menu WHERE fecha = '$fecha'";
     $viandas_result = mysqli_query($conn, $query);
 
     if (mysqli_num_rows($viandas_result) > 0) {
@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Comprobar si se seleccionó una vianda
         if (isset($_POST['vianda_id'])) {
             $vianda_id = $_POST['vianda_id'];
-            $query = "SELECT precio FROM viandas WHERE id = '$vianda_id'";
+            $query = "SELECT precio FROM menu WHERE id = '$vianda_id'";
             $precio_result = mysqli_query($conn, $query);
             $precio = mysqli_fetch_assoc($precio_result)['precio'];
 
