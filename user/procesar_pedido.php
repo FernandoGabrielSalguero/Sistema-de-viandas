@@ -19,8 +19,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if (mysqli_num_rows($result_verificar) > 0) {
         // Insertar el pedido en la base de datos, incluyendo las notas
-        $query = "INSERT INTO pedidos (usuario_id, hijo_id, vianda_id, fecha, notas) 
-                  VALUES ('$usuario_id', '$hijo_id', '$vianda_id', '$fecha', '$notas')";
+        $query = "INSERT INTO pedidos (usuario_id, hijo_id, id, fecha, notas) 
+                  VALUES ('$usuario_id', '$hijo_id', '$id', '$fecha', '$notas')";
         if (mysqli_query($conn, $query)) {
             $mensaje = "Pedido realizado con éxito.";
         } else {
