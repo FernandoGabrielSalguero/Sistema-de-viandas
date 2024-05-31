@@ -82,6 +82,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Seleccionar Vianda</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
+    <script>
+        function confirmarPedido() {
+            if (confirm("¿Estás seguro de querer realizar este pedido?")) {
+                document.getElementById("pedido_form").submit();
+            }
+        }
+    </script>
 </head>
 <body>
     <div class="container">
@@ -89,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <?php if (isset($mensaje)) : ?>
             <p><?= $mensaje ?></p>
         <?php endif; ?>
-        <form action="seleccionar_vianda.php" method="post">
+        <form id="pedido_form" action="seleccionar_vianda.php" method="post">
             <div class="form-group">
                 <label for="hijo_id">Seleccionar Hijo</label>
                 <select id="hijo_id" name="hijo_id" required>
@@ -116,7 +123,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     </select>
                 </div>
             <?php endif; ?>
-            <button type="submit">Seleccionar Vianda</button>
+            <?php if (isset($viandas_disponibles) && isset($hijos_result)) : ?>
+                <button type="button" onclick="confirmarPedido()">Realizar Pedido</button>
+            <?php endif; ?>
         </form>
         <a href="dashboard.php">Volver al Dashboard</a>
     </div>
