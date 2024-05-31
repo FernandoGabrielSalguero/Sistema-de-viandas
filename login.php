@@ -2,25 +2,18 @@
 session_start();
 include 'includes/db_connect.php';
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $username = $_POST['username'];
-    $password = $_POST['password'];
+if (mysqli_num_rows($result) == 1) {
+    $user = mysqli_fetch_assoc($result);
+    $_SESSION['usuario'] = $user['usuario'];
+    $_SESSION['rol'] = $user['rol'];
+    $_SESSION['usuario_id'] = $user['usuario_id']; // Asegúrate de que 'usuario_id' sea el nombre correcto del campo en tu base de datos
 
-    $query = "SELECT * FROM usuarios WHERE usuario = '$username' AND contrasena = '$password'";
-    $result = mysqli_query($conn, $query);
-
-    if (mysqli_num_rows($result) == 1) {
-        $user = mysqli_fetch_assoc($result);
-        $_SESSION['usuario'] = $user['usuario'];
-        $_SESSION['rol'] = $user['rol'];
-
-        if ($user['rol'] == 'Administrador') {
-            header('Location: admin/dashboard.php');
-        } else {
-            header('Location: user/dashboard.php');
-        }
-        exit;
+    if ($user['rol'] == 'Administrador') {
+        header('Location: admin/dashboard.php');
     } else {
-        echo "Usuario o contraseña incorrectos.";
+        header('Location: user/dashboard.php');
     }
+    exit;
+} else {
+    echo "Usuario o contraseña incorrectos.";
 }
