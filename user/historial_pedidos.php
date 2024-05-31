@@ -43,7 +43,7 @@ $result = mysqli_query($conn, $query);
                 <?php endwhile; ?>
             </tbody>
         </table>
-        <a href="dashboard_usuario.php">Volver al Dashboard</a>
+        <a href="dashboard.php">Volver al Dashboard</a>
     </div>
 </body>
 </html>

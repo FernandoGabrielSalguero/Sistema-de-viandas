@@ -47,7 +47,7 @@ $result_menu = mysqli_query($conn, $query_menu);
             </div>
             <button type="submit">Comprar Vianda</button>
         </form>
-        <a href="dashboard_usuario.php">Volver al Dashboard</a>
+        <a href="dashboard.php">Volver al Dashboard</a>
     </div>
 </body>
 </html>
