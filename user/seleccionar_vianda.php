@@ -38,6 +38,7 @@ while ($fecha_row = mysqli_fetch_assoc($fechas_result)) {
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -51,6 +52,7 @@ while ($fecha_row = mysqli_fetch_assoc($fechas_result)) {
         }
     </script>
 </head>
+
 <body>
     <div class="container">
         <h1>Seleccionar Vianda</h1>
@@ -74,7 +76,7 @@ while ($fecha_row = mysqli_fetch_assoc($fechas_result)) {
                 <div class="form-group">
                     <label for="<?= $fecha ?>">Menús del <?= $fecha ?></label>
                     <select id="<?= $fecha ?>" name="vianda_id" required>
-                        <option value="">Sin menú elegido</option> <!-- Opción predeterminada -->
+                        <option value="">Sin menú elegido</option>
                         <?php foreach ($menus as $menu) : ?>
                             <option value="<?= $menu['id'] ?>"><?= $menu['nombre'] ?> - $<?= $menu['precio'] ?></option>
                         <?php endforeach; ?>
@@ -94,4 +96,5 @@ while ($fecha_row = mysqli_fetch_assoc($fechas_result)) {
         <a href="dashboard.php">Volver al Dashboard</a>
     </div>
 </body>
+
 </html>
