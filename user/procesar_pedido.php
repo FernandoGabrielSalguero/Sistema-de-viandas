@@ -2,6 +2,9 @@
 session_start();
 include '../includes/db_connect.php';
 
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Obtener los datos del formulario
     $usuario_id = $_SESSION['usuario_id'];
