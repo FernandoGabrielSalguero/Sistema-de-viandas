@@ -19,60 +19,21 @@ if (isset($_SESSION['usuario_id'])) {
     $mensaje = "Error: No se pudo encontrar el usuario.";
 }
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Procesar la compra de viandas
-    $hijo_id = $_POST['hijo_id'];
-    $fecha = $_POST['fecha'];
+// Obtener las fechas únicas de los menús disponibles
+$query_fechas = "SELECT DISTINCT fecha FROM menu";
+$fechas_result = mysqli_query($conn, $query_fechas);
 
-    // Obtener viandas disponibles para la fecha seleccionada
-    $query = "SELECT * FROM menu WHERE fecha = '$fecha'";
-    $viandas_result = mysqli_query($conn, $query);
+// Array para almacenar los menús agrupados por fecha
+$menus_por_fecha = array();
 
-    if (mysqli_num_rows($viandas_result) > 0) {
-        // Se encontraron viandas para la fecha seleccionada
-        while ($row = mysqli_fetch_assoc($viandas_result)) {
-            $viandas_disponibles[] = $row;
-        }
-    } else {
-        // No se encontraron viandas para la fecha seleccionada
-        $mensaje = "No hay viandas disponibles para la fecha seleccionada.";
-    }
-
-    // Verificar si el usuario tiene saldo suficiente
-    if (isset($_SESSION['usuario_id'])) {
-        $usuario_id = $_SESSION['usuario_id'];
-        $query = "SELECT saldo FROM usuarios WHERE id = '$usuario_id'";
-        $saldo_result = mysqli_query($conn, $query);
-        $saldo = mysqli_fetch_assoc($saldo_result)['saldo'];
-
-        // Comprobar si se seleccionó una vianda
-        if (isset($_POST['vianda_id'])) {
-            $vianda_id = $_POST['vianda_id'];
-            $query = "SELECT precio FROM menu WHERE id = '$vianda_id'";
-            $precio_result = mysqli_query($conn, $query);
-            $precio = mysqli_fetch_assoc($precio_result)['precio'];
-
-            if ($saldo >= $precio) {
-                // Deduct saldo
-                $nuevo_saldo = $saldo - $precio;
-                $query = "UPDATE usuarios SET saldo = '$nuevo_saldo' WHERE id = '$usuario_id'";
-                mysqli_query($conn, $query);
-
-                // Insertar en la tabla de pedidos
-                $query = "INSERT INTO pedidos (usuario_id, hijo_id, vianda_id, fecha) VALUES ('$usuario_id', '$hijo_id', '$vianda_id', '$fecha')";
-                if (mysqli_query($conn, $query)) {
-                    $mensaje = "Vianda seleccionada con éxito.";
-                } else {
-                    $mensaje = "Error: " . mysqli_error($conn);
-                }
-            } else {
-                $mensaje = "Saldo insuficiente.";
-            }
-        }
-    } else {
-        $mensaje = "Error: No se pudo encontrar el usuario.";
-    }
+// Iterar sobre las fechas para obtener los menús correspondientes
+while ($fecha_row = mysqli_fetch_assoc($fechas_result)) {
+    $fecha = $fecha_row['fecha'];
+    $query_menu = "SELECT * FROM menu WHERE fecha = '$fecha'";
+    $menu_result = mysqli_query($conn, $query_menu);
+    $menus_por_fecha[$fecha] = mysqli_fetch_all($menu_result, MYSQLI_ASSOC);
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -109,21 +70,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <?php endif; ?>
                 </select>
             </div>
-            <div class="form-group">
-                <label for="fecha">Fecha</label>
-                <input type="date" id="fecha" name="fecha" required>
-            </div>
-            <?php if (isset($viandas_disponibles)) : ?>
+            <?php foreach ($menus_por_fecha as $fecha => $menus) : ?>
                 <div class="form-group">
-                    <label for="vianda_id">Seleccionar Vianda</label>
-                    <select id="vianda_id" name="vianda_id" required>
-                        <?php foreach ($viandas_disponibles as $vianda) : ?>
-                            <option value="<?= $vianda['id'] ?>"><?= $vianda['nombre'] ?> - $<?= $vianda['precio'] ?></option>
+                    <label for="<?= $fecha ?>">Menús del <?= $fecha ?></label>
+                    <select id="<?= $fecha ?>" name="vianda_id" required>
+                        <?php foreach ($menus as $menu) : ?>
+                            <option value="<?= $menu['id'] ?>"><?= $menu['nombre'] ?> - $<?= $menu['precio'] ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
-            <?php endif; ?>
-            <?php if (isset($viandas_disponibles) && isset($hijos_result)) : ?>
+            <?php endforeach; ?>
+            <?php if (isset($hijos_result)) : ?>
                 <button type="button" onclick="confirmarPedido()">Realizar Pedido</button>
             <?php endif; ?>
         </form>
