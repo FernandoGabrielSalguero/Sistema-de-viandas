@@ -9,12 +9,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Obtener los datos del formulario
     $usuario_id = $_SESSION['usuario_id'];
     $hijo_id = $_POST['hijo_id'];
-    $vianda_id = $_POST['vianda_id'];
+    $id = $_POST['id'];
     $fecha = date('Y-m-d'); // Obtener la fecha actual
     $notas = $_POST['notas']; // Obtener las notas del pedido
 
     // Verificar si el ID de la vianda existe en la tabla menu
-    $query_verificar = "SELECT id FROM menu WHERE id = '$vianda_id'";
+    $query_verificar = "SELECT id FROM menu WHERE id = '$id'";
     $result_verificar = mysqli_query($conn, $query_verificar);
 
     if (mysqli_num_rows($result_verificar) > 0) {
