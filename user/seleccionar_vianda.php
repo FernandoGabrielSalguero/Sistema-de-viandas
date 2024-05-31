@@ -81,6 +81,12 @@ while ($fecha_row = mysqli_fetch_assoc($fechas_result)) {
                     </select>
                 </div>
             <?php endforeach; ?>
+            <!-- Agregar campo de notas -->
+            <div class="form-group">
+                <label for="notas">Notas del Pedido</label>
+                <textarea id="notas" name="notas" rows="4" cols="50"></textarea>
+            </div>
+            <!-- Botón para realizar el pedido -->
             <?php if (isset($hijos_result)) : ?>
                 <button type="button" onclick="confirmarPedido()">Realizar Pedido</button>
             <?php endif; ?>
