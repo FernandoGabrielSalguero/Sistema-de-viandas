@@ -57,7 +57,7 @@ while ($fecha_row = mysqli_fetch_assoc($fechas_result)) {
         <?php if (isset($mensaje)) : ?>
             <p><?= $mensaje ?></p>
         <?php endif; ?>
-        <form id="pedido_form" action="seleccionar_vianda.php" method="post">
+        <form id="pedido_form" action="procesar_pedido.php" method="post">
             <div class="form-group">
                 <label for="hijo_id">Seleccionar Hijo</label>
                 <select id="hijo_id" name="hijo_id" required>
