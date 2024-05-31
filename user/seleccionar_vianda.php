@@ -74,6 +74,7 @@ while ($fecha_row = mysqli_fetch_assoc($fechas_result)) {
                 <div class="form-group">
                     <label for="<?= $fecha ?>">Menús del <?= $fecha ?></label>
                     <select id="<?= $fecha ?>" name="vianda_id" required>
+                        <option value="">Sin menú elegido</option> <!-- Opción predeterminada -->
                         <?php foreach ($menus as $menu) : ?>
                             <option value="<?= $menu['id'] ?>"><?= $menu['nombre'] ?> - $<?= $menu['precio'] ?></option>
                         <?php endforeach; ?>
