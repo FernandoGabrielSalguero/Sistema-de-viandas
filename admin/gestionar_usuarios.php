@@ -20,6 +20,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         $query = "INSERT INTO usuarios (nombre, apellido, usuario, contrasena, telefono, correo, rol) VALUES ('$nombre', '$apellido', '$usuario', '$contrasena', '$telefono', '$correo', '$rol')";
         if (mysqli_query($conn, $query)) {
+            $usuario_id = mysqli_insert_id($conn);
+
+            // Insertar los hijos del usuario en la tabla de hijos
+            if (isset($_POST['hijo_nombre']) && isset($_POST['hijo_curso'])) {
+                $hijo_nombres = $_POST['hijo_nombre'];
+                $hijo_cursos = $_POST['hijo_curso'];
+
+                for ($i = 0; $i < count($hijo_nombres); $i++) {
+                    $hijo_nombre = $hijo_nombres[$i];
+                    $hijo_curso = $hijo_cursos[$i];
+
+                    if (!empty($hijo_nombre) && !empty($hijo_curso)) {
+                        $query_hijo = "INSERT INTO hijos (usuario_id, nombre, curso) VALUES ('$usuario_id', '$hijo_nombre', '$hijo_curso')";
+                        mysqli_query($conn, $query_hijo);
+                    }
+                }
+            }
+
             echo "Usuario creado con éxito.";
         } else {
             echo "Error: " . $query . "<br>" . mysqli_error($conn);
@@ -96,6 +114,19 @@ $result = mysqli_query($conn, $query);
                     <option value="Administrador">Administrador</option>
                 </select>
             </div>
+
+            <!-- Campos para agregar hijos -->
+            <div id="hijos-container">
+                <h3>Hijos</h3>
+                <div class="hijo-form">
+                    <label for="hijo_nombre_1">Nombre del Hijo</label>
+                    <input type="text" id="hijo_nombre_1" name="hijo_nombre[]">
+                    <label for="hijo_curso_1">Curso</label>
+                    <input type="text" id="hijo_curso_1" name="hijo_curso[]">
+                </div>
+            </div>
+            <button type="button" id="agregar-hijo">Agregar otro hijo</button>
+
             <button type="submit">Crear Usuario</button>
         </form>
 
@@ -143,5 +174,21 @@ $result = mysqli_query($conn, $query);
         </table>
         <a href="dashboard.php">Volver al Dashboard</a>
     </div>
+
+    <script>
+        document.getElementById('agregar-hijo').addEventListener('click', function() {
+            const hijosContainer = document.getElementById('hijos-container');
+            const hijoCount = hijosContainer.getElementsByClassName('hijo-form').length + 1;
+            const newHijoForm = document.createElement('div');
+            newHijoForm.classList.add('hijo-form');
+            newHijoForm.innerHTML = `
+                <label for="hijo_nombre_${hijoCount}">Nombre del Hijo</label>
+                <input type="text" id="hijo_nombre_${hijoCount}" name="hijo_nombre[]">
+                <label for="hijo_curso_${hijoCount}">Curso</label>
+                <input type="text" id="hijo_curso_${hijoCount}" name="hijo_curso[]">
+            `;
+            hijosContainer.appendChild(newHijoForm);
+        });
+    </script>
 </body>
 </html>
