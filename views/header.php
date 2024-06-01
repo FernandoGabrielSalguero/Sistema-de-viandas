@@ -23,6 +23,8 @@ if (!isset($_SESSION['userid']) || $_SESSION['role'] != 'Administrador') {
             <button onclick="location.href='manage_menus.php'">Gestión de Menús</button>
             <button onclick="location.href='manage_users.php'">Gestión de Usuarios</button>
             <button onclick="location.href='manage_orders.php'">Gestión de Pedidos</button>
+            <button onclick="location.href='manage_colegios.php'">Colegios</button>
+            <button onclick="location.href='manage_cursos.php'">Cursos</button>
             <button onclick="location.href='../php/logout.php'">Logout</button>
         </nav>
     </div>
