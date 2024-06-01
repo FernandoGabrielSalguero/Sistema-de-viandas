@@ -7,10 +7,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 
 include '../includes/db.php';
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Código para añadir o modificar usuarios
-}
-
+// Fetch users from the database
 $query = "SELECT * FROM users";
 $result = $conn->query($query);
 ?>
@@ -34,7 +31,7 @@ $result = $conn->query($query);
         <a href="../logout.php">Cerrar Sesión</a>
     </div>
     <div class="main-content">
-        <h2>Usuarios</h2>
+        <h2>Gestionar Usuarios</h2>
         <table>
             <thead>
                 <tr>
@@ -43,7 +40,7 @@ $result = $conn->query($query);
                     <th>Apellido</th>
                     <th>Usuario</th>
                     <th>Teléfono</th>
-                    <th>Email</th>
+                    <th>Correo</th>
                     <th>Rol</th>
                     <th>Acciones</th>
                 </tr>
