@@ -3,6 +3,7 @@ include '../php/db.php';
 session_start();
 
 if (!isset($_SESSION['userid']) || $_SESSION['role'] != 'Usuario') {
+    echo "<script>console.error('Usuario no autorizado o sesión no iniciada');</script>";
     header("Location: login.php");
     exit();
 }
@@ -11,14 +12,18 @@ if (!isset($_SESSION['userid']) || $_SESSION['role'] != 'Usuario') {
 $userid = $_SESSION['userid'];
 $sql = "SELECT * FROM hijos WHERE usuario_id = $userid";
 $result = $conn->query($sql);
+
 if ($result === FALSE) {
     die("<script>console.error('Error en la consulta de hijos: " . $conn->error . "');</script>");
 }
+
 $hijos = [];
 if ($result->num_rows > 0) {
     while($row = $result->fetch_assoc()) {
         $hijos[] = $row;
     }
+} else {
+    echo "<script>console.warn('No se encontraron hijos para el usuario con ID $userid');</script>";
 }
 
 // Obtener el saldo del usuario
@@ -27,9 +32,12 @@ $saldo_result = $conn->query($sql);
 if ($saldo_result === FALSE) {
     die("<script>console.error('Error en la consulta de saldo: " . $conn->error . "');</script>");
 }
+
 $saldo = 0;
 if ($saldo_result->num_rows > 0) {
     $saldo = $saldo_result->fetch_assoc()['saldo'];
+} else {
+    echo "<script>console.warn('No se encontró saldo para el usuario con ID $userid');</script>";
 }
 
 // Obtener los menús disponibles
@@ -38,11 +46,14 @@ $menus_result = $conn->query($sql);
 if ($menus_result === FALSE) {
     die("<script>console.error('Error en la consulta de menús: " . $conn->error . "');</script>");
 }
+
 $menus = [];
 if ($menus_result->num_rows > 0) {
     while($row = $menus_result->fetch_assoc()) {
         $menus[$row['fecha']][] = $row;
     }
+} else {
+    echo "<script>console.warn('No se encontraron menús disponibles');</script>";
 }
 ?>
 
