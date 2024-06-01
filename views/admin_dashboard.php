@@ -15,6 +15,17 @@ if (!isset($_SESSION['userid']) || $_SESSION['role'] != 'Administrador') {
     <link rel="stylesheet" href="../css/styles.css">
     <title>Dashboard - Administrador</title>
     <style>
+        .header nav {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .header nav button {
+            flex: 1 1 calc(25% - 10px);
+            margin: 5px;
+            padding: 10px;
+            font-size: 14px;
+        }
         .kpi-container {
             display: flex;
             flex-wrap: wrap;
