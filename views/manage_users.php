@@ -1,5 +1,25 @@
 <?php
 include 'header.php';
+include '../php/db.php';
+
+// Obtener colegios y cursos
+$sql_colegios = "SELECT * FROM colegios";
+$result_colegios = $conn->query($sql_colegios);
+$colegios = [];
+if ($result_colegios->num_rows > 0) {
+    while($row = $result_colegios->fetch_assoc()) {
+        $colegios[] = $row;
+    }
+}
+
+$sql_cursos = "SELECT * FROM cursos";
+$result_cursos = $conn->query($sql_cursos);
+$cursos = [];
+if ($result_cursos->num_rows > 0) {
+    while($row = $result_cursos->fetch_assoc()) {
+        $cursos[] = $row;
+    }
+}
 ?>
 
 <div class="container">
@@ -67,7 +87,6 @@ include 'header.php';
         </thead>
         <tbody>
             <?php
-            include '../php/db.php';
             $sql = "SELECT * FROM usuarios";
             $result = $conn->query($sql);
 
@@ -90,11 +109,15 @@ include 'header.php';
                           </td>";
                     echo "<td>";
                     // Obtener las notas de los hijos
-                    $sqlHijos = "SELECT * FROM hijos WHERE usuario_id = " . $row['id'];
+                    $sqlHijos = "SELECT hijos.*, colegios.nombre AS colegio_nombre, cursos.nombre AS curso_nombre 
+                                 FROM hijos 
+                                 JOIN colegios ON hijos.colegio_id = colegios.id 
+                                 JOIN cursos ON hijos.curso_id = cursos.id 
+                                 WHERE usuario_id = " . $row['id'];
                     $resultHijos = $conn->query($sqlHijos);
                     if ($resultHijos->num_rows > 0) {
                         while($hijo = $resultHijos->fetch_assoc()) {
-                            echo "<p>" . $hijo['nombre'] . " " . $hijo['apellido'] . " (Curso: " . $hijo['curso'] . "): " . $hijo['notas'] . "</p>";
+                            echo "<p>" . $hijo['nombre'] . " " . $hijo['apellido'] . " (Curso: " . $hijo['curso_nombre'] . " - Colegio: " . $hijo['colegio_nombre'] . "): " . $hijo['notas'] . "</p>";
                         }
                     } else {
                         echo "<p>Sin notas</p>";
@@ -138,9 +161,17 @@ document.getElementById('add-hijo-button').addEventListener('click', function() 
             <label for="hijo_apellido_${numHijos}">Apellido:</label>
             <input type="text" id="hijo_apellido_${numHijos}" name="hijos[${numHijos}][apellido]" required>
             <label for="hijo_curso_${numHijos}">Curso:</label>
-            <input type="text" id="hijo_curso_${numHijos}" name="hijos[${numHijos}][curso]" required>
+            <select id="hijo_curso_${numHijos}" name="hijos[${numHijos}][curso_id]" required>
+                <?php foreach ($cursos as $curso): ?>
+                    <option value="<?php echo $curso['id']; ?>"><?php echo $curso['nombre']; ?></option>
+                <?php endforeach; ?>
+            </select>
             <label for="hijo_colegio_${numHijos}">Colegio:</label>
-            <input type="text" id="hijo_colegio_${numHijos}" name="hijos[${numHijos}][colegio]" required>
+            <select id="hijo_colegio_${numHijos}" name="hijos[${numHijos}][colegio_id]" required>
+                <?php foreach ($colegios as $colegio): ?>
+                    <option value="<?php echo $colegio['id']; ?>"><?php echo $colegio['nombre']; ?></option>
+                <?php endforeach; ?>
+            </select>
             <label for="hijo_notas_${numHijos}">Notas:</label>
             <textarea id="hijo_notas_${numHijos}" name="hijos[${numHijos}][notas]"></textarea>
         `;
