@@ -13,6 +13,8 @@ $userid = $_SESSION['userid'];
 $sql = "SELECT * FROM hijos WHERE usuario_id = $userid";
 $result = $conn->query($sql);
 
+echo "<script>console.log('Consultando hijos del usuario con ID $userid');</script>";
+
 if ($result === FALSE) {
     die("<script>console.error('Error en la consulta de hijos: " . $conn->error . "');</script>");
 }
@@ -22,6 +24,7 @@ if ($result->num_rows > 0) {
     while($row = $result->fetch_assoc()) {
         $hijos[] = $row;
     }
+    echo "<script>console.log('Hijos obtenidos: " . json_encode($hijos) . "');</script>";
 } else {
     echo "<script>console.warn('No se encontraron hijos para el usuario con ID $userid');</script>";
 }
@@ -52,6 +55,7 @@ if ($menus_result->num_rows > 0) {
     while($row = $menus_result->fetch_assoc()) {
         $menus[$row['fecha']][] = $row;
     }
+    echo "<script>console.log('Menús obtenidos: " . json_encode($menus) . "');</script>";
 } else {
     echo "<script>console.warn('No se encontraron menús disponibles');</script>";
 }
