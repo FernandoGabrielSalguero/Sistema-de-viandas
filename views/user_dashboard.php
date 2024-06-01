@@ -2,9 +2,6 @@
 include '../php/db.php';
 session_start();
 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 if (!isset($_SESSION['userid']) || $_SESSION['role'] != 'Usuario') {
     header("Location: login.php");
     exit();
@@ -14,10 +11,10 @@ if (!isset($_SESSION['userid']) || $_SESSION['role'] != 'Usuario') {
 $userid = $_SESSION['userid'];
 $sql = "SELECT * FROM hijos WHERE usuario_id = $userid";
 $result = $conn->query($sql);
-$hijos = [];
 if ($result === FALSE) {
-    die("Error en la consulta de hijos: " . $conn->error);
+    die("<script>console.error('Error en la consulta de hijos: " . $conn->error . "');</script>");
 }
+$hijos = [];
 if ($result->num_rows > 0) {
     while($row = $result->fetch_assoc()) {
         $hijos[] = $row;
@@ -27,10 +24,10 @@ if ($result->num_rows > 0) {
 // Obtener el saldo del usuario
 $sql = "SELECT saldo FROM usuarios WHERE id = $userid";
 $saldo_result = $conn->query($sql);
-$saldo = 0;
 if ($saldo_result === FALSE) {
-    die("Error en la consulta de saldo: " . $conn->error);
+    die("<script>console.error('Error en la consulta de saldo: " . $conn->error . "');</script>");
 }
+$saldo = 0;
 if ($saldo_result->num_rows > 0) {
     $saldo = $saldo_result->fetch_assoc()['saldo'];
 }
@@ -38,10 +35,10 @@ if ($saldo_result->num_rows > 0) {
 // Obtener los menús disponibles
 $sql = "SELECT * FROM menus ORDER BY fecha ASC";
 $menus_result = $conn->query($sql);
-$menus = [];
 if ($menus_result === FALSE) {
-    die("Error en la consulta de menús: " . $conn->error);
+    die("<script>console.error('Error en la consulta de menús: " . $conn->error . "');</script>");
 }
+$menus = [];
 if ($menus_result->num_rows > 0) {
     while($row = $menus_result->fetch_assoc()) {
         $menus[$row['fecha']][] = $row;
@@ -139,7 +136,7 @@ if ($menus_result->num_rows > 0) {
                 $result = $conn->query($sql);
 
                 if ($result === FALSE) {
-                    die("Error en la consulta de pedidos: " . $conn->error);
+                    die("<script>console.error('Error en la consulta de pedidos: " . $conn->error . "');</script>");
                 }
 
                 if ($result->num_rows > 0) {
