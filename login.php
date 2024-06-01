@@ -1,3 +1,39 @@
+<?php
+session_start();
+include 'includes/db.php';
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+
+    // Consulta para verificar las credenciales
+    $query = "SELECT * FROM users WHERE username = ?";
+    $stmt = $conn->prepare($query);
+    if ($stmt) {
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+        if ($user && $password == $user['password']) {
+            // Credenciales válidas, iniciar sesión
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['role'] = $user['role'];
+            if ($user['role'] == 'admin') {
+                header("Location: admin/dashboard.php");
+            } else {
+                header("Location: user/dashboard.php");
+            }
+            exit();
+        } else {
+            // Credenciales inválidas
+            $error_message = "Usuario o contraseña incorrectos";
+        }
+    } else {
+        $error_message = "Error en la consulta a la base de datos";
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
