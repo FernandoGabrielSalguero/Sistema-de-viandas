@@ -32,6 +32,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             header("Location: ../views/admin_dashboard.php");
         } elseif ($row['rol'] == 'Usuario') {
             header("Location: ../views/user_dashboard.php");
+        } elseif ($row['rol'] == 'Cocina') {
+            header("Location: ../views/kitchen_dashboard.php");
         }
     } else {
         $error = "Usuario o contraseña incorrectos.";
