@@ -24,8 +24,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Validate input
     if (empty($name) || empty($surname) || empty($username) || empty($password) || empty($phone) || empty($email) || empty($role)) {
         $error_message = 'Todos los campos son obligatorios.';
+        echo "<script>alert('Todos los campos son obligatorios.');</script>";
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error_message = 'El correo electrónico no es válido.';
+        echo "<script>alert('El correo electrónico no es válido.');</script>";
     } else {
         if ($id) {
             // Update existing user
@@ -54,12 +56,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $query = "INSERT INTO children (user_id, name, surname, class, school, grades) VALUES (?, ?, ?, ?, ?, ?)";
                     $stmt = $conn->prepare($query);
                     $stmt->bind_param("isssss", $user_id, $child_name, $child_surname, $child_class, $child_school, $child_grades);
-                    $stmt->execute();
+                    if (!$stmt->execute()) {
+                        $error_message = 'Error al guardar los hijos del usuario.';
+                        echo "<script>alert('Error al guardar los hijos del usuario.');</script>";
+                    }
                 }
             }
             $success_message = 'Usuario guardado exitosamente.';
+            echo "<script>alert('Usuario guardado exitosamente.');</script>";
         } else {
             $error_message = 'Error al guardar el usuario. Inténtelo de nuevo.';
+            echo "<script>alert('Error al guardar el usuario. Inténtelo de nuevo.');</script>";
         }
     }
 }
