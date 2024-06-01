@@ -8,6 +8,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $usuario = $_POST['username'];
     $contraseña = $_POST['password'];
 
+    // Escapar caracteres para prevenir inyección SQL
+    $usuario = $conn->real_escape_string($usuario);
+    $contraseña = $conn->real_escape_string($contraseña);
+
+    // Consultar la base de datos
     $sql = "SELECT * FROM usuarios WHERE usuario = '$usuario' AND contraseña = '$contraseña'";
     $result = $conn->query($sql);
 
