@@ -7,6 +7,52 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 
 include '../includes/db.php';
 
+// Handle form submission to add or edit users
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $name = $_POST['name'];
+    $surname = $_POST['surname'];
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+    $phone = $_POST['phone'];
+    $email = $_POST['email'];
+    $role = $_POST['role'];
+    $id = $_POST['id'];
+
+    if ($id) {
+        // Update existing user
+        $query = "UPDATE users SET name = ?, surname = ?, username = ?, password = ?, phone = ?, email = ?, role = ? WHERE id = ?";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("sssssssi", $name, $surname, $username, $password, $phone, $email, $role, $id);
+    } else {
+        // Insert new user
+        $query = "INSERT INTO users (name, surname, username, password, phone, email, role) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("sssssss", $name, $surname, $username, $password, $phone, $email, $role);
+    }
+    $stmt->execute();
+
+    if (!$id) {
+        $user_id = $stmt->insert_id;
+        // Add children for the new user
+        $children = json_decode($_POST['children'], true);
+        foreach ($children as $child) {
+            $child_name = $child['name'];
+            $child_surname = $child['surname'];
+            $child_class = $child['class'];
+            $child_school = $child['school'];
+            $child_grades = $child['grades'];
+
+            $query = "INSERT INTO children (user_id, name, surname, class, school, grades) VALUES (?, ?, ?, ?, ?, ?)";
+            $stmt = $conn->prepare($query);
+            $stmt->bind_param("isssss", $user_id, $child_name, $child_surname, $child_class, $child_school, $child_grades);
+            $stmt->execute();
+        }
+    }
+    
+    header("Location: manage_users.php");
+    exit();
+}
+
 // Fetch users from the database
 $query = "SELECT * FROM users";
 $result = $conn->query($query);
@@ -19,6 +65,30 @@ $result = $conn->query($query);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestionar Usuarios</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
+    <script>
+        let children = [];
+        
+        function addChild() {
+            const childName = document.getElementById('child_name').value;
+            const childSurname = document.getElementById('child_surname').value;
+            const childClass = document.getElementById('child_class').value;
+            const childSchool = document.getElementById('child_school').value;
+            const childGrades = document.getElementById('child_grades').value;
+
+            const child = {name: childName, surname: childSurname, class: childClass, school: childSchool, grades: childGrades};
+            children.push(child);
+            document.getElementById('children').value = JSON.stringify(children);
+            
+            document.getElementById('child_list').innerHTML += `<li>${childName} ${childSurname} (${childClass}, ${childSchool})</li>`;
+            
+            // Clear inputs
+            document.getElementById('child_name').value = '';
+            document.getElementById('child_surname').value = '';
+            document.getElementById('child_class').value = '';
+            document.getElementById('child_school').value = '';
+            document.getElementById('child_grades').value = '';
+        }
+    </script>
 </head>
 <body>
     <?php include '../includes/header.php'; ?>
@@ -32,6 +102,43 @@ $result = $conn->query($query);
     </div>
     <div class="main-content">
         <h2>Gestionar Usuarios</h2>
+        <form action="manage_users.php" method="POST">
+            <input type="hidden" name="id" value="">
+            <label for="name">Nombre:</label>
+            <input type="text" id="name" name="name" required>
+            <label for="surname">Apellido:</label>
+            <input type="text" id="surname" name="surname" required>
+            <label for="username">Usuario:</label>
+            <input type="text" id="username" name="username" required>
+            <label for="password">Contraseña:</label>
+            <input type="password" id="password" name="password" required>
+            <label for="phone">Teléfono:</label>
+            <input type="text" id="phone" name="phone" required>
+            <label for="email">Correo:</label>
+            <input type="email" id="email" name="email" required>
+            <label for="role">Rol:</label>
+            <select id="role" name="role" required>
+                <option value="admin">Administrador</option>
+                <option value="user">Usuario</option>
+            </select>
+            
+            <h3>Hijos</h3>
+            <ul id="child_list"></ul>
+            <label for="child_name">Nombre del Hijo:</label>
+            <input type="text" id="child_name">
+            <label for="child_surname">Apellido del Hijo:</label>
+            <input type="text" id="child_surname">
+            <label for="child_class">Curso:</label>
+            <input type="text" id="child_class">
+            <label for="child_school">Escuela:</label>
+            <input type="text" id="child_school">
+            <label for="child_grades">Notas:</label>
+            <input type="text" id="child_grades">
+            <button type="button" onclick="addChild()">Añadir Hijo</button>
+            <input type="hidden" id="children" name="children" value='[]'>
+            
+            <button type="submit">Guardar</button>
+        </form>
         <table>
             <thead>
                 <tr>
