@@ -10,13 +10,18 @@ $conn = new mysqli($servername, $username, $password, $dbname);
 
 // Verificar conexión
 if ($conn->connect_error) {
-    die("Conexión fallida: " . $conn->connect_error);
+    die(json_encode([
+        "status" => "error",
+        "message" => "Conexión fallida: " . $conn->connect_error
+    ]));
 }
 
 function handle_error($errno, $errstr, $errfile, $errline) {
-    echo "<b>Error:</b> [$errno] $errstr - $errfile:$errline";
-    echo "<br>";
-    echo "La ejecución del script ha sido detenida.";
+    $error_message = "[$errno] $errstr - $errfile:$errline";
+    echo json_encode([
+        "status" => "error",
+        "message" => $error_message
+    ]);
     die();
 }
 
