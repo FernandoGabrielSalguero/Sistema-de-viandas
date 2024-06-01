@@ -60,7 +60,7 @@ if ($menus_result->num_rows > 0) {
                 <label for="hijo">¿A quién le entregamos el pedido?</label>
                 <select id="hijo" name="hijo_id" required>
                     <?php foreach ($hijos as $hijo): ?>
-                        <option value="<?php echo $hijo['id']; ?>"><?php echo $hijo['nombre'] . ' ' . $hijo['apellido']; ?></option>
+                        <option value="<?php echo $hijo['id']; ?>" data-curso="<?php echo $hijo['curso']; ?>"><?php echo $hijo['nombre'] . ' ' . $hijo['apellido']; ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
@@ -70,10 +70,10 @@ if ($menus_result->num_rows > 0) {
                     <?php foreach ($menus as $fecha => $menu_items): ?>
                         <div class="menu-day">
                             <label><?php echo $fecha; ?></label>
-                            <select name="menu_id[<?php echo $fecha; ?>]">
-                                <option value="">Sin vianda seleccionada</option>
+                            <select name="menu_id[<?php echo $fecha; ?>]" class="menu-select" data-precio-total="0">
+                                <option value="" data-precio="0">Sin vianda seleccionada</option>
                                 <?php foreach ($menu_items as $menu): ?>
-                                    <option value="<?php echo $menu['id']; ?>"><?php echo $menu['nombre'] . ' ($' . $menu['precio'] . ')'; ?></option>
+                                    <option value="<?php echo $menu['id']; ?>" data-precio="<?php echo $menu['precio']; ?>"><?php echo $menu['nombre'] . ' ($' . $menu['precio'] . ')'; ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -85,7 +85,8 @@ if ($menus_result->num_rows > 0) {
 
         <div id="popup" class="popup">
             <div class="popup-content">
-                <p>Loresmdasdasldkas lkals dknasñk djnasldkj ansdkl jansdlkasjn dkalsjdn ñaksdj naks d</p>
+                <h4>Resumen del Pedido</h4>
+                <p id="resumen-pedido"></p>
                 <button id="popup-close">Aceptar</button>
             </div>
         </div>
@@ -131,6 +132,31 @@ if ($menus_result->num_rows > 0) {
     <script>
     document.getElementById('order-form').addEventListener('submit', function(event) {
         event.preventDefault();
+        
+        // Obtener el nombre del hijo seleccionado y su curso
+        var hijoSelect = document.getElementById('hijo');
+        var hijoNombre = hijoSelect.options[hijoSelect.selectedIndex].text;
+        var hijoCurso = hijoSelect.options[hijoSelect.selectedIndex].getAttribute('data-curso');
+
+        // Calcular el precio total y obtener el resumen de viandas
+        var total = 0;
+        var resumen = '';
+        var menus = document.querySelectorAll('.menu-select');
+        menus.forEach(function(menu) {
+            var selectedOption = menu.options[menu.selectedIndex];
+            var precio = parseFloat(selectedOption.getAttribute('data-precio'));
+            if (precio > 0) {
+                total += precio;
+                resumen += '<p>' + selectedOption.text + '</p>';
+            }
+        });
+
+        // Mostrar el resumen en el popup
+        document.getElementById('resumen-pedido').innerHTML = `
+            <p>Alumno: ${hijoNombre} (Curso: ${hijoCurso})</p>
+            ${resumen}
+            <p><strong>Total: $${total.toFixed(2)}</strong></p>
+        `;
         document.getElementById('popup').style.display = 'block';
     });
 
