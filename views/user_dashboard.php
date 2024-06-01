@@ -55,7 +55,7 @@ if ($menus_result->num_rows > 0) {
         <h2>Bienvenido, <?php echo $_SESSION['username']; ?></h2>
 
         <h3>Seleccionar Viandas</h3>
-        <form action="../php/place_order.php" method="POST">
+        <form id="order-form" action="../php/place_order.php" method="POST">
             <div class="input-group">
                 <label for="hijo">¿A quién le entregamos el pedido?</label>
                 <select id="hijo" name="hijo_id" required>
@@ -82,6 +82,13 @@ if ($menus_result->num_rows > 0) {
             </div>
             <button type="submit">Realizar Pedido</button>
         </form>
+
+        <div id="popup" class="popup">
+            <div class="popup-content">
+                <p>Loresmdasdasldkas lkals dknasñk djnasldkj ansdkl jansdlkasjn dkalsjdn ñaksdj naks d</p>
+                <button id="popup-close">Aceptar</button>
+            </div>
+        </div>
 
         <h3>Pedidos Realizados</h3>
         <table class="material-design-table">
@@ -121,5 +128,16 @@ if ($menus_result->num_rows > 0) {
             </tbody>
         </table>
     </div>
+    <script>
+    document.getElementById('order-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        document.getElementById('popup').style.display = 'block';
+    });
+
+    document.getElementById('popup-close').addEventListener('click', function() {
+        document.getElementById('popup').style.display = 'none';
+        document.getElementById('order-form').submit();
+    });
+    </script>
 </body>
 </html>
