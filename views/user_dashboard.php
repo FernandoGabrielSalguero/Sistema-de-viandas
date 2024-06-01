@@ -68,6 +68,9 @@ if ($menus_result->num_rows > 0) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../css/styles.css">
     <title>Panel de Usuario - Viandas</title>
+    <script>
+        console.log("Script cargado correctamente.");
+    </script>
 </head>
 <body>
     <div class="header">
@@ -83,29 +86,35 @@ if ($menus_result->num_rows > 0) {
             <div class="input-group">
                 <label for="hijo">¿A quién le entregamos el pedido?</label>
                 <select id="hijo" name="hijo_id" required>
-                    <?php if (count($hijos) > 0): ?>
-                        <?php foreach ($hijos as $hijo): ?>
-                            <option value="<?php echo $hijo['id']; ?>" data-curso="<?php echo $hijo['curso']; ?>"><?php echo $hijo['nombre'] . ' ' . $hijo['apellido']; ?></option>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <option value="">No hay hijos disponibles</option>
-                    <?php endif; ?>
+                    <?php
+                    echo "<script>console.log('Generando opciones para hijos');</script>";
+                    if (count($hijos) > 0):
+                        foreach ($hijos as $hijo):
+                            echo "<option value='{$hijo['id']}' data-curso='{$hijo['curso_id']}'>{$hijo['nombre']} {$hijo['apellido']}</option>";
+                        endforeach;
+                    else:
+                        echo "<option value=''>No hay hijos disponibles</option>";
+                    endif;
+                    ?>
                 </select>
             </div>
             <div class="input-group">
                 <label for="menu">Seleccione una vianda por día:</label>
                 <div id="menus">
-                    <?php foreach ($menus as $fecha => $menu_items): ?>
-                        <div class="menu-day">
-                            <label><?php echo $fecha; ?></label>
-                            <select name="menu_id[<?php echo $fecha; ?>]" class="menu-select" data-precio-total="0">
-                                <option value="" data-precio="0">Sin vianda seleccionada</option>
-                                <?php foreach ($menu_items as $menu): ?>
-                                    <option value="<?php echo $menu['id']; ?>" data-precio="<?php echo $menu['precio']; ?>"><?php echo $menu['nombre'] . ' ($' . $menu['precio'] . ')'; ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                    <?php endforeach; ?>
+                    <?php
+                    echo "<script>console.log('Generando opciones para menús');</script>";
+                    foreach ($menus as $fecha => $menu_items):
+                        echo "<div class='menu-day'>";
+                        echo "<label>{$fecha}</label>";
+                        echo "<select name='menu_id[{$fecha}]' class='menu-select' data-precio-total='0'>";
+                        echo "<option value='' data-precio='0'>Sin vianda seleccionada</option>";
+                        foreach ($menu_items as $menu):
+                            echo "<option value='{$menu['id']}' data-precio='{$menu['precio']}'>{$menu['nombre']} (\${$menu['precio']})</option>";
+                        endforeach;
+                        echo "</select>";
+                        echo "</div>";
+                    endforeach;
+                    ?>
                 </div>
             </div>
             <button type="submit">Realizar Pedido</button>
@@ -121,13 +130,15 @@ if ($menus_result->num_rows > 0) {
         </div>
 
         <h3>Notas de los Hijos</h3>
-        <?php if (count($hijos) > 0): ?>
-            <?php foreach ($hijos as $hijo): ?>
-                <p><?php echo $hijo['nombre'] . ' ' . $hijo['apellido'] . ' (Curso: ' . $hijo['curso'] . '): ' . $hijo['notas']; ?></p>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <p>No hay notas disponibles</p>
-        <?php endif; ?>
+        <?php
+        if (count($hijos) > 0):
+            foreach ($hijos as $hijo):
+                echo "<p>{$hijo['nombre']} {$hijo['apellido']} (Curso: {$hijo['curso_id']}): {$hijo['notas']}</p>";
+            endforeach;
+        else:
+            echo "<p>No hay notas disponibles</p>";
+        endif;
+        ?>
 
         <h3>Pedidos Realizados</h3>
         <table class="material-design-table">
@@ -157,11 +168,11 @@ if ($menus_result->num_rows > 0) {
                 if ($result->num_rows > 0) {
                     while($row = $result->fetch_assoc()) {
                         echo "<tr>";
-                        echo "<td>" . $row['id'] . "</td>";
-                        echo "<td>" . $row['hijo_nombre'] . " " . $row['hijo_apellido'] . "</td>";
-                        echo "<td>" . $row['menu_nombre'] . "</td>";
-                        echo "<td>" . $row['fecha'] . "</td>";
-                        echo "<td>" . $row['estado'] . "</td>";
+                        echo "<td>{$row['id']}</td>";
+                        echo "<td>{$row['hijo_nombre']} {$row['hijo_apellido']}</td>";
+                        echo "<td>{$row['menu_nombre']}</td>";
+                        echo "<td>{$row['fecha']}</td>";
+                        echo "<td>{$row['estado']}</td>";
                         echo "</tr>";
                     }
                 } else {
@@ -172,9 +183,15 @@ if ($menus_result->num_rows > 0) {
         </table>
     </div>
     <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("DOM completamente cargado y procesado.");
+    });
+
     document.getElementById('order-form').addEventListener('submit', function(event) {
         event.preventDefault();
         
+        console.log("Formulario enviado.");
+
         // Obtener el nombre del hijo seleccionado y su curso
         var hijoSelect = document.getElementById('hijo');
         var hijoNombre = hijoSelect.options[hijoSelect.selectedIndex].text;
