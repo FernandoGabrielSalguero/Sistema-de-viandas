@@ -152,11 +152,23 @@ if ($menus_result->num_rows > 0) {
             }
         });
 
+        // Calcular el monto restante a pagar después de descontar el saldo
+        var saldo = <?php echo $saldo; ?>;
+        var montoRestante = total - saldo;
+        var textoSaldo = '';
+        if (montoRestante > 0) {
+            textoSaldo = `<p>Saldo utilizado: $${saldo.toFixed(2)}</p><p>Total a transferir: $${montoRestante.toFixed(2)}</p>`;
+        } else {
+            textoSaldo = `<p>Saldo utilizado: $${total.toFixed(2)}</p><p>No es necesario realizar una transferencia. Su saldo cubre el total del pedido.</p>`;
+            montoRestante = 0;
+        }
+
         // Mostrar el resumen en el popup
         document.getElementById('resumen-pedido').innerHTML = `
             <p>Alumno: ${hijoNombre} (Curso: ${hijoCurso})</p>
             ${resumen}
             <p><strong>Total: $${total.toFixed(2)}</strong></p>
+            ${textoSaldo}
         `;
         document.getElementById('popup').style.display = 'block';
     });
