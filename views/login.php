@@ -1,30 +1,45 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../css/styles.css">
-    <title>Login - Viandas</title>
-</head>
-<body>
-    <div class="login-container">
-        <h1>Login</h1>
-        <?php
-        if (isset($_GET['error'])) {
-            echo '<div class="error">' . htmlspecialchars($_GET['error']) . '</div>';
+<?php
+include 'db.php';
+
+session_start();
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $usuario = $_POST['username'];
+    $contraseña = $_POST['password'];
+
+    // Escapar caracteres para prevenir inyección SQL
+    $usuario = $conn->real_escape_string($usuario);
+    $contraseña = $conn->real_escape_string($contraseña);
+
+    // Consultar la base de datos
+    $sql = "SELECT * FROM usuarios WHERE usuario = '$usuario' AND contraseña = '$contraseña'";
+    $result = $conn->query($sql);
+
+    if ($result === FALSE) {
+        $error = "Error en la consulta SQL: " . $conn->error;
+        echo "<script>console.error('$error');</script>";
+        header("Location: ../views/login.php?error=" . urlencode($error));
+        exit();
+    }
+
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $_SESSION['userid'] = $row['id'];
+        $_SESSION['username'] = $row['usuario'];
+        $_SESSION['role'] = $row['rol'];
+
+        if ($row['rol'] == 'Administrador') {
+            header("Location: ../views/admin_dashboard.php");
+        } elseif ($row['rol'] == 'Usuario') {
+            header("Location: ../views/user_dashboard.php");
+        } elseif ($row['rol'] == 'Cocina') {
+            header("Location: ../views/kitchen_dashboard.php");
+        } else {
+            echo "<script>console.error('Rol no reconocido: " . $row['rol'] . "');</script>";
         }
-        ?>
-        <form action="../php/login.php" method="POST">
-            <div class="input-group">
-                <label for="username">Usuario:</label>
-                <input type="text" id="username" name="username" required>
-            </div>
-            <div class="input-group">
-                <label for="password">Contraseña:</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <button type="submit">Ingresar</button>
-        </form>
-    </div>
-</body>
-</html>
+    } else {
+        $error = "Usuario o contraseña incorrectos.";
+        echo "<script>console.error('$error');</script>";
+        header("Location: ../views/login.php?error=" . urlencode($error));
+    }
+}

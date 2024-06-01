@@ -11,6 +11,9 @@ if (!isset($_SESSION['userid']) || $_SESSION['role'] != 'Cocina') {
 $sql = "SELECT * FROM hijos";
 $result = $conn->query($sql);
 $hijos = [];
+if ($result === FALSE) {
+    die("<script>console.error('Error en la consulta de hijos: " . $conn->error . "');</script>");
+}
 if ($result->num_rows > 0) {
     while($row = $result->fetch_assoc()) {
         $hijos[] = $row;
@@ -26,6 +29,9 @@ $sql = "SELECT pedidos.id, usuarios.usuario AS nombre_papa, hijos.nombre AS nomb
         JOIN menus ON pedidos.menu_id = menus.id";
 $result = $conn->query($sql);
 $pedidos = [];
+if ($result === FALSE) {
+    die("<script>console.error('Error en la consulta de pedidos: " . $conn->error . "');</script>");
+}
 if ($result->num_rows > 0) {
     while($row = $result->fetch_assoc()) {
         $pedidos[] = $row;
@@ -40,6 +46,9 @@ $sql = "SELECT hijos.colegio, hijos.curso, menus.nombre, COUNT(pedidos.id) AS ca
         GROUP BY hijos.colegio, hijos.curso, menus.nombre";
 $kpi_result = $conn->query($sql);
 $kpis = [];
+if ($kpi_result === FALSE) {
+    die("<script>console.error('Error en la consulta del resumen de menús: " . $conn->error . "');</script>");
+}
 if ($kpi_result->num_rows > 0) {
     while($row = $kpi_result->fetch_assoc()) {
         $kpis[] = $row;
