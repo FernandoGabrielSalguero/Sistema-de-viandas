@@ -24,6 +24,7 @@ if (!isset($_SESSION['userid']) || $_SESSION['role'] != 'Administrador') {
         <h2>Bienvenido, <?php echo $_SESSION['username']; ?></h2>
         <ul>
             <li><a href="manage_menus.php">Gestión de Menús</a></li>
+            <li><a href="manage_users.php">Gestión de Usuarios</a></li>
             <!-- Agregar más enlaces aquí según sea necesario -->
         </ul>
     </div>
