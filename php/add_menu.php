@@ -11,7 +11,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $sql = "INSERT INTO menus (nombre, precio, fecha) VALUES ('$nombre', '$precio', '$fecha')";
     
     if ($conn->query($sql) === TRUE) {
-        header("Location: ../views/admin_dashboard.php");
+        header("Location: ../views/manage_menus.php");
     } else {
         echo "Error: " . $sql . "<br>" . $conn->error;
     }

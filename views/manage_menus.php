@@ -44,7 +44,10 @@ include 'header.php';
                     echo "<td>" . $row['nombre'] . "</td>";
                     echo "<td>" . $row['precio'] . "</td>";
                     echo "<td>" . $row['fecha'] . "</td>";
-                    echo "<td><a href='../php/delete_menu.php?id=" . $row['id'] . "' class='delete-button'>Eliminar</a></td>";
+                    echo "<td>
+                            <a href='../php/edit_menu.php?id=" . $row['id'] . "'>Editar</a> |
+                            <a href='../php/delete_menu.php?id=" . $row['id'] . "' class='delete-button'>Eliminar</a>
+                          </td>";
                     echo "</tr>";
                 }
             } else {
