@@ -5,6 +5,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 include '../includes/db.php';
 
 $error_message = '';
