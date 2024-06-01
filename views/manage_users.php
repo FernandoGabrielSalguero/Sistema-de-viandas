@@ -59,6 +59,8 @@ include 'header.php';
                 <th>Teléfono</th>
                 <th>Correo</th>
                 <th>Rol</th>
+                <th>Saldo</th>
+                <th>Notas de los Hijos</th>
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -79,13 +81,32 @@ include 'header.php';
                     echo "<td>" . $row['correo'] . "</td>";
                     echo "<td>" . $row['rol'] . "</td>";
                     echo "<td>
+                            <form action='../php/update_saldo.php' method='POST'>
+                                <input type='hidden' name='id' value='" . $row['id'] . "'>
+                                <input type='number' step='0.01' name='saldo' value='" . $row['saldo'] . "'>
+                                <button type='submit'>Actualizar</button>
+                            </form>
+                          </td>";
+                    echo "<td>";
+                    // Obtener las notas de los hijos
+                    $sqlHijos = "SELECT * FROM hijos WHERE usuario_id = " . $row['id'];
+                    $resultHijos = $conn->query($sqlHijos);
+                    if ($resultHijos->num_rows > 0) {
+                        while($hijo = $resultHijos->fetch_assoc()) {
+                            echo "<p>" . $hijo['nombre'] . " " . $hijo['apellido'] . " (Curso: " . $hijo['curso'] . "): " . $hijo['notas'] . "</p>";
+                        }
+                    } else {
+                        echo "<p>Sin notas</p>";
+                    }
+                    echo "</td>";
+                    echo "<td>
                             <a href='../php/edit_user.php?id=" . $row['id'] . "'>Editar</a> |
                             <a href='../php/delete_user.php?id=" . $row['id'] . "' class='delete-button'>Eliminar</a>
                           </td>";
                     echo "</tr>";
                 }
             } else {
-                echo "<tr><td colspan='8'>No hay usuarios disponibles</td></tr>";
+                echo "<tr><td colspan='10'>No hay usuarios disponibles</td></tr>";
             }
             ?>
         </tbody>

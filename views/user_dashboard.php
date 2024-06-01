@@ -92,6 +92,15 @@ if ($menus_result->num_rows > 0) {
             </div>
         </div>
 
+        <h3>Notas de los Hijos</h3>
+        <?php if (count($hijos) > 0): ?>
+            <?php foreach ($hijos as $hijo): ?>
+                <p><?php echo $hijo['nombre'] . ' ' . $hijo['apellido'] . ' (Curso: ' . $hijo['curso'] . '): ' . $hijo['notas']; ?></p>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <p>No hay notas disponibles</p>
+        <?php endif; ?>
+
         <h3>Pedidos Realizados</h3>
         <table class="material-design-table">
             <thead>
