@@ -7,50 +7,61 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 
 include '../includes/db.php';
 
+$error_message = '';
+$success_message = '';
+
 // Handle form submission to add or edit users
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $name = $_POST['name'];
-    $surname = $_POST['surname'];
-    $username = $_POST['username'];
-    $password = $_POST['password'];
-    $phone = $_POST['phone'];
-    $email = $_POST['email'];
-    $role = $_POST['role'];
+    $name = trim($_POST['name']);
+    $surname = trim($_POST['surname']);
+    $username = trim($_POST['username']);
+    $password = trim($_POST['password']);
+    $phone = trim($_POST['phone']);
+    $email = trim($_POST['email']);
+    $role = trim($_POST['role']);
     $id = $_POST['id'];
 
-    if ($id) {
-        // Update existing user
-        $query = "UPDATE users SET name = ?, surname = ?, username = ?, password = ?, phone = ?, email = ?, role = ? WHERE id = ?";
-        $stmt = $conn->prepare($query);
-        $stmt->bind_param("sssssssi", $name, $surname, $username, $password, $phone, $email, $role, $id);
+    // Validate input
+    if (empty($name) || empty($surname) || empty($username) || empty($password) || empty($phone) || empty($email) || empty($role)) {
+        $error_message = 'Todos los campos son obligatorios.';
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $error_message = 'El correo electrónico no es válido.';
     } else {
-        // Insert new user
-        $query = "INSERT INTO users (name, surname, username, password, phone, email, role) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        $stmt = $conn->prepare($query);
-        $stmt->bind_param("sssssss", $name, $surname, $username, $password, $phone, $email, $role);
-    }
-    $stmt->execute();
-
-    if (!$id) {
-        $user_id = $stmt->insert_id;
-        // Add children for the new user
-        $children = json_decode($_POST['children'], true);
-        foreach ($children as $child) {
-            $child_name = $child['name'];
-            $child_surname = $child['surname'];
-            $child_class = $child['class'];
-            $child_school = $child['school'];
-            $child_grades = $child['grades'];
-
-            $query = "INSERT INTO children (user_id, name, surname, class, school, grades) VALUES (?, ?, ?, ?, ?, ?)";
+        if ($id) {
+            // Update existing user
+            $query = "UPDATE users SET name = ?, surname = ?, username = ?, password = ?, phone = ?, email = ?, role = ? WHERE id = ?";
             $stmt = $conn->prepare($query);
-            $stmt->bind_param("isssss", $user_id, $child_name, $child_surname, $child_class, $child_school, $child_grades);
-            $stmt->execute();
+            $stmt->bind_param("sssssssi", $name, $surname, $username, $password, $phone, $email, $role, $id);
+        } else {
+            // Insert new user
+            $query = "INSERT INTO users (name, surname, username, password, phone, email, role) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            $stmt = $conn->prepare($query);
+            $stmt->bind_param("sssssss", $name, $surname, $username, $password, $phone, $email, $role);
+        }
+
+        if ($stmt->execute()) {
+            if (!$id) {
+                $user_id = $stmt->insert_id;
+                // Add children for the new user
+                $children = json_decode($_POST['children'], true);
+                foreach ($children as $child) {
+                    $child_name = $child['name'];
+                    $child_surname = $child['surname'];
+                    $child_class = $child['class'];
+                    $child_school = $child['school'];
+                    $child_grades = $child['grades'];
+
+                    $query = "INSERT INTO children (user_id, name, surname, class, school, grades) VALUES (?, ?, ?, ?, ?, ?)";
+                    $stmt = $conn->prepare($query);
+                    $stmt->bind_param("isssss", $user_id, $child_name, $child_surname, $child_class, $child_school, $child_grades);
+                    $stmt->execute();
+                }
+            }
+            $success_message = 'Usuario guardado exitosamente.';
+        } else {
+            $error_message = 'Error al guardar el usuario. Inténtelo de nuevo.';
         }
     }
-    
-    header("Location: manage_users.php");
-    exit();
 }
 
 // Fetch users from the database
@@ -102,6 +113,15 @@ $result = $conn->query($query);
     </div>
     <div class="main-content">
         <h2>Gestionar Usuarios</h2>
+        
+        <?php if (!empty($error_message)): ?>
+            <div class="error-message"><?= $error_message ?></div>
+        <?php endif; ?>
+        
+        <?php if (!empty($success_message)): ?>
+            <div class="success-message"><?= $success_message ?></div>
+        <?php endif; ?>
+
         <form action="manage_users.php" method="POST">
             <input type="hidden" name="id" value="">
             <label for="name">Nombre:</label>
