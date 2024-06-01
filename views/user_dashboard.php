@@ -12,6 +12,9 @@ $userid = $_SESSION['userid'];
 $sql = "SELECT * FROM hijos WHERE usuario_id = $userid";
 $result = $conn->query($sql);
 $hijos = [];
+if ($result === FALSE) {
+    die("Error en la consulta de hijos: " . $conn->error);
+}
 if ($result->num_rows > 0) {
     while($row = $result->fetch_assoc()) {
         $hijos[] = $row;
@@ -22,6 +25,9 @@ if ($result->num_rows > 0) {
 $sql = "SELECT saldo FROM usuarios WHERE id = $userid";
 $saldo_result = $conn->query($sql);
 $saldo = 0;
+if ($saldo_result === FALSE) {
+    die("Error en la consulta de saldo: " . $conn->error);
+}
 if ($saldo_result->num_rows > 0) {
     $saldo = $saldo_result->fetch_assoc()['saldo'];
 }
@@ -30,6 +36,9 @@ if ($saldo_result->num_rows > 0) {
 $sql = "SELECT * FROM menus ORDER BY fecha ASC";
 $menus_result = $conn->query($sql);
 $menus = [];
+if ($menus_result === FALSE) {
+    die("Error en la consulta de menús: " . $conn->error);
+}
 if ($menus_result->num_rows > 0) {
     while($row = $menus_result->fetch_assoc()) {
         $menus[$row['fecha']][] = $row;
@@ -59,9 +68,13 @@ if ($menus_result->num_rows > 0) {
             <div class="input-group">
                 <label for="hijo">¿A quién le entregamos el pedido?</label>
                 <select id="hijo" name="hijo_id" required>
-                    <?php foreach ($hijos as $hijo): ?>
-                        <option value="<?php echo $hijo['id']; ?>" data-curso="<?php echo $hijo['curso']; ?>"><?php echo $hijo['nombre'] . ' ' . $hijo['apellido']; ?></option>
-                    <?php endforeach; ?>
+                    <?php if (count($hijos) > 0): ?>
+                        <?php foreach ($hijos as $hijo): ?>
+                            <option value="<?php echo $hijo['id']; ?>" data-curso="<?php echo $hijo['curso']; ?>"><?php echo $hijo['nombre'] . ' ' . $hijo['apellido']; ?></option>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <option value="">No hay hijos disponibles</option>
+                    <?php endif; ?>
                 </select>
             </div>
             <div class="input-group">
@@ -121,6 +134,10 @@ if ($menus_result->num_rows > 0) {
                         JOIN menus ON pedidos.menu_id = menus.id
                         WHERE pedidos.usuario_id = $userid";
                 $result = $conn->query($sql);
+
+                if ($result === FALSE) {
+                    die("Error en la consulta de pedidos: " . $conn->error);
+                }
 
                 if ($result->num_rows > 0) {
                     while($row = $result->fetch_assoc()) {
