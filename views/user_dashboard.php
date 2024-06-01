@@ -18,16 +18,23 @@ if ($result->num_rows > 0) {
     }
 }
 
+// Obtener el saldo del usuario
+$sql = "SELECT saldo FROM usuarios WHERE id = $userid";
+$saldo_result = $conn->query($sql);
+$saldo = 0;
+if ($saldo_result->num_rows > 0) {
+    $saldo = $saldo_result->fetch_assoc()['saldo'];
+}
+
 // Obtener los menús disponibles
 $sql = "SELECT * FROM menus ORDER BY fecha ASC";
 $menus_result = $conn->query($sql);
 $menus = [];
 if ($menus_result->num_rows > 0) {
     while($row = $menus_result->fetch_assoc()) {
-        $menus[] = $row;
+        $menus[$row['fecha']][] = $row;
     }
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -41,6 +48,7 @@ if ($menus_result->num_rows > 0) {
 <body>
     <div class="header">
         <h1>Panel de Usuario</h1>
+        <p>Saldo: $<?php echo number_format($saldo, 2); ?></p>
         <button onclick="location.href='../php/logout.php'">Logout</button>
     </div>
     <div class="container">
@@ -49,7 +57,7 @@ if ($menus_result->num_rows > 0) {
         <h3>Seleccionar Viandas</h3>
         <form action="../php/place_order.php" method="POST">
             <div class="input-group">
-                <label for="hijo">Seleccione un hijo:</label>
+                <label for="hijo">¿A quién le entregamos el pedido?</label>
                 <select id="hijo" name="hijo_id" required>
                     <?php foreach ($hijos as $hijo): ?>
                         <option value="<?php echo $hijo['id']; ?>"><?php echo $hijo['nombre'] . ' ' . $hijo['apellido']; ?></option>
@@ -59,10 +67,15 @@ if ($menus_result->num_rows > 0) {
             <div class="input-group">
                 <label for="menu">Seleccione una vianda por día:</label>
                 <div id="menus">
-                    <?php foreach ($menus as $menu): ?>
-                        <div class="menu-item">
-                            <input type="radio" id="menu_<?php echo $menu['id']; ?>" name="menu_id[<?php echo $menu['fecha']; ?>]" value="<?php echo $menu['id']; ?>" required>
-                            <label for="menu_<?php echo $menu['id']; ?>"><?php echo $menu['fecha'] . ': ' . $menu['nombre'] . ' ($' . $menu['precio'] . ')'; ?></label>
+                    <?php foreach ($menus as $fecha => $menu_items): ?>
+                        <div class="menu-day">
+                            <label><?php echo $fecha; ?></label>
+                            <select name="menu_id[<?php echo $fecha; ?>]">
+                                <option value="">Sin vianda seleccionada</option>
+                                <?php foreach ($menu_items as $menu): ?>
+                                    <option value="<?php echo $menu['id']; ?>"><?php echo $menu['nombre'] . ' ($' . $menu['precio'] . ')'; ?></option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
                     <?php endforeach; ?>
                 </div>

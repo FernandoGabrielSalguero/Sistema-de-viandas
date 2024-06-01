@@ -12,9 +12,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     try {
         foreach ($menus as $fecha => $menu_id) {
-            $sql = "INSERT INTO pedidos (usuario_id, hijo_id, menu_id, estado) 
-                    VALUES ('$usuario_id', '$hijo_id', '$menu_id', 'En espera de aprobación')";
-            $conn->query($sql);
+            if (!empty($menu_id)) {
+                $sql = "INSERT INTO pedidos (usuario_id, hijo_id, menu_id, estado) 
+                        VALUES ('$usuario_id', '$hijo_id', '$menu_id', 'En espera de aprobación')";
+                $conn->query($sql);
+            }
         }
 
         // Confirmar la transacción
