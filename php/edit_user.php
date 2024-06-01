@@ -2,7 +2,7 @@
 include 'db.php';
 
 if (!isset($_GET['id'])) {
-    die("ID de usuario no especificado.");
+    die("ID del usuario no especificado.");
 }
 
 $id = $_GET['id'];
@@ -35,7 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $hijo_notas = $hijo['notas'];
 
             $sql = "INSERT INTO hijos (nombre, apellido, curso, colegio, notas, usuario_id) 
-                    VALUES ('$hijo_nombre', '$hijo_apellido', '$hijo_curso', '$hijo_colegio', '$hijo_notas', '$id')";
+                    VALUES ('$hijo_nombre', '$hijo_apellido', '$hijo_curso', '$hijo_colegio', '$hijo_notas', $id)";
             $conn->query($sql);
         }
     }
@@ -53,12 +53,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $usuario = $result->fetch_assoc();
 
-    // Obtener la información de los hijos
+    // Obtener los hijos del usuario
     $sql = "SELECT * FROM hijos WHERE usuario_id=$id";
-    $result = $conn->query($sql);
+    $resultHijos = $conn->query($sql);
     $hijos = [];
-    while ($row = $result->fetch_assoc()) {
-        $hijos[] = $row;
+    if ($resultHijos->num_rows > 0) {
+        while($row = $resultHijos->fetch_assoc()) {
+            $hijos[] = $row;
+        }
     }
 }
 ?>
@@ -107,6 +109,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <select id="rol" name="rol" required>
                     <option value="Administrador" <?php echo $usuario['rol'] == 'Administrador' ? 'selected' : ''; ?>>Administrador</option>
                     <option value="Usuario" <?php echo $usuario['rol'] == 'Usuario' ? 'selected' : ''; ?>>Usuario</option>
+                    <option value="Cocina" <?php echo $usuario['rol'] == 'Cocina' ? 'selected' : ''; ?>>Cocina</option>
                 </select>
             </div>
 
@@ -172,6 +175,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     });
     </script>
-
 </body>
 </html>

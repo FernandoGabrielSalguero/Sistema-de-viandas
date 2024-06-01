@@ -34,7 +34,7 @@ include 'header.php';
             <select id="rol" name="rol" required>
                 <option value="Administrador">Administrador</option>
                 <option value="Usuario">Usuario</option>
-                <option value="Usuario">Cocina</option>
+                <option value="Cocina">Cocina</option>
             </select>
         </div>
 
