@@ -5,6 +5,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 include '../includes/db.php';
 
 $error_message = '';
@@ -53,10 +56,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $child_school = $child['school'];
                     $child_grades = $child['grades'];
 
-                    $query = "INSERT INTO children (user_id, name, surname, class, school, grades) VALUES (?, ?, ?, ?, ?, ?)";
-                    $stmt = $conn->prepare($query);
-                    $stmt->bind_param("isssss", $user_id, $child_name, $child_surname, $child_class, $child_school, $child_grades);
-                    if ($stmt->execute()) {
+                    $query_children = "INSERT INTO children (user_id, name, surname, class, school, grades) VALUES (?, ?, ?, ?, ?, ?)";
+                    $stmt_children = $conn->prepare($query_children);
+                    $stmt_children->bind_param("isssss", $user_id, $child_name, $child_surname, $child_class, $child_school, $child_grades);
+                    if ($stmt_children->execute()) {
                         // Do nothing if insertion successful
                     } else {
                         $error_message = 'Error al guardar los hijos del usuario.';
