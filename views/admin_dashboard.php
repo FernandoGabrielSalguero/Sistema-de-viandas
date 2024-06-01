@@ -48,6 +48,15 @@ if (!isset($_SESSION['userid']) || $_SESSION['role'] != 'Administrador') {
             font-size: 24px;
             margin: 10px 0 0;
         }
+        .filter-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .filter-container input {
+            margin: 0 10px;
+            padding: 5px;
+        }
     </style>
 </head>
 <body>
@@ -64,6 +73,13 @@ if (!isset($_SESSION['userid']) || $_SESSION['role'] != 'Administrador') {
         </nav>
     </div>
     <div class="container">
+        <div class="filter-container">
+            <label for="start-date">Desde:</label>
+            <input type="date" id="start-date">
+            <label for="end-date">Hasta:</label>
+            <input type="date" id="end-date">
+            <button onclick="fetchDashboardData()">Filtrar</button>
+        </div>
         <div class="kpi-container" id="kpi-container">
             <div class="kpi-card">
                 <h3>Dinero en Pedidos Aprobados</h3>
@@ -97,7 +113,13 @@ if (!isset($_SESSION['userid']) || $_SESSION['role'] != 'Administrador') {
     </div>
     <script>
         async function fetchDashboardData() {
-            const response = await fetch('../php/admin_dashboard_data.php');
+            const startDate = document.getElementById('start-date').value;
+            const endDate = document.getElementById('end-date').value;
+            let url = '../php/admin_dashboard_data.php';
+            if (startDate && endDate) {
+                url += `?start_date=${startDate}&end_date=${endDate}`;
+            }
+            const response = await fetch(url);
             const data = await response.json();
             document.getElementById('total-aprobado').textContent = `$${parseFloat(data.total_aprobado).toFixed(2)}`;
             document.getElementById('total-espera').textContent = `$${parseFloat(data.total_espera).toFixed(2)}`;
