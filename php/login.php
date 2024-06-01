@@ -16,6 +16,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $sql = "SELECT * FROM usuarios WHERE usuario = '$usuario' AND contraseña = '$contraseña'";
     $result = $conn->query($sql);
 
+    if ($result === FALSE) {
+        $error = "Error en la consulta SQL: " . $conn->error;
+        header("Location: ../views/login.php?error=" . urlencode($error));
+        exit();
+    }
+
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
         $_SESSION['userid'] = $row['id'];
@@ -28,6 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             header("Location: ../views/user_dashboard.php");
         }
     } else {
-        echo "Usuario o contraseña incorrectos.";
+        $error = "Usuario o contraseña incorrectos.";
+        header("Location: ../views/login.php?error=" . urlencode($error));
     }
 }

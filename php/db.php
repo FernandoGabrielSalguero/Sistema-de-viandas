@@ -12,3 +12,12 @@ $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
     die("Conexión fallida: " . $conn->connect_error);
 }
+
+function handle_error($errno, $errstr, $errfile, $errline) {
+    echo "<b>Error:</b> [$errno] $errstr - $errfile:$errline";
+    echo "<br>";
+    echo "La ejecución del script ha sido detenida.";
+    die();
+}
+
+set_error_handler("handle_error");

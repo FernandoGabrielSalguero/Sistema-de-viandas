@@ -9,6 +9,11 @@
 <body>
     <div class="login-container">
         <h1>Login</h1>
+        <?php
+        if (isset($_GET['error'])) {
+            echo '<div class="error">' . htmlspecialchars($_GET['error']) . '</div>';
+        }
+        ?>
         <form action="../php/login.php" method="POST">
             <div class="input-group">
                 <label for="username">Usuario:</label>
