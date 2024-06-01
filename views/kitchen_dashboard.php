@@ -18,8 +18,8 @@ if ($result->num_rows > 0) {
 }
 
 // Obtener los pedidos con detalles adicionales
-$sql = "SELECT pedidos.id, usuarios.usuario AS nombre_papa, hijos.nombre AS nombre_hijo, hijos.apellido AS apellido_hijo, hijos.curso, hijos.notas, 
-               menus.nombre AS menu_nombre, menus.fecha, pedidos.estado, pedidos.fecha_pedido
+$sql = "SELECT pedidos.id, usuarios.usuario AS nombre_papa, hijos.nombre AS nombre_hijo, hijos.apellido AS apellido_hijo, 
+               hijos.curso, hijos.colegio, hijos.notas, menus.nombre AS menu_nombre, menus.fecha, pedidos.estado, pedidos.fecha_pedido
         FROM pedidos
         JOIN usuarios ON pedidos.usuario_id = usuarios.id
         JOIN hijos ON pedidos.hijo_id = hijos.id
@@ -32,11 +32,12 @@ if ($result->num_rows > 0) {
     }
 }
 
-// Obtener el resumen de menús
-$sql = "SELECT menus.nombre, COUNT(pedidos.id) AS cantidad
+// Obtener el resumen de menús separado por colegio y curso
+$sql = "SELECT hijos.colegio, hijos.curso, menus.nombre, COUNT(pedidos.id) AS cantidad
         FROM pedidos
+        JOIN hijos ON pedidos.hijo_id = hijos.id
         JOIN menus ON pedidos.menu_id = menus.id
-        GROUP BY menus.nombre";
+        GROUP BY hijos.colegio, hijos.curso, menus.nombre";
 $kpi_result = $conn->query($sql);
 $kpis = [];
 if ($kpi_result->num_rows > 0) {
@@ -44,6 +45,10 @@ if ($kpi_result->num_rows > 0) {
         $kpis[] = $row;
     }
 }
+
+// Obtener listas de colegios y cursos para los filtros
+$colegios = array_unique(array_column($kpis, 'colegio'));
+$cursos = array_unique(array_column($kpis, 'curso'));
 ?>
 
 <!DOCTYPE html>
@@ -68,6 +73,16 @@ if ($kpi_result->num_rows > 0) {
             justify-content: space-around;
             flex-wrap: wrap;
         }
+        .filter-buttons {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+        .filter-buttons button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -79,17 +94,25 @@ if ($kpi_result->num_rows > 0) {
         <h2>Notas de los Hijos</h2>
         <?php if (count($hijos) > 0): ?>
             <?php foreach ($hijos as $hijo): ?>
-                <p><?php echo $hijo['nombre'] . ' ' . $hijo['apellido'] . ' (Curso: ' . $hijo['curso'] . '): ' . $hijo['notas']; ?></p>
+                <p><?php echo $hijo['nombre'] . ' ' . $hijo['apellido'] . ' (Curso: ' . $hijo['curso'] . ' - Colegio: ' . $hijo['colegio'] . '): ' . $hijo['notas']; ?></p>
             <?php endforeach; ?>
         <?php else: ?>
             <p>No hay notas disponibles</p>
         <?php endif; ?>
 
         <h2>Resumen de Menús</h2>
-        <div class="kpi-container">
+        <div class="filter-buttons">
+            <button onclick="filterKPIs('')">Todos</button>
+            <?php foreach ($colegios as $colegio): ?>
+                <button onclick="filterKPIs('<?php echo $colegio; ?>')"><?php echo $colegio; ?></button>
+            <?php endforeach; ?>
+        </div>
+        <div class="kpi-container" id="kpi-container">
             <?php foreach ($kpis as $kpi): ?>
-                <div class="kpi-card">
+                <div class="kpi-card" data-colegio="<?php echo $kpi['colegio']; ?>">
                     <h3><?php echo $kpi['nombre']; ?></h3>
+                    <p>Colegio: <?php echo $kpi['colegio']; ?></p>
+                    <p>Curso: <?php echo $kpi['curso']; ?></p>
                     <p>Cantidad: <?php echo $kpi['cantidad']; ?></p>
                 </div>
             <?php endforeach; ?>
@@ -102,6 +125,7 @@ if ($kpi_result->num_rows > 0) {
                 <tr>
                     <th>Nombre Alumno</th>
                     <th>Curso</th>
+                    <th>Colegio</th>
                     <th>Nombre Papá</th>
                     <th>Menú</th>
                     <th>Día</th>
@@ -114,6 +138,7 @@ if ($kpi_result->num_rows > 0) {
                         <tr>
                             <td><?php echo $pedido['nombre_hijo'] . ' ' . $pedido['apellido_hijo']; ?></td>
                             <td><?php echo $pedido['curso']; ?></td>
+                            <td><?php echo $pedido['colegio']; ?></td>
                             <td><?php echo $pedido['nombre_papa']; ?></td>
                             <td><?php echo $pedido['menu_nombre']; ?></td>
                             <td><?php echo $pedido['fecha']; ?></td>
@@ -121,12 +146,23 @@ if ($kpi_result->num_rows > 0) {
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
-                    <tr><td colspan="6">No hay pedidos realizados</td></tr>
+                    <tr><td colspan="7">No hay pedidos realizados</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>
     </div>
     <script>
+    function filterKPIs(colegio) {
+        var cards = document.getElementsByClassName('kpi-card');
+        for (var i = 0; i < cards.length; i++) {
+            if (colegio === '' || cards[i].getAttribute('data-colegio') === colegio) {
+                cards[i].style.display = 'block';
+            } else {
+                cards[i].style.display = 'none';
+            }
+        }
+    }
+
     function filterTable() {
         var input, filter, table, tr, td, i, j, txtValue;
         input = document.getElementById('filter');
