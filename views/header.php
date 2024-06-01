@@ -19,11 +19,10 @@ if (!isset($_SESSION['userid']) || $_SESSION['role'] != 'Administrador') {
     <div class="header">
         <h1>Panel de Administrador</h1>
         <nav>
-            <ul>
-                <li><a href="admin_dashboard.php">Dashboard</a></li>
-                <li><a href="manage_menus.php">Gestión de Menús</a></li>
-                <li><a href="manage_users.php">Gestión de Usuarios</a></li>
-                <li><a href="../php/logout.php">Logout</a></li>
-            </ul>
+            <button onclick="location.href='admin_dashboard.php'">Dashboard</button>
+            <button onclick="location.href='manage_menus.php'">Gestión de Menús</button>
+            <button onclick="location.href='manage_users.php'">Gestión de Usuarios</button>
+            <button onclick="location.href='manage_orders.php'">Gestión de Pedidos</button>
+            <button onclick="location.href='../php/logout.php'">Logout</button>
         </nav>
     </div>
