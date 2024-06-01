@@ -55,7 +55,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $child_class = $child['class'];
                     $child_school = $child['school'];
                     $child_grades = $child['grades'];
-
+        
                     $query_children = "INSERT INTO children (user_id, name, surname, class, school, grades) VALUES (?, ?, ?, ?, ?, ?)";
                     $stmt_children = $conn->prepare($query_children);
                     $stmt_children->bind_param("isssss", $user_id, $child_name, $child_surname, $child_class, $child_school, $child_grades);
@@ -65,6 +65,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         $error_message = 'Error al guardar los hijos del usuario.';
                         echo "<script>alert('Error al guardar los hijos del usuario.');</script>";
                     }
+                    // Cerrar el statement después de cada ejecución
+                    $stmt_children->close();
                 }
             }
             $success_message = 'Usuario guardado exitosamente.';
@@ -73,6 +75,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $error_message = 'Error al guardar el usuario. Inténtelo de nuevo.';
             echo "<script>alert('Error al guardar el usuario. Inténtelo de nuevo.');</script>";
         }
+        
     }
 }
 
