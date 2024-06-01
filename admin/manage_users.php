@@ -1,12 +1,9 @@
 <?php
 session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'admin' && $_SESSION['role'] !== 'user')) {
     header("Location: ../login.php");
     exit();
 }
-
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 
 include '../includes/db.php';
 
@@ -45,17 +42,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         if ($stmt->execute()) {
-            if (!$id) {
+            if (!$id && $_SESSION['role'] === 'user') {
                 $user_id = $stmt->insert_id;
                 // Add children for the new user
                 $children = json_decode($_POST['children'], true);
-                foreach ($children as $child) {
-                    $child_name = $child['name'];
-                    $child_surname = $child['surname'];
-                    $child_class = $child['class'];
-                    $child_school = $child['school'];
-                    $child_grades = $child['grades'];
-        
+                $max_children = min(count($children), 10); // Limitar a 10 hijos
+                for ($i = 0; $i < $max_children; $i++) {
+                    $child_name = $children[$i]['name'];
+                    $child_surname = $children[$i]['surname'];
+                    $child_class = $children[$i]['class'];
+                    $child_school = $children[$i]['school'];
+                    $child_grades = $children[$i]['grades'];
+
                     $query_children = "INSERT INTO children (user_id, name, surname, class, school, grades) VALUES (?, ?, ?, ?, ?, ?)";
                     $stmt_children = $conn->prepare($query_children);
                     $stmt_children->bind_param("isssss", $user_id, $child_name, $child_surname, $child_class, $child_school, $child_grades);
@@ -75,7 +73,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $error_message = 'Error al guardar el usuario. Inténtelo de nuevo.';
             echo "<script>alert('Error al guardar el usuario. Inténtelo de nuevo.');</script>";
         }
-        
     }
 }
 
@@ -86,6 +83,7 @@ $result = $conn->query($query);
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -93,7 +91,7 @@ $result = $conn->query($query);
     <link rel="stylesheet" href="../assets/css/styles.css">
     <script>
         let children = [];
-        
+
         function addChild() {
             const childName = document.getElementById('child_name').value;
             const childSurname = document.getElementById('child_surname').value;
@@ -101,12 +99,18 @@ $result = $conn->query($query);
             const childSchool = document.getElementById('child_school').value;
             const childGrades = document.getElementById('child_grades').value;
 
-            const child = {name: childName, surname: childSurname, class: childClass, school: childSchool, grades: childGrades};
+            const child = {
+                name: childName,
+                surname: childSurname,
+                class: childClass,
+                school: childSchool,
+                grades: childGrades
+            };
             children.push(child);
             document.getElementById('children').value = JSON.stringify(children);
-            
+
             document.getElementById('child_list').innerHTML += `<li>${childName} ${childSurname} (${childClass}, ${childSchool})</li>`;
-            
+
             // Clear inputs
             document.getElementById('child_name').value = '';
             document.getElementById('child_surname').value = '';
@@ -116,6 +120,7 @@ $result = $conn->query($query);
         }
     </script>
 </head>
+
 <body>
     <?php include '../includes/header.php'; ?>
     <div class="sidebar">
@@ -128,12 +133,12 @@ $result = $conn->query($query);
     </div>
     <div class="main-content">
         <h2>Gestionar Usuarios</h2>
-        
-        <?php if (!empty($error_message)): ?>
+
+        <?php if (!empty($error_message)) : ?>
             <div class="error-message"><?= $error_message ?></div>
         <?php endif; ?>
-        
-        <?php if (!empty($success_message)): ?>
+
+        <?php if (!empty($success_message)) : ?>
             <div class="success-message"><?= $success_message ?></div>
         <?php endif; ?>
 
@@ -156,7 +161,6 @@ $result = $conn->query($query);
                 <option value="admin">Administrador</option>
                 <option value="user">Usuario</option>
             </select>
-            
             <h3>Hijos</h3>
             <ul id="child_list"></ul>
             <label for="child_name">Nombre del Hijo:</label>
@@ -171,7 +175,7 @@ $result = $conn->query($query);
             <input type="text" id="child_grades">
             <button type="button" onclick="addChild()">Añadir Hijo</button>
             <input type="hidden" id="children" name="children" value='[]'>
-            
+
             <button type="submit">Guardar</button>
         </form>
         <table>
@@ -188,7 +192,7 @@ $result = $conn->query($query);
                 </tr>
             </thead>
             <tbody>
-                <?php while ($row = $result->fetch_assoc()): ?>
+                <?php while ($row = $result->fetch_assoc()) : ?>
                     <tr>
                         <td><?= $row['id'] ?></td>
                         <td><?= $row['name'] ?></td>
@@ -207,6 +211,3 @@ $result = $conn->query($query);
         </table>
     </div>
     <?php include '../includes/footer.php'; ?>
-</body>
-</html>
-
