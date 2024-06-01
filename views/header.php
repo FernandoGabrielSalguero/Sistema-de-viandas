@@ -14,6 +14,19 @@ if (!isset($_SESSION['userid']) || $_SESSION['role'] != 'Administrador') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../css/styles.css">
     <title>Admin Panel - Viandas</title>
+    <style>
+        .header nav {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .header nav button {
+            flex: 1 1 calc(25% - 10px);
+            margin: 5px;
+            padding: 10px;
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
     <div class="header">
@@ -28,3 +41,7 @@ if (!isset($_SESSION['userid']) || $_SESSION['role'] != 'Administrador') {
             <button onclick="location.href='../php/logout.php'">Logout</button>
         </nav>
     </div>
+    <div class="container">
+    </div>
+</body>
+</html>
