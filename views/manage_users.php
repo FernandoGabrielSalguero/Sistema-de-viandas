@@ -36,6 +36,15 @@ include 'header.php';
                 <option value="Usuario">Usuario</option>
             </select>
         </div>
+
+        <div id="hijos-container" style="display: none;">
+            <h4>Hijos</h4>
+            <div id="hijos-forms">
+                <!-- Los formularios de los hijos se agregarán aquí -->
+            </div>
+            <button type="button" id="add-hijo-button">Agregar Hijo</button>
+        </div>
+
         <button type="submit">Crear Usuario</button>
     </form>
 
@@ -82,5 +91,43 @@ include 'header.php';
         </tbody>
     </table>
 </div>
+
+<script>
+document.getElementById('rol').addEventListener('change', function() {
+    var hijosContainer = document.getElementById('hijos-container');
+    if (this.value === 'Usuario') {
+        hijosContainer.style.display = 'block';
+    } else {
+        hijosContainer.style.display = 'none';
+    }
+});
+
+document.getElementById('add-hijo-button').addEventListener('click', function() {
+    var hijosForms = document.getElementById('hijos-forms');
+    var numHijos = hijosForms.children.length;
+
+    if (numHijos < 10) {
+        var nuevoHijoForm = document.createElement('div');
+        nuevoHijoForm.classList.add('input-group');
+        nuevoHijoForm.innerHTML = `
+            <h5>Hijo ${numHijos + 1}</h5>
+            <label for="hijo_nombre_${numHijos}">Nombre:</label>
+            <input type="text" id="hijo_nombre_${numHijos}" name="hijos[${numHijos}][nombre]" required>
+            <label for="hijo_apellido_${numHijos}">Apellido:</label>
+            <input type="text" id="hijo_apellido_${numHijos}" name="hijos[${numHijos}][apellido]" required>
+            <label for="hijo_curso_${numHijos}">Curso:</label>
+            <input type="text" id="hijo_curso_${numHijos}" name="hijos[${numHijos}][curso]" required>
+            <label for="hijo_colegio_${numHijos}">Colegio:</label>
+            <input type="text" id="hijo_colegio_${numHijos}" name="hijos[${numHijos}][colegio]" required>
+            <label for="hijo_notas_${numHijos}">Notas:</label>
+            <textarea id="hijo_notas_${numHijos}" name="hijos[${numHijos}][notas]"></textarea>
+        `;
+        hijosForms.appendChild(nuevoHijoForm);
+    } else {
+        alert('El usuario no puede tener más de 10 hijos.');
+    }
+});
+</script>
+
 </body>
 </html>
