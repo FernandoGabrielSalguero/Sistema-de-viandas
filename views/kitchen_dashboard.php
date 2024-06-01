@@ -17,9 +17,9 @@ if ($result->num_rows > 0) {
     }
 }
 
-// Obtener los pedidos
-$sql = "SELECT pedidos.id, usuarios.usuario, hijos.nombre AS hijo_nombre, hijos.apellido AS hijo_apellido, 
-               menus.nombre AS menu_nombre, pedidos.estado, pedidos.fecha_pedido
+// Obtener los pedidos con detalles adicionales
+$sql = "SELECT pedidos.id, usuarios.usuario AS nombre_papa, hijos.nombre AS nombre_hijo, hijos.apellido AS apellido_hijo, hijos.curso, hijos.notas, 
+               menus.nombre AS menu_nombre, menus.fecha, pedidos.estado, pedidos.fecha_pedido
         FROM pedidos
         JOIN usuarios ON pedidos.usuario_id = usuarios.id
         JOIN hijos ON pedidos.hijo_id = hijos.id
@@ -31,6 +31,19 @@ if ($result->num_rows > 0) {
         $pedidos[] = $row;
     }
 }
+
+// Obtener el resumen de menús
+$sql = "SELECT menus.nombre, COUNT(pedidos.id) AS cantidad
+        FROM pedidos
+        JOIN menus ON pedidos.menu_id = menus.id
+        GROUP BY menus.nombre";
+$kpi_result = $conn->query($sql);
+$kpis = [];
+if ($kpi_result->num_rows > 0) {
+    while($row = $kpi_result->fetch_assoc()) {
+        $kpis[] = $row;
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -40,6 +53,22 @@ if ($result->num_rows > 0) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../css/styles.css">
     <title>Panel de Cocina - Viandas</title>
+    <style>
+        .kpi-card {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 10px;
+            text-align: center;
+            flex: 1;
+        }
+        .kpi-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+    </style>
 </head>
 <body>
     <div class="header">
@@ -56,28 +85,39 @@ if ($result->num_rows > 0) {
             <p>No hay notas disponibles</p>
         <?php endif; ?>
 
+        <h2>Resumen de Menús</h2>
+        <div class="kpi-container">
+            <?php foreach ($kpis as $kpi): ?>
+                <div class="kpi-card">
+                    <h3><?php echo $kpi['nombre']; ?></h3>
+                    <p>Cantidad: <?php echo $kpi['cantidad']; ?></p>
+                </div>
+            <?php endforeach; ?>
+        </div>
+
         <h2>Pedidos Realizados</h2>
-        <table class="material-design-table">
+        <input type="text" id="filter" placeholder="Filtrar pedidos..." onkeyup="filterTable()">
+        <table class="material-design-table" id="pedidos-table">
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Usuario</th>
-                    <th>Hijo</th>
+                    <th>Nombre Alumno</th>
+                    <th>Curso</th>
+                    <th>Nombre Papá</th>
                     <th>Menú</th>
-                    <th>Estado</th>
-                    <th>Fecha de Pedido</th>
+                    <th>Día</th>
+                    <th>Notas</th>
                 </tr>
             </thead>
             <tbody>
                 <?php if (count($pedidos) > 0): ?>
                     <?php foreach ($pedidos as $pedido): ?>
                         <tr>
-                            <td><?php echo $pedido['id']; ?></td>
-                            <td><?php echo $pedido['usuario']; ?></td>
-                            <td><?php echo $pedido['hijo_nombre'] . ' ' . $pedido['hijo_apellido']; ?></td>
+                            <td><?php echo $pedido['nombre_hijo'] . ' ' . $pedido['apellido_hijo']; ?></td>
+                            <td><?php echo $pedido['curso']; ?></td>
+                            <td><?php echo $pedido['nombre_papa']; ?></td>
                             <td><?php echo $pedido['menu_nombre']; ?></td>
-                            <td><?php echo $pedido['estado']; ?></td>
-                            <td><?php echo $pedido['fecha_pedido']; ?></td>
+                            <td><?php echo $pedido['fecha']; ?></td>
+                            <td><?php echo $pedido['notas']; ?></td>
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
@@ -86,5 +126,27 @@ if ($result->num_rows > 0) {
             </tbody>
         </table>
     </div>
+    <script>
+    function filterTable() {
+        var input, filter, table, tr, td, i, j, txtValue;
+        input = document.getElementById('filter');
+        filter = input.value.toLowerCase();
+        table = document.getElementById('pedidos-table');
+        tr = table.getElementsByTagName('tr');
+        for (i = 1; i < tr.length; i++) {
+            tr[i].style.display = 'none';
+            td = tr[i].getElementsByTagName('td');
+            for (j = 0; j < td.length; j++) {
+                if (td[j]) {
+                    txtValue = td[j].textContent || td[j].innerText;
+                    if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                        tr[i].style.display = '';
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    </script>
 </body>
 </html>
