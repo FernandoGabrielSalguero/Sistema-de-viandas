@@ -45,14 +45,14 @@ if ($pedidosResult === FALSE) {
 }
 
 // Obtener el resumen de menús separado por colegio y curso
-$sql = "SELECT co.nombre AS colegio, cu.nombre AS curso, m.nombre, COUNT(p.id) AS cantidad
+$sql = "SELECT co.nombre AS colegio, cu.nombre AS curso, m.nombre, COUNT(p.id) AS cantidad, m.fecha AS vianda_fecha
         FROM pedidos p
         JOIN hijos h ON p.hijo_id = h.id
         JOIN colegios co ON h.colegio_id = co.id
         JOIN cursos cu ON h.curso_id = cu.id
         JOIN menus m ON p.menu_id = m.id
         WHERE p.estado = 'Aprobado'
-        GROUP BY co.nombre, cu.nombre, m.nombre";
+        GROUP BY co.nombre, cu.nombre, m.nombre, m.fecha";
 $kpi_result = $conn->query($sql);
 $kpis = [];
 if ($kpi_result === FALSE) {
@@ -115,6 +115,17 @@ if ($kpi_result === FALSE) {
         .filter-buttons button:hover {
             background-color: #e1e1e1;
         }
+        .kpi-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+        }
+        .search-input {
+            margin-bottom: 10px;
+            padding: 8px;
+            width: 100%;
+            box-sizing: border-box;
+        }
     </style>
 </head>
 <body>
@@ -136,9 +147,10 @@ if ($kpi_result === FALSE) {
             <?php endforeach; ?>
         </div>
         <div class="filter-group">
-            <span>Fecha:</span>
-            <button onclick="filterKPIs('fecha', '2024-06-01')">2024-06-01</button>
-            <button onclick="filterKPIs('fecha', '2024-06-02')">2024-06-02</button>
+            <span>Fecha de la Vianda:</span>
+            <?php foreach (array_unique(array_column($kpis, 'vianda_fecha')) as $fecha) : ?>
+                <button onclick="filterKPIs('fecha', '<?= $fecha; ?>')"><?= $fecha; ?></button>
+            <?php endforeach; ?>
         </div>
         <button onclick="filterKPIs('reset')">Resetear Filtros</button>
     </div>
@@ -146,7 +158,7 @@ if ($kpi_result === FALSE) {
         <h2>Resumen de Viandas Aprobadas</h2>
         <div class="kpi-container">
             <?php foreach ($kpis as $kpi) : ?>
-                <div class="kpi-card" data-colegio="<?= $kpi['colegio']; ?>" data-curso="<?= $kpi['curso']; ?>" data-menu="<?= $kpi['nombre']; ?>">
+                <div class="kpi-card" data-colegio="<?= $kpi['colegio']; ?>" data-curso="<?= $kpi['curso']; ?>" data-menu="<?= $kpi['nombre']; ?>" data-fecha="<?= $kpi['vianda_fecha']; ?>">
                     <h4><?= $kpi['nombre']; ?></h4>
                     <p>Colegio: <?= $kpi['colegio']; ?></p>
                     <p>Curso: <?= $kpi['curso']; ?></p>
@@ -155,6 +167,7 @@ if ($kpi_result === FALSE) {
             <?php endforeach; ?>
         </div>
         <h2>Pedidos Realizados</h2>
+        <input type="text" id="search" class="search-input" placeholder="Buscar en pedidos..." oninput="searchTable()">
         <table class="material-design-table">
             <thead>
                 <tr>
@@ -167,7 +180,7 @@ if ($kpi_result === FALSE) {
                     <th>Notas</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="pedidoTable">
                 <?php foreach ($pedidos as $pedido) : ?>
                     <tr>
                         <td><?= $pedido['nombre_hijo'] . " " . $pedido['apellido_hijo']; ?></td>
@@ -200,6 +213,29 @@ if ($kpi_result === FALSE) {
                            (filterType === 'fecha' && fecha === filterValue)) {
                     card.style.display = 'block';
                 }
+            }
+        }
+
+        function searchTable() {
+            var input, filter, table, tr, td, i, txtValue;
+            input = document.getElementById("search");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("pedidoTable");
+            tr = table.getElementsByTagName("tr");
+
+            for (i = 0; i < tr.length; i++) {
+                td = tr[i].getElementsByTagName("td");
+                var showRow = false;
+                for (var j = 0; j < td.length; j++) {
+                    if (td[j]) {
+                        txtValue = td[j].textContent || td[j].innerText;
+                        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                            showRow = true;
+                            break;
+                        }
+                    }
+                }
+                tr[i].style.display = showRow ? "" : "none";
             }
         }
     </script>
