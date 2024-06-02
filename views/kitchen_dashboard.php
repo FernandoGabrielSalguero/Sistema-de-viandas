@@ -22,4 +22,22 @@ if ($result === FALSE) {
     echo "Consulta SQL exitosa: SELECT 1<br>"; // Debug
 }
 
+
+// Obtener los hijos de todos los usuarios con sus colegios y cursos
+$sql = "SELECT h.nombre, h.apellido, h.notas, co.nombre AS colegio, cu.nombre AS curso
+        FROM hijos h
+        JOIN colegios co ON h.colegio_id = co.id
+        JOIN cursos cu ON h.curso_id = cu.id";
+$hijosResult = $conn->query($sql);
+$hijos = [];
+if ($hijosResult === FALSE) {
+    echo "Error en la consulta de hijos: " . $conn->error . "<br>"; // Debug
+} else {
+    while($row = $hijosResult->fetch_assoc()) {
+        $hijos[] = $row;
+        echo "Hijo cargado: " . $row['nombre'] . " " . $row['apellido'] . "<br>"; // Debug
+    }
+}
+
+
 echo "Fin del script<br>"; // Debug
