@@ -1,5 +1,4 @@
 <?php
-// login.php
 include 'db.php';
 
 session_start();
