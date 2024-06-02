@@ -3,14 +3,14 @@ include '../php/db.php';
 session_start();
 
 if (!isset($_SESSION['userid']) || $_SESSION['role'] != 'Cocina') {
-    header("Location: ../views/login.php");
+    header("Location: login.php");
     exit();
 }
 
 // Obtener los hijos de todos los usuarios con sus colegios y cursos
-$sql = "SELECT h.nombre, h.apellido, h.notas, c.nombre AS colegio_nombre, cu.nombre AS curso_nombre
+$sql = "SELECT h.nombre, h.apellido, h.notas, co.nombre AS colegio, cu.nombre AS curso
         FROM hijos h
-        JOIN colegios c ON h.colegio_id = c.id
+        JOIN colegios co ON h.colegio_id = co.id
         JOIN cursos cu ON h.curso_id = cu.id";
 $hijosResult = $conn->query($sql);
 $hijos = [];
@@ -23,11 +23,11 @@ while($row = $hijosResult->fetch_assoc()) {
 
 // Obtener los pedidos con detalles adicionales
 $sql = "SELECT p.id, u.usuario AS nombre_papa, h.nombre AS nombre_hijo, h.apellido AS apellido_hijo, 
-               cu.nombre AS curso, c.nombre AS colegio, h.notas, m.nombre AS menu_nombre, m.fecha, p.estado, p.fecha_pedido
+               cu.nombre AS curso, co.nombre AS colegio, h.notas, m.nombre AS menu_nombre, m.fecha, p.estado, p.fecha_pedido
         FROM pedidos p
         JOIN usuarios u ON p.usuario_id = u.id
         JOIN hijos h ON p.hijo_id = h.id
-        JOIN colegios c ON h.colegio_id = c.id
+        JOIN colegios co ON h.colegio_id = co.id
         JOIN cursos cu ON h.curso_id = cu.id
         JOIN menus m ON p.menu_id = m.id";
 $pedidosResult = $conn->query($sql);
@@ -40,14 +40,14 @@ while($row = $pedidosResult->fetch_assoc()) {
 }
 
 // Obtener el resumen de menús separado por colegio y curso
-$sql = "SELECT c.nombre AS colegio, cu.nombre AS curso, m.nombre, COUNT(p.id) AS cantidad
+$sql = "SELECT co.nombre AS colegio, cu.nombre AS curso, m.nombre, COUNT(p.id) AS cantidad
         FROM pedidos p
         JOIN hijos h ON p.hijo_id = h.id
-        JOIN colegios c ON h.colegio_id = c.id
+        JOIN colegios co ON h.colegio_id = co.id
         JOIN cursos cu ON h.curso_id = cu.id
         JOIN menus m ON p.menu_id = m.id
         WHERE p.estado = 'Aprobado'
-        GROUP BY c.nombre, cu.nombre, m.nombre";
+        GROUP BY co.nombre, cu.nombre, m.nombre";
 $kpi_result = $conn->query($sql);
 $kpis = [];
 if ($kpi_result === FALSE) {
