@@ -45,14 +45,14 @@ if ($pedidosResult === FALSE) {
 }
 
 // Obtener el resumen de menús separado por colegio y curso
-$sql = "SELECT co.nombre AS colegio, cu.nombre AS curso, m.nombre, COUNT(p.id) AS cantidad, m.fecha AS vianda_fecha
+$sql = "SELECT co.nombre AS colegio, cu.nombre AS curso, m.nombre, COUNT(p.id) AS cantidad
         FROM pedidos p
         JOIN hijos h ON p.hijo_id = h.id
         JOIN colegios co ON h.colegio_id = co.id
         JOIN cursos cu ON h.curso_id = cu.id
         JOIN menus m ON p.menu_id = m.id
         WHERE p.estado = 'Aprobado'
-        GROUP BY co.nombre, cu.nombre, m.nombre, m.fecha";
+        GROUP BY co.nombre, cu.nombre, m.nombre";
 $kpi_result = $conn->query($sql);
 $kpis = [];
 if ($kpi_result === FALSE) {
@@ -96,7 +96,7 @@ if ($kpi_result === FALSE) {
         }
         .filter-buttons {
             display: flex;
-            justify-content: space-between;
+            justify-content: space-around;
             flex-wrap: wrap;
         }
         .filter-group {
@@ -146,19 +146,13 @@ if ($kpi_result === FALSE) {
                 <button onclick="filterKPIs('curso', '<?= $curso; ?>')"><?= $curso; ?></button>
             <?php endforeach; ?>
         </div>
-        <div class="filter-group">
-            <span>Fecha de la Vianda:</span>
-            <?php foreach (array_unique(array_column($kpis, 'vianda_fecha')) as $fecha) : ?>
-                <button onclick="filterKPIs('fecha', '<?= $fecha; ?>')"><?= $fecha; ?></button>
-            <?php endforeach; ?>
-        </div>
         <button onclick="filterKPIs('reset')">Resetear Filtros</button>
     </div>
     <div class="container">
         <h2>Resumen de Viandas Aprobadas</h2>
         <div class="kpi-container">
             <?php foreach ($kpis as $kpi) : ?>
-                <div class="kpi-card" data-colegio="<?= $kpi['colegio']; ?>" data-curso="<?= $kpi['curso']; ?>" data-menu="<?= $kpi['nombre']; ?>" data-fecha="<?= $kpi['vianda_fecha']; ?>">
+                <div class="kpi-card" data-colegio="<?= $kpi['colegio']; ?>" data-curso="<?= $kpi['curso']; ?>" data-menu="<?= $kpi['nombre']; ?>">
                     <h4><?= $kpi['nombre']; ?></h4>
                     <p>Colegio: <?= $kpi['colegio']; ?></p>
                     <p>Curso: <?= $kpi['curso']; ?></p>
@@ -167,17 +161,16 @@ if ($kpi_result === FALSE) {
             <?php endforeach; ?>
         </div>
         <h2>Pedidos Realizados</h2>
-        <input type="text" id="search" class="search-input" placeholder="Buscar en pedidos..." oninput="searchTable()">
         <table class="material-design-table">
             <thead>
                 <tr>
-                    <th>Nombre del Hijo</th>
-                    <th>Curso</th>
-                    <th>Colegio</th>
-                    <th>Nombre del Papá</th>
-                    <th>Menú</th>
-                    <th>Fecha</th>
-                    <th>Notas</th>
+                    <th><input class="search-input" oninput="searchColumn(this, 0)" placeholder="Nombre del Hijo"></th>
+                    <th><input class="search-input" oninput="searchColumn(this, 1)" placeholder="Curso"></th>
+                    <th><input class="search-input" oninput="searchColumn(this, 2)" placeholder="Colegio"></th>
+                    <th><input class="search-input" oninput="searchColumn(this, 3)" placeholder="Nombre del Papá"></th>
+                    <th><input class="search-input" oninput="searchColumn(this, 4)" placeholder="Menú"></th>
+                    <th><input class="search-input" oninput="searchColumn(this, 5)" placeholder="Fecha"></th>
+                    <th><input class="search-input" oninput="searchColumn(this, 6)" placeholder="Notas"></th>
                 </tr>
             </thead>
             <tbody id="pedidoTable">
@@ -202,40 +195,33 @@ if ($kpi_result === FALSE) {
                 var card = kpiCards[i];
                 var colegio = card.getAttribute('data-colegio');
                 var curso = card.getAttribute('data-curso');
-                var fecha = card.getAttribute('data-fecha');
 
                 card.style.display = 'none'; // Oculta todas las tarjetas primero
 
                 if (filterType === 'reset') {
                     card.style.display = 'block';
                 } else if ((filterType === 'colegio' && colegio === filterValue) ||
-                           (filterType === 'curso' && curso === filterValue) ||
-                           (filterType === 'fecha' && fecha === filterValue)) {
+                           (filterType === 'curso' && curso === filterValue)) {
                     card.style.display = 'block';
                 }
             }
         }
 
-        function searchTable() {
-            var input, filter, table, tr, td, i, txtValue;
-            input = document.getElementById("search");
-            filter = input.value.toUpperCase();
-            table = document.getElementById("pedidoTable");
-            tr = table.getElementsByTagName("tr");
+        function searchColumn(input, columnIndex) {
+            var filter = input.value.toUpperCase();
+            var table = document.getElementById("pedidoTable");
+            var tr = table.getElementsByTagName("tr");
 
-            for (i = 0; i < tr.length; i++) {
-                td = tr[i].getElementsByTagName("td");
-                var showRow = false;
-                for (var j = 0; j < td.length; j++) {
-                    if (td[j]) {
-                        txtValue = td[j].textContent || td[j].innerText;
-                        if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                            showRow = true;
-                            break;
-                        }
+            for (var i = 0; i < tr.length; i++) {
+                var td = tr[i].getElementsByTagName("td")[columnIndex];
+                if (td) {
+                    var txtValue = td.textContent || td.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
                     }
-                }
-                tr[i].style.display = showRow ? "" : "none";
+                } 
             }
         }
     </script>
