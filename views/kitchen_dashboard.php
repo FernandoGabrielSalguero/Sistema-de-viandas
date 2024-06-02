@@ -107,7 +107,7 @@ if ($kpi_result === FALSE) {
         .filter-buttons button {
             margin: 5px;
             padding: 10px;
-            background-color: #f0f0f0;
+            background-color: #008855;
             border: 1px solid #ccc;
             border-radius: 5px;
             cursor: pointer;
