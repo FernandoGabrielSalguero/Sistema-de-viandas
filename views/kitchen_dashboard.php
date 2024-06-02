@@ -65,6 +65,7 @@ if ($kpi_result === FALSE) {
 ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -78,56 +79,61 @@ if ($kpi_result === FALSE) {
             padding: 20px;
             margin: 10px;
             text-align: center;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
             display: inline-block;
             width: 200px;
         }
+
         .material-design-table {
             width: 100%;
             border-collapse: collapse;
         }
-        .material-design-table th, .material-design-table td {
+
+        .material-design-table th,
+        .material-design-table td {
             border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
         }
+
         .material-design-table th {
             background-color: #f2f2f2;
         }
     </style>
 </head>
+
 <body>
     <div class="header">
         <h1>Panel de Cocina</h1>
         <button onclick="location.href='../php/logout.php'">Cerrar sesión</button>
     </div>
     <div class="filter-buttons">
-    <h3>Filtros:</h3>
-    <div>
-        <span>Colegio:</span>
-        <?php foreach (array_unique(array_column($kpis, 'colegio')) as $colegio): ?>
-            <button onclick="filterKPIs('colegio', '<?= $colegio; ?>')"><?= $colegio; ?></button>
-        <?php endforeach; ?>
+        <h3>Filtros:</h3>
+        <div>
+            <span>Colegio:</span>
+            <?php foreach (array_unique(array_column($kpis, 'colegio')) as $colegio) : ?>
+                <button onclick="filterKPIs('colegio', '<?= $colegio; ?>')"><?= $colegio; ?></button>
+            <?php endforeach; ?>
+        </div>
+        <div>
+            <span>Curso:</span>
+            <?php foreach (array_unique(array_column($kpis, 'curso')) as $curso) : ?>
+                <button onclick="filterKPIs('curso', '<?= $curso; ?>')"><?= $curso; ?></button>
+            <?php endforeach; ?>
+        </div>
+        <div>
+            <span>Fecha:</span>
+            <!-- Asumiendo que tienes fechas en los KPIs, dinamiza este apartado según tus datos -->
+            <button onclick="filterKPIs('fecha', '2024-06-01')">2024-06-01</button>
+            <button onclick="filterKPIs('fecha', '2024-06-02')">2024-06-02</button>
+        </div>
+        <button onclick="filterKPIs('reset')">Resetear Filtros</button>
     </div>
-    <div>
-        <span>Curso:</span>
-        <?php foreach (array_unique(array_column($kpis, 'curso')) as $curso): ?>
-            <button onclick="filterKPIs('curso', '<?= $curso; ?>')"><?= $curso; ?></button>
-        <?php endforeach; ?>
-    </div>
-    <div>
-        <span>Fecha:</span>
-        <!-- Asumiendo que tienes fechas en los KPIs, dinamiza este apartado según tus datos -->
-        <button onclick="filterKPIs('fecha', '2024-06-01')">2024-06-01</button>
-        <button onclick="filterKPIs('fecha', '2024-06-02')">2024-06-02</button>
-    </div>
-    <button onclick="filterKPIs('reset')">Resetear Filtros</button>
-</div>
 
     <div class="container">
         <h2>Resumen de Viandas Aprobadas</h2>
         <div class="kpi-container">
-            <?php foreach ($kpis as $kpi): ?>
+            <?php foreach ($kpis as $kpi) : ?>
                 <div class="kpi-card">
                     <h4><?= $kpi['nombre']; ?></h4>
                     <p>Colegio: <?= $kpi['colegio']; ?></p>
@@ -150,7 +156,7 @@ if ($kpi_result === FALSE) {
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($pedidos as $pedido): ?>
+                <?php foreach ($pedidos as $pedido) : ?>
                     <tr>
                         <td><?= $pedido['nombre_hijo'] . " " . $pedido['apellido_hijo']; ?></td>
                         <td><?= $pedido['curso']; ?></td>
@@ -164,5 +170,30 @@ if ($kpi_result === FALSE) {
             </tbody>
         </table>
     </div>
+    <script>
+        function filterKPIs(filterType, filterValue) {
+            var kpiCards = document.getElementsByClassName('kpi-card');
+            for (var i = 0; i < kpiCards.length; i++) {
+                var card = kpiCards[i];
+                var colegio = card.getAttribute('data-colegio');
+                var curso = card.getAttribute('data-curso');
+                var fecha = card.getAttribute('data-fecha'); // Asegúrate de agregar data-fecha en tus tarjetas KPI si usas fechas
+
+                card.style.display = 'none'; // Oculta todas las tarjetas primero
+
+                if (filterType === 'reset') {
+                    card.style.display = 'block';
+                } else if (filterType === 'colegio' && colegio === filterValue) {
+                    card.style.display = 'block';
+                } else if (filterType === 'curso' && curso === filterValue) {
+                    card.style.display = 'block';
+                } else if (filterType === 'fecha' && fecha === filterValue) {
+                    card.style.display = 'block';
+                }
+            }
+        }
+    </script>
+
 </body>
+
 </html>
