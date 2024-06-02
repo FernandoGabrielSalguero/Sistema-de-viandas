@@ -59,5 +59,25 @@ if ($pedidosResult === FALSE) {
     }
 }
 
+// Obtener el resumen de menús separado por colegio y curso
+$sql = "SELECT co.nombre AS colegio, cu.nombre AS curso, m.nombre, COUNT(p.id) AS cantidad
+        FROM pedidos p
+        JOIN hijos h ON p.hijo_id = h.id
+        JOIN colegios co ON h.colegio_id = co.id
+        JOIN cursos cu ON h.curso_id = cu.id
+        JOIN menus m ON p.menu_id = m.id
+        WHERE p.estado = 'Aprobado'
+        GROUP BY co.nombre, cu.nombre, m.nombre";
+$kpi_result = $conn->query($sql);
+$kpis = [];
+if ($kpi_result === FALSE) {
+    echo "Error en la consulta del resumen de menús: " . $conn->error . "<br>"; // Debug
+} else {
+    while($row = $kpi_result->fetch_assoc()) {
+        $kpis[] = $row;
+        echo "KPI cargado: " . $row['nombre'] . " - " . $row['cantidad'] . "<br>"; // Debug
+    }
+}
+
 
 echo "Fin del script<br>"; // Debug
