@@ -7,8 +7,9 @@ if (!isset($_SESSION['userid']) || $_SESSION['role'] != 'Cocina') {
     exit();
 }
 
-function logErrorAndDie($error) {
-    echo "<script>console.error(`PHP Error: ${error}`);</script>";
+function logErrorAndDie($error)
+{
+    echo "<script>console.error('PHP Error: " . $error . "');</script>";
     exit();
 }
 
@@ -36,6 +37,7 @@ if ($notasResult === FALSE) {
 ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -52,6 +54,7 @@ if ($notasResult === FALSE) {
         }
     </style>
 </head>
+
 <body>
     <div class="header">
         <h1>Panel de Cocina</h1>
@@ -91,4 +94,5 @@ if ($notasResult === FALSE) {
         ?>
     </div>
 </body>
+
 </html>
