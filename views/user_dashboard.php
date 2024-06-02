@@ -79,7 +79,7 @@ if ($menus_result->num_rows > 0) {
         <button onclick="location.href='../php/logout.php'">Logout</button>
     </div>
     <div class="container">
-        <h2>Bienvenido, <?php echo $_SESSION['username']; ?></h2>
+        <h2>¡Que gusto verte de nuevo!, <?php echo $_SESSION['username']; ?></h2>
 
         <h3>Seleccionar Viandas</h3>
         <form id="order-form" action="../php/place_order.php" method="POST">
