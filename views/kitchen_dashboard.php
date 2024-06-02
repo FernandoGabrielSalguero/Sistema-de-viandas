@@ -65,7 +65,6 @@ if ($kpi_result === FALSE) {
 ?>
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -83,58 +82,71 @@ if ($kpi_result === FALSE) {
             display: inline-block;
             width: 200px;
         }
-
         .material-design-table {
             width: 100%;
             border-collapse: collapse;
         }
-
-        .material-design-table th,
-        .material-design-table td {
+        .material-design-table th, .material-design-table td {
             border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
         }
-
         .material-design-table th {
             background-color: #f2f2f2;
         }
+        .filter-buttons {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+        }
+        .filter-buttons button {
+            margin: 5px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .filter-buttons button:hover {
+            background-color: #e1e1e1;
+        }
     </style>
 </head>
-
 <body>
     <div class="header">
         <h1>Panel de Cocina</h1>
         <button onclick="location.href='../php/logout.php'">Cerrar sesión</button>
     </div>
     <div class="filter-buttons">
-        <h3>Filtros:</h3>
-        <div>
+        <div class="filter-group">
             <span>Colegio:</span>
             <?php foreach (array_unique(array_column($kpis, 'colegio')) as $colegio) : ?>
                 <button onclick="filterKPIs('colegio', '<?= $colegio; ?>')"><?= $colegio; ?></button>
             <?php endforeach; ?>
         </div>
-        <div>
+        <div class="filter-group">
             <span>Curso:</span>
             <?php foreach (array_unique(array_column($kpis, 'curso')) as $curso) : ?>
                 <button onclick="filterKPIs('curso', '<?= $curso; ?>')"><?= $curso; ?></button>
             <?php endforeach; ?>
         </div>
-        <div>
+        <div class="filter-group">
             <span>Fecha:</span>
-            <!-- Asumiendo que tienes fechas en los KPIs, dinamiza este apartado según tus datos -->
             <button onclick="filterKPIs('fecha', '2024-06-01')">2024-06-01</button>
             <button onclick="filterKPIs('fecha', '2024-06-02')">2024-06-02</button>
         </div>
         <button onclick="filterKPIs('reset')">Resetear Filtros</button>
     </div>
-
     <div class="container">
         <h2>Resumen de Viandas Aprobadas</h2>
         <div class="kpi-container">
             <?php foreach ($kpis as $kpi) : ?>
-                <div class="kpi-card">
+                <div class="kpi-card" data-colegio="<?= $kpi['colegio']; ?>" data-curso="<?= $kpi['curso']; ?>" data-menu="<?= $kpi['nombre']; ?>">
                     <h4><?= $kpi['nombre']; ?></h4>
                     <p>Colegio: <?= $kpi['colegio']; ?></p>
                     <p>Curso: <?= $kpi['curso']; ?></p>
@@ -177,23 +189,19 @@ if ($kpi_result === FALSE) {
                 var card = kpiCards[i];
                 var colegio = card.getAttribute('data-colegio');
                 var curso = card.getAttribute('data-curso');
-                var fecha = card.getAttribute('data-fecha'); // Asegúrate de agregar data-fecha en tus tarjetas KPI si usas fechas
+                var fecha = card.getAttribute('data-fecha');
 
                 card.style.display = 'none'; // Oculta todas las tarjetas primero
 
                 if (filterType === 'reset') {
                     card.style.display = 'block';
-                } else if (filterType === 'colegio' && colegio === filterValue) {
-                    card.style.display = 'block';
-                } else if (filterType === 'curso' && curso === filterValue) {
-                    card.style.display = 'block';
-                } else if (filterType === 'fecha' && fecha === filterValue) {
+                } else if ((filterType === 'colegio' && colegio === filterValue) ||
+                           (filterType === 'curso' && curso === filterValue) ||
+                           (filterType === 'fecha' && fecha === filterValue)) {
                     card.style.display = 'block';
                 }
             }
         }
     </script>
-
 </body>
-
 </html>
