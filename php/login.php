@@ -33,6 +33,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             header("Location: ../views/user_dashboard.php");
         } elseif ($row['rol'] == 'Cocina') {
             header("Location: ../views/kitchen_dashboard.php");
+        } else {
+            $error = "Rol no reconocido.";
+            header("Location: ../views/login.php?error=" . urlencode($error));
         }
     } else {
         $error = "Usuario o contraseña incorrectos.";
