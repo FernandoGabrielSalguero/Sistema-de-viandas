@@ -7,6 +7,11 @@ if (!isset($_SESSION['userid']) || $_SESSION['role'] != 'Cocina') {
     exit();
 }
 
+function logErrorAndDie($error) {
+    echo "<script>console.error(`PHP Error: ${error}`);</script>";
+    exit();
+}
+
 // Consulta para obtener la cantidad de cada tipo de menú aprobado, agrupado por colegio y curso
 $menusSql = "SELECT m.nombre AS menu, h.colegio, h.curso, COUNT(*) AS cantidad
              FROM pedidos p
@@ -15,12 +20,18 @@ $menusSql = "SELECT m.nombre AS menu, h.colegio, h.curso, COUNT(*) AS cantidad
              WHERE p.estado = 'Aprobado'
              GROUP BY m.nombre, h.colegio, h.curso";
 $menusResult = $conn->query($menusSql);
+if ($menusResult === FALSE) {
+    logErrorAndDie($conn->error);
+}
 
 // Consulta para obtener las notas especiales de los hijos
 $notasSql = "SELECT DISTINCT nombre, apellido, notas, colegio, curso
              FROM hijos
              WHERE notas IS NOT NULL AND notas != ''";
 $notasResult = $conn->query($notasSql);
+if ($notasResult === FALSE) {
+    logErrorAndDie($conn->error);
+}
 
 ?>
 <!DOCTYPE html>
