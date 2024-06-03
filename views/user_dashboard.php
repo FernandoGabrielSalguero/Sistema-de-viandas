@@ -158,5 +158,8 @@ if ($menus_result->num_rows > 0) {
             document.getElementById('popup').style.display = 'none';
         });
     </script>
+
+    <!-- Incluir el resumen del pedido -->
+<?php include 'order_summary.php'; ?>
 </body>
 </html>
