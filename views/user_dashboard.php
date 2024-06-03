@@ -66,49 +66,52 @@ if ($menus_result->num_rows > 0) {
             <div class="input-group">
                 <label for="hijo">¿A quién le entregamos el pedido?</label>
                 <select id="hijo" name="hijo_id" required>
-                    <?php
-                    if (count($hijos) > 0):
-                        foreach ($hijos as $hijo):
-                            echo "<option value='{$hijo['id']}' data-curso='{$hijo['curso_id']}'>{$hijo['nombre']} {$hijo['apellido']}</option>";
-                        endforeach;
-                    else:
-                        echo "<option value=''>No hay hijos disponibles</option>";
-                    endif;
-                    ?>
+                    <?php foreach ($hijos as $hijo): ?>
+                        <option value='<?php echo $hijo['id']; ?>' data-curso='<?php echo $hijo['curso_id']; ?>'>
+                            <?php echo htmlspecialchars($hijo['nombre']) . " " . htmlspecialchars($hijo['apellido']); ?>
+                        </option>
+                    <?php endforeach; ?>
                 </select>
             </div>
             <div class="input-group">
                 <label for="menu">Seleccione una vianda por día:</label>
                 <div id="menus">
-                    <?php
-                    foreach ($menus as $fecha => $menu_items):
-                        $formattedDate = date("d-m-Y", strtotime($fecha));
-                        echo "<div class='menu-day'>";
-                        echo "<label>{$formattedDate}</label>";
-                        echo "<select name='menu_id[{$fecha}]' class='menu-select' data-precio-total='0'>";
-                        echo "<option value='' data-precio='0'>Sin vianda seleccionada</option>";
-                        foreach ($menu_items as $menu):
-                            echo "<option value='{$menu['id']}' data-precio='{$menu['precio']}'>{$menu['nombre']} (\${$menu['precio']})</option>";
-                        endforeach;
-                        echo "</select>";
-                        echo "</div>";
-                    endforeach;
-                    ?>
+                    <?php foreach ($menus as $fecha => $menu_items): ?>
+                        <div class='menu-day'>
+                            <label><?php echo date("d-m-Y", strtotime($fecha)); ?></label>
+                            <select name='menu_id[<?php echo $fecha; ?>]' class='menu-select' data-precio-total='0'>
+                                <option value='' data-precio='0'>Sin vianda seleccionada</option>
+                                <?php foreach ($menu_items as $menu): ?>
+                                    <option value='<?php echo $menu['id']; ?>' data-precio='<?php echo $menu['precio']; ?>'>
+                                        <?php echo htmlspecialchars($menu['nombre']) . " (\$" . number_format($menu['precio'], 2) . ")"; ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    <?php endforeach; ?>
                 </div>
             </div>
             <button type="submit" style="background-color: #4CAF50; color: white; cursor: pointer;">Realizar Pedido</button>
         </form>
 
+        <!-- Pop-up para confirmación de pedido -->
+        <div id="orderSummaryPopup" style="display:none; position: fixed; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+            <div style="background-color: white; width: 50%; margin: 100px auto; padding: 20px;">
+                <h4>Resumen del Pedido</h4>
+                <div id="orderDetails"></div>
+                <button onclick="submitOrderForm()">Aceptar</button>
+                <button onclick="closePopup()">Cerrar</button>
+            </div>
+        </div>
+
         <h3>Notas de los Hijos</h3>
-        <?php
-        if (count($hijos) > 0):
-            foreach ($hijos as $hijo):
-                echo "<p>{$hijo['nombre']} {$hijo['apellido']} (Curso: {$hijo['curso_id']}): {$hijo['notas']}</p>";
-            endforeach;
-        else:
-            echo "<p>No hay notas disponibles</p>";
-        endif;
-        ?>
+        <?php if (!empty($hijos)): ?>
+            <?php foreach ($hijos as $hijo): ?>
+                <p><?php echo htmlspecialchars($hijo['nombre']) . " " . htmlspecialchars($hijo['apellido']); ?> (Curso: <?php echo $hijo['curso_id']; ?>): <?php echo htmlspecialchars($hijo['notas']); ?></p>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <p>No hay notas disponibles</p>
+        <?php endif; ?>
 
         <h3>Pedidos Realizados</h3>
         <table class="material-design-table">
@@ -122,23 +125,61 @@ if ($menus_result->num_rows > 0) {
                 </tr>
             </thead>
             <tbody>
-                <?php
-                if ($result->num_rows > 0):
-                    while ($row = $result->fetch_assoc()):
-                        echo "<tr>";
-                        echo "<td>{$row['id']}</td>";
-                        echo "<td>{$row['hijo_nombre']} {$row['hijo_apellido']}</td>";
-                        echo "<td>{$row['menu_nombre']}</td>";
-                        echo "<td>" . date("d-m-Y", strtotime($row['fecha'])) . "</td>";
-                        echo "<td>{$row['estado']}</td>";
-                        echo "</tr>";
-                    endwhile;
-                else:
-                    echo "<tr><td colspan='5'>No hay pedidos realizados</td></tr>";
-                endif;
-                ?>
+                <?php if (!empty($result) && $result->num_rows > 0): ?>
+                    <?php while ($row = $result->fetch_assoc()): ?>
+                        <tr>
+                            <td><?php echo $row['id']; ?></td>
+                            <td><?php echo htmlspecialchars($row['hijo_nombre']) . " " . htmlspecialchars($row['hijo_apellido']); ?></td>
+                            <td><?php echo htmlspecialchars($row['menu_nombre']); ?></td>
+                            <td><?php echo date("d-m-Y", strtotime($row['fecha'])); ?></td>
+                            <td><?php echo $row['estado']; ?></td>
+                        </tr>
+                    <?php endwhile; ?>
+                <?php else: ?>
+                    <tr><td colspan='5'>No hay pedidos realizados</td></tr>
+                <?php endif; ?>
             </tbody>
         </table>
     </div>
+
+    <script>
+        document.getElementById('order-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the form from submitting through the browser
+
+            var hijoSelect = document.getElementById('hijo');
+            var hijoNombre = hijoSelect.options[hijoSelect.selectedIndex].text;
+            var total = 0;
+            var detallesPedido = '';
+
+            // Calculate total and collect details
+            document.querySelectorAll('.menu-select').forEach(function(select) {
+                var precio = parseFloat(select.options[select.selectedIndex].getAttribute('data-precio'));
+                if (precio > 0) {
+                    total += precio;
+                    var fecha = select.parentNode.querySelector('label').textContent;
+                    var menu = select.options[select.selectedIndex].text;
+                    detallesPedido += `<p>${fecha}: ${menu} - $${precio.toFixed(2)}</p>`;
+                }
+            });
+
+            // Display details in the popup
+            document.getElementById('orderDetails').innerHTML = `
+                <p>Alumno: ${hijoNombre}</p>
+                ${detallesPedido}
+                <p>Total: $${total.toFixed(2)}</p>
+                <p>Saldo actual: $${parseFloat(<?php echo json_encode($saldo); ?>).toFixed(2)}</p>
+                <p>Total a pagar después del saldo: $${Math.max(0, total - <?php echo json_encode($saldo); ?>).toFixed(2)}</p>
+            `;
+            document.getElementById('orderSummaryPopup').style.display = 'block';
+        });
+
+        function submitOrderForm() {
+            document.getElementById('order-form').submit(); // Real form submission
+        }
+
+        function closePopup() {
+            document.getElementById('orderSummaryPopup').style.display = 'none';
+        }
+    </script>
 </body>
 </html>
