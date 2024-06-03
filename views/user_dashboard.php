@@ -166,6 +166,7 @@ if ($menus_result->num_rows > 0) {
             </tbody>
         </table>
     </div>
+    <?php include 'details_card.php'; ?>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
