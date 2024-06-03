@@ -52,6 +52,8 @@ if ($menus_result->num_rows > 0) {
     <title>¡Qué gusto verte de nuevo, <?php echo $_SESSION['username']; ?>!</title>
 
     <style>
+
+
         .input-group,
         .menu-day {
             margin-bottom: 20px;
@@ -136,7 +138,7 @@ if ($menus_result->num_rows > 0) {
             <p>No hay notas disponibles</p>
         <?php endif; ?>
 
-        <!-- <h3>Pedidos Realizados</h3>
+        <h3>Pedidos Realizados</h3>
         <table class="material-design-table">
             <thead>
                 <tr>
@@ -164,9 +166,8 @@ if ($menus_result->num_rows > 0) {
                     </tr>
                 <?php endif; ?>
             </tbody>
-        </table> -->
+        </table>
     </div>
-    <?php include 'pedidos_realizados.php'; ?>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
