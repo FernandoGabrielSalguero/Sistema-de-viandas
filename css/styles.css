@@ -7,7 +7,7 @@ body {
 }
 
 .header {
-    background-color: #d9534f;
+    background-color: #ff0700;
     color: #fff;
     padding: 10px 0;
     text-align: center;
@@ -18,7 +18,7 @@ body {
 }
 
 .header nav button {
-    background-color: #d9534f;
+    background-color: #209b0a;
     border: none;
     color: white;
     padding: 10px 20px;
