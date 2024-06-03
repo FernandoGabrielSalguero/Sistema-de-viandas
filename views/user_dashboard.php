@@ -8,40 +8,19 @@ if (!isset($_SESSION['userid']) || $_SESSION['role'] != 'Usuario') {
     exit();
 }
 
-// Obtener datos del usuario
 $userid = $_SESSION['userid'];
-$userQuery = "SELECT nombre, telefono, correo FROM usuarios WHERE id = $userid";
-$userResult = $conn->query($userQuery);
-$userInfo = $userResult->fetch_assoc();
+$userQuery = "SELECT nombre FROM usuarios WHERE id = $userid";
+$userInfo = $conn->query($userQuery)->fetch_assoc();
 
-// Obtener los hijos del usuario
 $sql = "SELECT h.*, c.nombre as colegio_nombre, cu.nombre as curso_nombre FROM hijos h
-        LEFT JOIN colegios c ON h.colegio_id = c.id
-        LEFT JOIN cursos cu ON h.curso_id = cu.id
+        JOIN colegios c ON h.colegio_id = c.id
+        JOIN cursos cu ON h.curso_id = cu.id
         WHERE h.usuario_id = $userid";
-$result = $conn->query($sql);
+$hijos = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
 
-echo "<script>console.log('Consultando hijos del usuario con ID $userid');</script>";
-
-if ($result === FALSE) {
-    die("<script>console.error('Error en la consulta de hijos: " . $conn->error . "');</script>");
-}
-
-$hijos = [];
-if ($result->num_rows > 0) {
-    while($row = $result->fetch_assoc()) {
-        $hijos[] = $row;
-    }
-    echo "<script>console.log('Hijos obtenidos: " . json_encode($hijos) . "');</script>";
-} else {
-    echo "<script>console.warn('No se encontraron hijos para el usuario con ID $userid');</script>";
-}
-
-// Obtener el saldo del usuario
 $saldo_result = $conn->query("SELECT saldo FROM usuarios WHERE id = $userid");
-$saldo = $saldo_result && $saldo_result->num_rows > 0 ? $saldo_result->fetch_assoc()['saldo'] : 0;
+$saldo = $saldo_result->num_rows > 0 ? $saldo_result->fetch_assoc()['saldo'] : 0;
 
-// Obtener los menús disponibles
 $menus_result = $conn->query("SELECT * FROM menus ORDER BY fecha ASC");
 $menus = [];
 if ($menus_result->num_rows > 0) {
@@ -61,15 +40,14 @@ if ($menus_result->num_rows > 0) {
 </head>
 <body>
     <div class="header">
-        <h1>Panel de Usuario</h1>
-        <p>Usuario: <?= $userInfo['nombre']; ?> | Email: <?= $userInfo['correo']; ?> | Tel: <?= $userInfo['telefono']; ?></p>
+        <h1>Qué bueno verte de nuevo, <?= $userInfo['nombre']; ?></h1>
         <p>Saldo: $<?= number_format($saldo, 2); ?></p>
-        <button onclick="window.location.href='../php/logout.php'">Logout</button>
-        <button onclick="window.open('https://wa.me/542613406173', '_blank')">Contacto</button>
+        <div style="display: flex; justify-content: space-between; width: 300px;">
+            <button onclick="window.location.href='../php/logout.php'">Cerrar sesión</button>
+            <button onclick="window.open('https://wa.me/542613406173', '_blank')">Contacto</button>
+        </div>
     </div>
     <div class="container">
-        <h2>¡Que gusto verte de nuevo!, <?= $_SESSION['username']; ?></h2>
-
         <h3>Seleccionar Viandas</h3>
         <form id="order-form" action="../php/place_order.php" method="POST">
             <div class="input-group">
@@ -105,6 +83,7 @@ if ($menus_result->num_rows > 0) {
                 <p id="resumen-pedido"></p>
                 <p>Gracias por confiar en nosotros! Tu pedido se encuentra en estado "En espera de aprobación"...</p>
                 <button id="popup-close">Cerrar</button>
+                <button onclick="document.getElementById('popup').style.display='none'">Cerrar</button>
             </div>
         </div>
 
@@ -126,68 +105,58 @@ if ($menus_result->num_rows > 0) {
                 </tr>
             </thead>
             <tbody>
-                <?php
-                $sql = "SELECT pedidos.id, hijos.nombre AS hijo_nombre, hijos.apellido AS hijo_apellido, 
-                               menus.nombre AS menu_nombre, menus.fecha, pedidos.estado
-                        FROM pedidos
-                        JOIN hijos ON pedidos.hijo_id = hijos.id
-                        JOIN menus ON pedidos.menu_id = menus.id
-                        WHERE pedidos.usuario_id = $userid";
-                $result = $conn->query($sql);
-
-                if ($result->num_rows > 0) {
-                    while($row = $result->fetch_assoc()) {
-                        echo "<tr>";
-                        echo "<td>{$row['id']}</td>";
-                        echo "<td>{$row['hijo_nombre']} {$row['hijo_apellido']}</td>";
-                        echo "<td>{$row['menu_nombre']}</td>";
-                        echo "<td>{$row['fecha']}</td>";
-                        echo "<td>{$row['estado']}</td>";
-                        echo "<td><button onclick='cancelOrder({$row['id']})'>Cancelar</button></td>";
-                        echo "</tr>";
-                    }
-                } else {
-                    echo "<tr><td colspan='6'>No hay pedidos realizados</td></tr>";
-                }
-                ?>
+                <?php foreach ($conn->query("SELECT pedidos.id, hijos.nombre AS hijo_nombre, hijos.apellido AS hijo_apellido, 
+                                                 menus.nombre AS menu_nombre, menus.fecha, pedidos.estado
+                                          FROM pedidos
+                                          JOIN hijos ON pedidos.hijo_id = hijos.id
+                                          JOIN menus ON pedidos.menu_id = menus.id
+                                          WHERE pedidos.usuario_id = $userid") as $row): ?>
+                    <tr>
+                        <td><?= $row['id']; ?></td>
+                        <td><?= $row['hijo_nombre'] . ' ' . $row['hijo_apellido']; ?></td>
+                        <td><?= $row['menu_nombre']; ?></td>
+                        <td><?= $row['fecha']; ?></td>
+                        <td><?= $row['estado']; ?></td>
+                        <td><button onclick="cancelOrder(<?= $row['id']; ?>)">Cancelar</button></td>
+                    </tr>
+                <?php endforeach; ?>
             </tbody>
         </table>
     </div>
     <script>
-    function updateTotal() {
-        var total = 0;
-        document.querySelectorAll('.menu-select').forEach(function(select) {
-            total += parseFloat(select.options[select.selectedIndex].getAttribute('data-precio'));
+        document.querySelectorAll('.menu-select').forEach(select => select.addEventListener('change', updateTotal));
+
+        function updateTotal() {
+            let total = Array.from(document.querySelectorAll('.menu-select')).reduce((acc, select) => {
+                return acc + parseFloat(select.options[select.selectedIndex].dataset.precio);
+            }, 0);
+            document.getElementById('total').textContent = total.toFixed(2);
+        }
+
+        function cancelOrder(orderId) {
+            if (!confirm('¿Está seguro que desea cancelar este pedido?')) return;
+            fetch('../php/cancel_order.php', {
+                method: 'POST',
+                body: JSON.stringify({ order_id: orderId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Pedido cancelado exitosamente.');
+                    location.reload();
+                } else {
+                    alert('No se pudo cancelar el pedido.');
+                }
+            })
+            .catch(error => {
+                console.error('Error al cancelar pedido:', error);
+                alert('Error al tratar de cancelar el pedido.');
+            });
+        }
+
+        document.getElementById('popup-close').addEventListener('click', () => {
+            document.getElementById('popup').style.display = 'none';
         });
-        document.getElementById('total').textContent = total.toFixed(2);
-    }
-
-    function cancelOrder(orderId) {
-        if (!confirm('¿Está seguro que desea cancelar este pedido?')) return;
-        var form = new FormData();
-        form.append('order_id', orderId);
-        fetch('../php/cancel_order.php', {
-            method: 'POST',
-            body: form
-        }).then(response => response.json())
-          .then(data => {
-            alert(data.message);
-            if (data.success) location.reload();
-        }).catch(error => {
-            console.error('Error:', error);
-            alert('Error al cancelar el pedido.');
-        });
-    }
-
-    document.getElementById('popup-close').addEventListener('click', function() {
-        document.getElementById('popup').style.display = 'none';
-    });
-
-    document.getElementById('order-form').addEventListener('submit', function(event) {
-        event.preventDefault();
-        // Simulate form submission here
-        console.log('Formulario enviado y procesado.');
-    });
     </script>
 </body>
 </html>
