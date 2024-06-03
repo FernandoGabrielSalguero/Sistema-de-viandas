@@ -197,16 +197,17 @@ document.getElementById('order-form').addEventListener('submit', function(event)
     var hijoNombre = hijoSelect.options[hijoSelect.selectedIndex].text;
     var hijoCurso = hijoSelect.options[hijoSelect.selectedIndex].getAttribute('data-curso');
 
-    // Calcular el precio total y obtener el resumen de viandas
+    // Calcular el precio total y compilar los detalles de los menús seleccionados
     var total = 0;
-    var resumen = '';
+    var detallesPedido = '';
     var menus = document.querySelectorAll('.menu-select');
     menus.forEach(function(menu) {
         var selectedOption = menu.options[menu.selectedIndex];
         var precio = parseFloat(selectedOption.getAttribute('data-precio'));
+        var fecha = menu.parentElement.querySelector('label').textContent;
         if (precio > 0) {
             total += precio;
-            resumen += '<p>' + selectedOption.text + ' - $' + precio.toFixed(2) + '</p>';
+            detallesPedido += `<p>${fecha}: ${selectedOption.text} - $${precio.toFixed(2)}</p>`;
         }
     });
 
@@ -218,30 +219,26 @@ document.getElementById('order-form').addEventListener('submit', function(event)
         textoSaldo = `<p>Saldo utilizado: $${saldo.toFixed(2)}</p><p>Total a transferir: $${montoRestante.toFixed(2)}</p>`;
     } else {
         textoSaldo = `<p>Saldo utilizado: $${total.toFixed(2)}</p><p>No es necesario realizar una transferencia. Su saldo cubre el total del pedido.</p>`;
-        montoRestante = 0;
     }
 
     // Mostrar el resumen en el popup
-    document.getElementById('resumen-pedido').innerHTML = `
+    var resumenPedido = `
         <p>Alumno: ${hijoNombre} (Curso: ${hijoCurso})</p>
-        ${resumen}
+        ${detallesPedido}
         <p><strong>Total: $${total.toFixed(2)}</strong></p>
         ${textoSaldo}
+        <p>Gracias por confiar en nosotros! Tu pedido se encuentra en estado "En espera de aprobación" eso significa que estamos esperando la transferencia del saldo para poder aprobar el encargo. Recordá que podes hacerlo al siguiente CBU: 0340300408300313721004 a nombre de: Federico Figueroa en el banco: BANCO PATAGONIA, CUIT: 20273627651 Alias: ROJO.GENIO.CASINO. La aprobación puede demorar hasta 48 hs en efectuarse. Cuando esté aprobada, el estado de tu pedido será: APROBADO</p>
     `;
+
+    document.getElementById('resumen-pedido').innerHTML = resumenPedido;
     document.getElementById('popup').style.display = 'block';
 });
 
 document.getElementById('popup-close').addEventListener('click', function() {
-    // Enviar la información al archivo order_summary.php mediante GET y abrirlo en una nueva pestaña
-    var url = 'order_summary.php?hijoNombre=' + encodeURIComponent(hijoNombre) +
-        '&hijoCurso=' + encodeURIComponent(hijoCurso) +
-        '&resumen=' + encodeURIComponent(resumen) +
-        '&total=' + total +
-        '&textoSaldo=' + encodeURIComponent(textoSaldo);
-    window.location.href = url; // Cambiado para redireccionar en la misma pestaña
     document.getElementById('popup').style.display = 'none';
 });
 </script>
+
 
 
 </body>
