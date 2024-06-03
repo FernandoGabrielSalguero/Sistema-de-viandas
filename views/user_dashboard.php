@@ -198,7 +198,7 @@ if ($menus_result->num_rows > 0) {
         }
     </script>
 
-<?php include 'details_card.php'; ?>
+<?php include 'pedidos_realizados.php'; ?>
 </body>
 
 </html>
