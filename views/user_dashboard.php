@@ -21,7 +21,7 @@ if ($result === FALSE) {
 
 $hijos = [];
 if ($result->num_rows > 0) {
-    while($row = $result->fetch_assoc()) {
+    while ($row = $result->fetch_assoc()) {
         $hijos[] = $row;
     }
     echo "<script>console.log('Hijos obtenidos: " . json_encode($hijos) . "');</script>";
@@ -52,7 +52,7 @@ if ($menus_result === FALSE) {
 
 $menus = [];
 if ($menus_result->num_rows > 0) {
-    while($row = $menus_result->fetch_assoc()) {
+    while ($row = $menus_result->fetch_assoc()) {
         $menus[$row['fecha']][] = $row;
     }
     echo "<script>console.log('Menús obtenidos: " . json_encode($menus) . "');</script>";
@@ -63,6 +63,7 @@ if ($menus_result->num_rows > 0) {
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -72,6 +73,7 @@ if ($menus_result->num_rows > 0) {
         console.log("Script cargado correctamente.");
     </script>
 </head>
+
 <body>
     <div class="header">
         <h1>Panel de Usuario</h1>
@@ -79,10 +81,9 @@ if ($menus_result->num_rows > 0) {
         <button onclick="location.href='../php/logout.php'">Logout</button>
     </div>
 
-        <!-- Incluir como un iframe -->
-        <iframe src="details_card.php" style="width: 100%; height: 300px; border: none;"></iframe>
+    <!-- Incluir la tarjeta de detalles -->
+    <?php include 'details_card.php'; ?>
 
-        
     <div class="container">
         <h2>¡Que gusto verte de nuevo!, <?php echo $_SESSION['username']; ?></h2>
 
@@ -93,11 +94,11 @@ if ($menus_result->num_rows > 0) {
                 <select id="hijo" name="hijo_id" required>
                     <?php
                     echo "<script>console.log('Generando opciones para hijos');</script>";
-                    if (count($hijos) > 0):
-                        foreach ($hijos as $hijo):
+                    if (count($hijos) > 0) :
+                        foreach ($hijos as $hijo) :
                             echo "<option value='{$hijo['id']}' data-curso='{$hijo['curso_id']}'>{$hijo['nombre']} {$hijo['apellido']}</option>";
                         endforeach;
-                    else:
+                    else :
                         echo "<option value=''>No hay hijos disponibles</option>";
                     endif;
                     ?>
@@ -108,12 +109,12 @@ if ($menus_result->num_rows > 0) {
                 <div id="menus">
                     <?php
                     echo "<script>console.log('Generando opciones para menús');</script>";
-                    foreach ($menus as $fecha => $menu_items):
+                    foreach ($menus as $fecha => $menu_items) :
                         echo "<div class='menu-day'>";
                         echo "<label>{$fecha}</label>";
                         echo "<select name='menu_id[{$fecha}]' class='menu-select' data-precio-total='0'>";
                         echo "<option value='' data-precio='0'>Sin vianda seleccionada</option>";
-                        foreach ($menu_items as $menu):
+                        foreach ($menu_items as $menu) :
                             echo "<option value='{$menu['id']}' data-precio='{$menu['precio']}'>{$menu['nombre']} (\${$menu['precio']})</option>";
                         endforeach;
                         echo "</select>";
@@ -129,11 +130,11 @@ if ($menus_result->num_rows > 0) {
 
         <h3>Notas de los Hijos</h3>
         <?php
-        if (count($hijos) > 0):
-            foreach ($hijos as $hijo):
+        if (count($hijos) > 0) :
+            foreach ($hijos as $hijo) :
                 echo "<p>{$hijo['nombre']} {$hijo['apellido']} (Curso: {$hijo['curso_id']}): {$hijo['notas']}</p>";
             endforeach;
-        else:
+        else :
             echo "<p>No hay notas disponibles</p>";
         endif;
         ?>
@@ -164,7 +165,7 @@ if ($menus_result->num_rows > 0) {
                 }
 
                 if ($result->num_rows > 0) {
-                    while($row = $result->fetch_assoc()) {
+                    while ($row = $result->fetch_assoc()) {
                         echo "<tr>";
                         echo "<td>{$row['id']}</td>";
                         echo "<td>{$row['hijo_nombre']} {$row['hijo_apellido']}</td>";
@@ -181,46 +182,46 @@ if ($menus_result->num_rows > 0) {
         </table>
     </div>
     <script>
-document.addEventListener('DOMContentLoaded', function() {
-    console.log("DOM completamente cargado y procesado.");
-});
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOM completamente cargado y procesado.");
+        });
 
-document.getElementById('order-form').addEventListener('submit', function(event) {
-    event.preventDefault();
-    
-    console.log("Formulario enviado.");
+        document.getElementById('order-form').addEventListener('submit', function(event) {
+            event.preventDefault();
 
-    // Obtener el nombre del hijo seleccionado y su curso
-    var hijoSelect = document.getElementById('hijo');
-    var hijoNombre = hijoSelect.options[hijoSelect.selectedIndex].text;
-    var hijoCurso = hijoSelect.options[hijoSelect.selectedIndex].getAttribute('data-curso');
+            console.log("Formulario enviado.");
 
-    // Calcular el precio total y compilar los detalles de los menús seleccionados
-    var total = 0;
-    var detallesPedido = '';
-    var menus = document.querySelectorAll('.menu-select');
-    menus.forEach(function(menu) {
-        var selectedOption = menu.options[menu.selectedIndex];
-        var precio = parseFloat(selectedOption.getAttribute('data-precio'));
-        var fecha = menu.parentElement.querySelector('label').textContent;
-        if (precio > 0) {
-            total += precio;
-            detallesPedido += `<p>${fecha}: ${selectedOption.text} - $${precio.toFixed(2)}</p>`;
-        }
-    });
+            // Obtener el nombre del hijo seleccionado y su curso
+            var hijoSelect = document.getElementById('hijo');
+            var hijoNombre = hijoSelect.options[hijoSelect.selectedIndex].text;
+            var hijoCurso = hijoSelect.options[hijoSelect.selectedIndex].getAttribute('data-curso');
 
-    // Calcular el monto restante a pagar después de descontar el saldo
-    var saldo = <?php echo $saldo; ?>;
-    var montoRestante = total - saldo;
-    var textoSaldo = '';
-    if (montoRestante > 0) {
-        textoSaldo = `<p>Saldo utilizado: $${saldo.toFixed(2)}</p><p>Total a transferir: $${montoRestante.toFixed(2)}</p>`;
-    } else {
-        textoSaldo = `<p>Saldo utilizado: $${total.toFixed(2)}</p><p>No es necesario realizar una transferencia. Su saldo cubre el total del pedido.</p>`;
-    }
+            // Calcular el precio total y compilar los detalles de los menús seleccionados
+            var total = 0;
+            var detallesPedido = '';
+            var menus = document.querySelectorAll('.menu-select');
+            menus.forEach(function(menu) {
+                var selectedOption = menu.options[menu.selectedIndex];
+                var precio = parseFloat(selectedOption.getAttribute('data-precio'));
+                var fecha = menu.parentElement.querySelector('label').textContent;
+                if (precio > 0) {
+                    total += precio;
+                    detallesPedido += `<p>${fecha}: ${selectedOption.text} - $${precio.toFixed(2)}</p>`;
+                }
+            });
 
-    // Mostrar el resumen en el popup
-    var resumenPedido = `
+            // Calcular el monto restante a pagar después de descontar el saldo
+            var saldo = <?php echo $saldo; ?>;
+            var montoRestante = total - saldo;
+            var textoSaldo = '';
+            if (montoRestante > 0) {
+                textoSaldo = `<p>Saldo utilizado: $${saldo.toFixed(2)}</p><p>Total a transferir: $${montoRestante.toFixed(2)}</p>`;
+            } else {
+                textoSaldo = `<p>Saldo utilizado: $${total.toFixed(2)}</p><p>No es necesario realizar una transferencia. Su saldo cubre el total del pedido.</p>`;
+            }
+
+            // Mostrar el resumen en el popup
+            var resumenPedido = `
         <p>Alumno: ${hijoNombre} (Curso: ${hijoCurso})</p>
         ${detallesPedido}
         <p><strong>Total: $${total.toFixed(2)}</strong></p>
@@ -228,16 +229,17 @@ document.getElementById('order-form').addEventListener('submit', function(event)
         <p>Gracias por confiar en nosotros! Tu pedido se encuentra en estado "En espera de aprobación" eso significa que estamos esperando la transferencia del saldo para poder aprobar el encargo. Recordá que podes hacerlo al siguiente CBU: 0340300408300313721004 a nombre de: Federico Figueroa en el banco: BANCO PATAGONIA, CUIT: 20273627651 Alias: ROJO.GENIO.CASINO. La aprobación puede demorar hasta 48 hs en efectuarse. Cuando esté aprobada, el estado de tu pedido será: APROBADO</p>
     `;
 
-    document.getElementById('resumen-pedido').innerHTML = resumenPedido;
-    document.getElementById('popup').style.display = 'block';
-});
+            document.getElementById('resumen-pedido').innerHTML = resumenPedido;
+            document.getElementById('popup').style.display = 'block';
+        });
 
-document.getElementById('popup-close').addEventListener('click', function() {
-    document.getElementById('popup').style.display = 'none';
-});
-</script>
+        document.getElementById('popup-close').addEventListener('click', function() {
+            document.getElementById('popup').style.display = 'none';
+        });
+    </script>
 
 
 
 </body>
+
 </html>
