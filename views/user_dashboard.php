@@ -197,6 +197,8 @@ if ($menus_result->num_rows > 0) {
             document.getElementById('orderSummaryPopup').style.display = 'none';
         }
     </script>
+
+<?php include 'details_card.php'; ?>
 </body>
 
 </html>
