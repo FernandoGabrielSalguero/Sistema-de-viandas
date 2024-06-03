@@ -123,41 +123,52 @@ if ($menus_result->num_rows > 0) {
         </table>
     </div>
     <script>
-        document.querySelectorAll('.menu-select').forEach(select => select.addEventListener('change', updateTotal));
+document.getElementById('order-form').addEventListener('submit', function(event) {
+    event.preventDefault(); // Previene el envío normal del formulario
 
-        function updateTotal() {
-            let total = Array.from(document.querySelectorAll('.menu-select')).reduce((acc, select) => {
-                return acc + parseFloat(select.options[select.selectedIndex].dataset.precio);
-            }, 0);
-            document.getElementById('total').textContent = total.toFixed(2);
+    // Obtener el nombre del hijo seleccionado y su curso
+    var hijoSelect = document.getElementById('hijo');
+    var hijoNombre = hijoSelect.options[hijoSelect.selectedIndex].text;
+    var hijoCurso = hijoSelect.options[hijoSelect.selectedIndex].getAttribute('data-curso');
+
+    // Calcular el precio total y obtener el resumen de viandas
+    var total = 0;
+    var resumen = '';
+    var menus = document.querySelectorAll('.menu-select');
+    menus.forEach(function(menu) {
+        var selectedOption = menu.options[menu.selectedIndex];
+        var precio = parseFloat(selectedOption.getAttribute('data-precio'));
+        if (precio > 0) {
+            total += precio;
+            resumen += '<p>' + selectedOption.text + ' - $' + selectedOption.getAttribute('data-precio') + '</p>';
         }
+    });
 
-        function cancelOrder(orderId) {
-            if (!confirm('¿Está seguro que desea cancelar este pedido?')) return;
-            fetch('../php/cancel_order.php', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        order_id: orderId
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Pedido cancelado exitosamente.');
-                        location.reload();
-                    } else {
-                        alert('No se pudo cancelar el pedido.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error al cancelar pedido:', error);
-                    alert('Error al tratar de cancelar el pedido.');
-                });
-        }
+    // Calcular el monto restante a pagar después de descontar el saldo
+    var saldo = <?php echo $saldo; ?>;
+    var montoRestante = total - saldo;
+    var textoSaldo = '';
+    if (montoRestante > 0) {
+        textoSaldo = `<p>Saldo utilizado: $${saldo.toFixed(2)}</p><p>Total a transferir: $${montoRestante.toFixed(2)}</p>`;
+    } else {
+        textoSaldo = `<p>Saldo utilizado: $${total.toFixed(2)}</p><p>No es necesario realizar una transferencia. Su saldo cubre el total del pedido.</p>`;
+        montoRestante = 0;
+    }
 
-        document.getElementById('popup-close').addEventListener('click', () => {
-            document.getElementById('popup').style.display = 'none';
-        });
-    </script>
+    // Mostrar el resumen en el pop-up
+    document.getElementById('resumen-pedido').innerHTML = `
+        <p>Alumno: ${hijoNombre} (Curso: ${hijoCurso})</p>
+        ${resumen}
+        <p><strong>Total: $${total.toFixed(2)}</strong></p>
+        ${textoSaldo}
+    `;
+    document.getElementById('popup').style.display = 'block';
+});
+
+document.getElementById('popup-close').addEventListener('click', function() {
+    document.getElementById('popup').style.display = 'none';
+});
+</script>
+
 </body>
 </html>
