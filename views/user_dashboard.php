@@ -81,6 +81,7 @@ if ($menus_result->num_rows > 0) {
         <p>Saldo: $<?php echo number_format($saldo, 2); ?></p>
         <button onclick="location.href='../php/logout.php'">Logout</button>
         <button style="background-color: #25d366;" onclick="window.location.href='https://wa.me/543406173';">Contacto</button>
+        <button onclick="location.href='pedidos_realizados.php'">Mis Pedidos</button> <!-- Botón nuevo para Mis Pedidos -->
     </div>
 
     <?php include 'details_card.php'; ?>
@@ -201,7 +202,6 @@ if ($menus_result->num_rows > 0) {
         }
     </script>
 
-    <?php include_once 'pedidos_realizados.php'; ?>
 
 </body>
 
