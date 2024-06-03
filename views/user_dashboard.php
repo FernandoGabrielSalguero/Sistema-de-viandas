@@ -183,58 +183,65 @@ if ($menus_result->num_rows > 0) {
         </table>
     </div>
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log("DOM completamente cargado y procesado.");
-    });
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("DOM completamente cargado y procesado.");
+});
 
-    document.getElementById('order-form').addEventListener('submit', function(event) {
-        event.preventDefault();
-        
-        console.log("Formulario enviado.");
+document.getElementById('order-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+    
+    console.log("Formulario enviado.");
 
-        // Obtener el nombre del hijo seleccionado y su curso
-        var hijoSelect = document.getElementById('hijo');
-        var hijoNombre = hijoSelect.options[hijoSelect.selectedIndex].text;
-        var hijoCurso = hijoSelect.options[hijoSelect.selectedIndex].getAttribute('data-curso');
+    // Obtener el nombre del hijo seleccionado y su curso
+    var hijoSelect = document.getElementById('hijo');
+    var hijoNombre = hijoSelect.options[hijoSelect.selectedIndex].text;
+    var hijoCurso = hijoSelect.options[hijoSelect.selectedIndex].getAttribute('data-curso');
 
-        // Calcular el precio total y obtener el resumen de viandas
-        var total = 0;
-        var resumen = '';
-        var menus = document.querySelectorAll('.menu-select');
-        menus.forEach(function(menu) {
-            var selectedOption = menu.options[menu.selectedIndex];
-            var precio = parseFloat(selectedOption.getAttribute('data-precio'));
-            if (precio > 0) {
-                total += precio;
-                resumen += '<p>' + selectedOption.text + '</p>';
-            }
-        });
-
-        // Calcular el monto restante a pagar después de descontar el saldo
-        var saldo = <?php echo $saldo; ?>;
-        var montoRestante = total - saldo;
-        var textoSaldo = '';
-        if (montoRestante > 0) {
-            textoSaldo = `<p>Saldo utilizado: $${saldo.toFixed(2)}</p><p>Total a transferir: $${montoRestante.toFixed(2)}</p>`;
-        } else {
-            textoSaldo = `<p>Saldo utilizado: $${total.toFixed(2)}</p><p>No es necesario realizar una transferencia. Su saldo cubre el total del pedido.</p>`;
-            montoRestante = 0;
+    // Calcular el precio total y obtener el resumen de viandas
+    var total = 0;
+    var resumen = '';
+    var menus = document.querySelectorAll('.menu-select');
+    menus.forEach(function(menu) {
+        var selectedOption = menu.options[menu.selectedIndex];
+        var precio = parseFloat(selectedOption.getAttribute('data-precio'));
+        if (precio > 0) {
+            total += precio;
+            resumen += '<p>' + selectedOption.text + ' - $' + precio.toFixed(2) + '</p>';
         }
-
-        // Mostrar el resumen en el popup
-        document.getElementById('resumen-pedido').innerHTML = `
-            <p>Alumno: ${hijoNombre} (Curso: ${hijoCurso})</p>
-            ${resumen}
-            <p><strong>Total: $${total.toFixed(2)}</strong></p>
-            ${textoSaldo}
-        `;
-        document.getElementById('popup').style.display = 'block';
     });
 
-    document.getElementById('popup-close').addEventListener('click', function() {
-        document.getElementById('popup').style.display = 'none';
-        document.getElementById('order-form').submit();
-    });
-    </script>
+    // Calcular el monto restante a pagar después de descontar el saldo
+    var saldo = <?php echo $saldo; ?>;
+    var montoRestante = total - saldo;
+    var textoSaldo = '';
+    if (montoRestante > 0) {
+        textoSaldo = `<p>Saldo utilizado: $${saldo.toFixed(2)}</p><p>Total a transferir: $${montoRestante.toFixed(2)}</p>`;
+    } else {
+        textoSaldo = `<p>Saldo utilizado: $${total.toFixed(2)}</p><p>No es necesario realizar una transferencia. Su saldo cubre el total del pedido.</p>`;
+        montoRestante = 0;
+    }
+
+    // Mostrar el resumen en el popup
+    document.getElementById('resumen-pedido').innerHTML = `
+        <p>Alumno: ${hijoNombre} (Curso: ${hijoCurso})</p>
+        ${resumen}
+        <p><strong>Total: $${total.toFixed(2)}</strong></p>
+        ${textoSaldo}
+    `;
+    document.getElementById('popup').style.display = 'block';
+});
+
+document.getElementById('popup-close').addEventListener('click', function() {
+    // Enviar la información al archivo order_summary.php mediante GET
+    var url = 'order_summary.php?hijoNombre=' + encodeURIComponent(hijoNombre) +
+        '&hijoCurso=' + encodeURIComponent(hijoCurso) +
+        '&resumen=' + encodeURIComponent(resumen) +
+        '&total=' + total +
+        '&textoSaldo=' + encodeURIComponent(textoSaldo);
+    window.open(url, 'ResumenPedido', 'height=600,width=800');
+    document.getElementById('popup').style.display = 'none';
+});
+</script>
+
 </body>
 </html>
