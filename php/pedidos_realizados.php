@@ -1,9 +1,9 @@
 <?php
-include 'db.php'; // Asegúrate de tener un archivo db.php que maneje la conexión a la base de datos
+include 'db.php';
 
 session_start();
 if (!isset($_SESSION['userid'])) {
-    header("Location: login.php"); // Redirección al login si el usuario no está logueado
+    header("Location: login.php");
     exit();
 }
 
@@ -15,7 +15,11 @@ $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $userid);
 $stmt->execute();
 $result = $stmt->get_result();
-while ($row = $result->fetch_assoc()) {
-    $pedidos[] = $row;
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $pedidos[] = $row;
+    }
+} else {
+    echo "<p>No se encontraron pedidos.</p>"; // Agregar esta línea para depuración
 }
 $stmt->close();
