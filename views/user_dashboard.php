@@ -147,7 +147,7 @@ if ($menus_result->num_rows > 0) {
                     <th>ID</th>
                     <th>Hijo</th>
                     <th>Menú</th>
-                    <th>Fecha de Pedido</th>
+                    <th>Fecha de entrega</th>
                     <th>Estado</th>
                 </tr>
             </thead>
@@ -232,16 +232,17 @@ document.getElementById('order-form').addEventListener('submit', function(event)
 });
 
 document.getElementById('popup-close').addEventListener('click', function() {
-    // Enviar la información al archivo order_summary.php mediante GET
+    // Enviar la información al archivo order_summary.php mediante GET y abrirlo en una nueva pestaña
     var url = 'order_summary.php?hijoNombre=' + encodeURIComponent(hijoNombre) +
         '&hijoCurso=' + encodeURIComponent(hijoCurso) +
         '&resumen=' + encodeURIComponent(resumen) +
         '&total=' + total +
         '&textoSaldo=' + encodeURIComponent(textoSaldo);
-    window.open(url, 'ResumenPedido', 'height=600,width=800');
+    window.location.href = url; // Cambiado para redireccionar en la misma pestaña
     document.getElementById('popup').style.display = 'none';
 });
 </script>
+
 
 </body>
 </html>
