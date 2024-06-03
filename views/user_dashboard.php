@@ -136,7 +136,7 @@ if ($menus_result->num_rows > 0) {
             <p>No hay notas disponibles</p>
         <?php endif; ?>
 
-        <h3>Pedidos Realizados</h3>
+        <!-- <h3>Pedidos Realizados</h3>
         <table class="material-design-table">
             <thead>
                 <tr>
@@ -164,7 +164,7 @@ if ($menus_result->num_rows > 0) {
                     </tr>
                 <?php endif; ?>
             </tbody>
-        </table>
+        </table> -->
     </div>
     <?php include 'pedidos_realizados.php'; ?>
 
