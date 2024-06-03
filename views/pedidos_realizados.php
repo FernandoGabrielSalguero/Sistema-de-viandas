@@ -22,13 +22,23 @@ $saldo = $saldo_result->num_rows > 0 ? $saldo_result->fetch_assoc()['saldo'] : 0
     <link rel="stylesheet" href="../css/styles.css">
     <title>Pedidos Realizados</title>
     <style>
-        body { font-family: Arial, sans-serif; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background-color: #f2f2f2; }
-        .header { background-color: #f9f9f9; padding: 10px 20px; text-align: center; }
-        button { padding: 8px 16px; margin-right: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        button:hover { background-color: #45a049; }
+        .input-group,
+        .menu-day {
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #369456;
+            /* Un verde más oscuro para el hover */
+        }
     </style>
 </head>
 <body>
