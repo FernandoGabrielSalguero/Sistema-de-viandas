@@ -78,6 +78,11 @@ if ($menus_result->num_rows > 0) {
         <p>Saldo: $<?php echo number_format($saldo, 2); ?></p>
         <button onclick="location.href='../php/logout.php'">Logout</button>
     </div>
+
+        <!-- Incluir como un iframe -->
+        <iframe src="details_card.php" style="width: 100%; height: 300px; border: none;"></iframe>
+
+        
     <div class="container">
         <h2>¡Que gusto verte de nuevo!, <?php echo $_SESSION['username']; ?></h2>
 
@@ -120,14 +125,7 @@ if ($menus_result->num_rows > 0) {
             <button type="submit">Realizar Pedido</button>
         </form>
 
-        <!-- <div id="popup" class="popup">
-            <div class="popup-content">
-                <h4>Detalles importantes:</h4>
-                <p id="resumen-pedido"></p>
-                <p>Recordá que una vez realziado el pedido, debes transferir el total del importe a la cuenta CBU: 0340300408300313721004 a nombre de: Federico Figueroa en el banco: BANCO PATAGONIA, CUIT: 20273627651 Alias: ROJO.GENIO.CASINO. Muchas gracias</p>
-                <button id="popup-close">Aceptar</button>
-            </div>
-        </div> -->
+
 
         <h3>Notas de los Hijos</h3>
         <?php
