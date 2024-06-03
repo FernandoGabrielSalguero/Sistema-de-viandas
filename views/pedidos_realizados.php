@@ -1,4 +1,3 @@
-<?php include '../php/pedidos_realizados.php'; // Incluye el script que kcprepara los datos ?>
 
 <!DOCTYPE html>
 <html lang="es">
