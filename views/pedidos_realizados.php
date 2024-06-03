@@ -43,7 +43,7 @@ $saldo = $saldo_result->num_rows > 0 ? $saldo_result->fetch_assoc()['saldo'] : 0
 </head>
 <body>
     <div class="header">
-        <h1>¡Qué bueno verte de nuevo, <?php echo htmlspecialchars($userInfo['nombre']); ?>!</h1>
+        <h1>Estos son tus pedidos, <?php echo htmlspecialchars($userInfo['nombre']); ?>!</h1>
         <p>Saldo: $<?php echo number_format($saldo, 2); ?></p>
         <button onclick="location.href='../php/logout.php'">Cerrar sesión</button>
         <button onclick="window.open('https://wa.me/542613406173', '_blank')">Contacto</button>
