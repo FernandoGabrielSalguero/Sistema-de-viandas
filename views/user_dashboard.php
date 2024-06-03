@@ -91,7 +91,8 @@ if ($menus_result->num_rows > 0) {
                     <?php endforeach; ?>
                 </div>
             </div>
-            <button type="submit" style="background-color: #4CAF50; color: white; cursor: pointer;">Realizar Pedido</button>
+            <button type="submit" id="realizarPedido" style="background-color: #4CAF50; color: white; cursor: pointer;">Realizar Pedido</button>
+
         </form>
 
         <!-- Pop-up para confirmación de pedido -->
