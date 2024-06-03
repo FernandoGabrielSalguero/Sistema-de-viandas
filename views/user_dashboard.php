@@ -52,26 +52,23 @@ if ($menus_result->num_rows > 0) {
     <title>¡Qué gusto verte de nuevo, <?php echo $_SESSION['username']; ?>!</title>
 
     <style>
-        .container {
-    text-align: center; /* Centra los elementos dentro del contenedor */
-}
+        .input-group,
+        .menu-day {
+            margin-bottom: 20px;
+        }
 
-.input-group,
-.menu-day {
-    margin-bottom: 20px;
-}
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
 
-button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    transition: background-color 0.3s ease;
-}
-
-button:hover {
-    background-color: #369456; /* Un verde más oscuro para el hover */
-}
+        button:hover {
+            background-color: #369456;
+            /* Un verde más oscuro para el hover */
+        }
     </style>
 </head>
 
