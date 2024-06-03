@@ -44,12 +44,37 @@ if ($menus_result->num_rows > 0) {
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../css/styles.css">
     <title>¡Qué gusto verte de nuevo, <?php echo $_SESSION['username']; ?>!</title>
+
+    <style>
+        .container {
+    text-align: center; /* Centra los elementos dentro del contenedor */
+}
+
+.input-group,
+.menu-day {
+    margin-bottom: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #369456; /* Un verde más oscuro para el hover */
+}
+    </style>
 </head>
+
 <body>
     <div class="header">
         <h1>¡Qué gusto verte de nuevo, <?php echo $_SESSION['username']; ?>!</h1>
@@ -66,7 +91,7 @@ if ($menus_result->num_rows > 0) {
             <div class="input-group">
                 <label for="hijo">¿A quién le entregamos el pedido?</label>
                 <select id="hijo" name="hijo_id" required>
-                    <?php foreach ($hijos as $hijo): ?>
+                    <?php foreach ($hijos as $hijo) : ?>
                         <option value='<?php echo $hijo['id']; ?>' data-curso='<?php echo $hijo['curso_id']; ?>'>
                             <?php echo htmlspecialchars($hijo['nombre']) . " " . htmlspecialchars($hijo['apellido']); ?>
                         </option>
@@ -76,12 +101,12 @@ if ($menus_result->num_rows > 0) {
             <div class="input-group">
                 <label for="menu">Seleccione una vianda por día:</label>
                 <div id="menus">
-                    <?php foreach ($menus as $fecha => $menu_items): ?>
+                    <?php foreach ($menus as $fecha => $menu_items) : ?>
                         <div class='menu-day'>
                             <label><?php echo date("d-m-Y", strtotime($fecha)); ?></label>
                             <select name='menu_id[<?php echo $fecha; ?>]' class='menu-select' data-precio-total='0'>
                                 <option value='' data-precio='0'>Sin vianda seleccionada</option>
-                                <?php foreach ($menu_items as $menu): ?>
+                                <?php foreach ($menu_items as $menu) : ?>
                                     <option value='<?php echo $menu['id']; ?>' data-precio='<?php echo $menu['precio']; ?>'>
                                         <?php echo htmlspecialchars($menu['nombre']) . " (\$" . number_format($menu['precio'], 2) . ")"; ?>
                                     </option>
@@ -106,11 +131,11 @@ if ($menus_result->num_rows > 0) {
         </div>
 
         <h3>Notas de los Hijos</h3>
-        <?php if (!empty($hijos)): ?>
-            <?php foreach ($hijos as $hijo): ?>
+        <?php if (!empty($hijos)) : ?>
+            <?php foreach ($hijos as $hijo) : ?>
                 <p><?php echo htmlspecialchars($hijo['nombre']) . " " . htmlspecialchars($hijo['apellido']); ?> (Curso: <?php echo $hijo['curso_id']; ?>): <?php echo htmlspecialchars($hijo['notas']); ?></p>
             <?php endforeach; ?>
-        <?php else: ?>
+        <?php else : ?>
             <p>No hay notas disponibles</p>
         <?php endif; ?>
 
@@ -126,8 +151,8 @@ if ($menus_result->num_rows > 0) {
                 </tr>
             </thead>
             <tbody>
-                <?php if (!empty($result) && $result->num_rows > 0): ?>
-                    <?php while ($row = $result->fetch_assoc()): ?>
+                <?php if (!empty($result) && $result->num_rows > 0) : ?>
+                    <?php while ($row = $result->fetch_assoc()) : ?>
                         <tr>
                             <td><?php echo $row['id']; ?></td>
                             <td><?php echo htmlspecialchars($row['hijo_nombre']) . " " . htmlspecialchars($row['hijo_apellido']); ?></td>
@@ -136,14 +161,36 @@ if ($menus_result->num_rows > 0) {
                             <td><?php echo $row['estado']; ?></td>
                         </tr>
                     <?php endwhile; ?>
-                <?php else: ?>
-                    <tr><td colspan='5'>No hay pedidos realizados</td></tr>
+                <?php else : ?>
+                    <tr>
+                        <td colspan='5'>No hay pedidos realizados</td>
+                    </tr>
                 <?php endif; ?>
             </tbody>
         </table>
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const selects = document.querySelectorAll('.menu-select');
+            selects.forEach(select => {
+                select.addEventListener('change', updateTotal);
+            });
+
+            function updateTotal() {
+                let total = 0;
+                selects.forEach(select => {
+                    const precio = parseFloat(select.options[select.selectedIndex].getAttribute('data-precio'));
+                    if (!isNaN(precio)) {
+                        total += precio;
+                    }
+                });
+                const botonPedido = document.getElementById('realizarPedido');
+                botonPedido.textContent = `Realizar Pedido - Total: $${total.toFixed(2)}`;
+            }
+        });
+
+
         document.getElementById('order-form').addEventListener('submit', function(event) {
             event.preventDefault(); // Prevent the form from submitting through the browser
 
@@ -183,4 +230,5 @@ if ($menus_result->num_rows > 0) {
         }
     </script>
 </body>
+
 </html>
