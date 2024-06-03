@@ -122,9 +122,9 @@ if ($menus_result->num_rows > 0) {
 
         <div id="popup" class="popup">
             <div class="popup-content">
-                <h4>Resumen del Pedido</h4>
+                <h4>Detalles importantes:</h4>
                 <p id="resumen-pedido"></p>
-                <p>Recordá que podes hacerlo al siguiente CBU: 0340300408300313721004 a nombre de: Federico Figueroa en el banco: BANCO PATAGONIA, CUIT: 20273627651 Alias: ROJO.GENIO.CASINO. La aprobación puede demorar hasta 48 hs en efectuarse. Cuando esté aprobada, el estado de tu pedido será: APROBADO</p>
+                <p>Recordá que una vez realziado el pedido, debes transferir el total del importe a la cuenta CBU: 0340300408300313721004 a nombre de: Federico Figueroa en el banco: BANCO PATAGONIA, CUIT: 20273627651 Alias: ROJO.GENIO.CASINO. Muchas gracias</p>
                 <button id="popup-close">Aceptar</button>
             </div>
         </div>
