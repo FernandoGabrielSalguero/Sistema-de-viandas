@@ -201,7 +201,7 @@ if ($menus_result->num_rows > 0) {
         }
     </script>
 
-    <?php include 'pedidos_realizados.php'; ?>
+    <?php include_once 'pedidos_realizados.php'; ?>
 
 </body>
 
