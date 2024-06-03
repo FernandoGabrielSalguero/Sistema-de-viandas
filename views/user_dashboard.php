@@ -8,6 +8,9 @@ if (!isset($_SESSION['userid']) || $_SESSION['role'] != 'Usuario') {
     exit();
 }
 
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
 $userid = $_SESSION['userid'];
 
 // Obtener los hijos del usuario
@@ -198,7 +201,14 @@ if ($menus_result->num_rows > 0) {
         }
     </script>
 
-<?php include 'pedidos_realizados.php'; ?>
+<?php
+include 'pedidos_realizados.php';
+?>
+
+
+
+
+
 </body>
 
 </html>
