@@ -1,5 +1,5 @@
 <?php
-include '../db.php'; // Ajusta esta línea según la ubicación real de db.php
+include '../php/db.php'; // Ajusta esta línea según la ubicación real de db.php
 session_start();
 
 if (!isset($_SESSION['userid']) || $_SESSION['role'] != 'Usuario') {
