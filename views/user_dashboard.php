@@ -9,7 +9,7 @@ if (!isset($_SESSION['userid']) || $_SESSION['role'] != 'Usuario') {
 }
 
 $userid = $_SESSION['userid'];
-$userQuery = "SELECT nombre, email, telefono FROM usuarios WHERE id = $userid";
+$userQuery = "SELECT nombre FROM usuarios WHERE id = $userid";
 $userInfo = $conn->query($userQuery)->fetch_assoc();
 
 $sql = "SELECT h.*, c.nombre as colegio_nombre, cu.nombre as curso_nombre FROM hijos h
@@ -32,16 +32,17 @@ if ($menus_result->num_rows > 0) {
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../css/styles.css">
     <title>Panel de Usuario - Viandas</title>
 </head>
+
 <body>
     <div class="header">
         <h1>Qué bueno verte de nuevo, <?= $userInfo['nombre']; ?></h1>
-        <p>Email: <?= $userInfo['email']; ?> | Teléfono: <?= $userInfo['telefono']; ?></p>
         <p>Saldo: $<?= number_format($saldo, 2); ?></p>
         <div style="display: flex; justify-content: space-between; width: 300px;">
             <button onclick="window.location.href='../php/logout.php'">Cerrar sesión</button>
@@ -78,7 +79,15 @@ if ($menus_result->num_rows > 0) {
             <button type="submit">Realizar Pedido (Total: $<span id="total">0</span>)</button>
         </form>
 
-        <?php include 'order_summary.php'; ?>
+        <div id="popup" class="popup">
+            <div class="popup-content">
+                <h4>Resumen del Pedido</h4>
+                <p id="resumen-pedido"></p>
+                <p>Gracias por confiar en nosotros! Tu pedido se encuentra en estado "En espera de aprobación"...</p>
+                <button id="popup-close">Cerrar</button>
+                <button onclick="document.getElementById('popup').style.display='none'">Cerrar</button>
+            </div>
+        </div>
 
         <h3>Notas de los Hijos</h3>
         <?php foreach ($hijos as $hijo) : ?>
@@ -154,6 +163,8 @@ if ($menus_result->num_rows > 0) {
         });
     </script>
 
+    <!-- Incluir el resumen del pedido -->
+    <?php include 'order_summary.php'; ?>
 </body>
 
 </html>
