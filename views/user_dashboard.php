@@ -32,14 +32,12 @@ if ($menus_result->num_rows > 0) {
 
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../css/styles.css">
     <title>Panel de Usuario - Viandas</title>
 </head>
-
 <body>
     <div class="header">
         <h1>Qué bueno verte de nuevo, <?= $userInfo['nombre']; ?></h1>
@@ -83,9 +81,8 @@ if ($menus_result->num_rows > 0) {
             <div class="popup-content">
                 <h4>Resumen del Pedido</h4>
                 <p id="resumen-pedido"></p>
-                <p>Gracias por confiar en nosotros! Tu pedido se encuentra en estado "En espera de aprobación"...</p>
+                <p>Gracias por confiar en nosotros! Tu pedido se encuentra en estado "En espera de aprobación"...<br>Recordá que puedes realizar la transferencia al CBU indicado para acelerar la aprobación.</p>
                 <button id="popup-close">Cerrar</button>
-                <button onclick="document.getElementById('popup').style.display='none'">Cerrar</button>
             </div>
         </div>
 
@@ -162,9 +159,5 @@ if ($menus_result->num_rows > 0) {
             document.getElementById('popup').style.display = 'none';
         });
     </script>
-
-    <!-- Incluir el resumen del pedido -->
-    <?php include 'order_summary.php'; ?>
 </body>
-
 </html>
