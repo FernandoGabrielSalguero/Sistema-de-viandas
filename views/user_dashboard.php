@@ -52,8 +52,6 @@ if ($menus_result->num_rows > 0) {
     <title>¡Qué gusto verte de nuevo, <?php echo $_SESSION['username']; ?>!</title>
 
     <style>
-
-
         .input-group,
         .menu-day {
             margin-bottom: 20px;
