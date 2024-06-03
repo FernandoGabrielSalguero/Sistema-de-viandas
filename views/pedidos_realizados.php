@@ -1,5 +1,5 @@
 <?php
-include 'db.php'; // Asegúrate de que la ruta es correcta para incluir el archivo de conexión a la base de datos
+include '../db.php'; 
 
 session_start();
 
