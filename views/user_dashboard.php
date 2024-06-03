@@ -79,9 +79,9 @@ if ($menus_result->num_rows > 0) {
     <div class="header">
         <h1>¡Qué gusto verte de nuevo, <?php echo $_SESSION['username']; ?>!</h1>
         <p>Saldo: $<?php echo number_format($saldo, 2); ?></p>
-        <button onclick="location.href='../php/logout.php'">Logout</button>
-        <button style="background-color: #25d366;" onclick="window.location.href='https://wa.me/543406173';">Contacto</button>
         <button onclick="location.href='pedidos_realizados.php'">Mis Pedidos</button>
+        <button style="background-color: #25d366;" onclick="window.location.href='https://wa.me/543406173';">Contacto</button>
+        <button onclick="location.href='../php/logout.php'">Logout</button>
     </div>
 
     <?php include 'details_card.php'; ?>
