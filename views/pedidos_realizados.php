@@ -1,4 +1,3 @@
-<?php include '../php/pedidos_realizados.php'; // Incluye el script que prepara los datos ?>
 
 <!DOCTYPE html>
 <html lang="es">
@@ -16,14 +15,7 @@
             <th>Fecha</th>
             <th>Estado</th>
         </tr>
-        <?php foreach ($pedidos as $pedido): ?>
-        <tr>
-            <td><?php echo htmlspecialchars($pedido['id']); ?></td>
-            <td><?php echo htmlspecialchars($pedido['nombre']); ?></td>
-            <td><?php echo htmlspecialchars($pedido['fecha']); ?></td>
-            <td><?php echo htmlspecialchars($pedido['estado']); ?></td>
-        </tr>
-        <?php endforeach; ?>
+
     </table>
 </body>
 </html>
