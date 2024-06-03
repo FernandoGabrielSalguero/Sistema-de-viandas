@@ -136,35 +136,6 @@ if ($menus_result->num_rows > 0) {
             <p>No hay notas disponibles</p>
         <?php endif; ?>
 
-        <h3>Pedidos Realizados</h3>
-        <table class="material-design-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Hijo</th>
-                    <th>Menú</th>
-                    <th>Fecha de entrega</th>
-                    <th>Estado</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (!empty($result) && $result->num_rows > 0) : ?>
-                    <?php while ($row = $result->fetch_assoc()) : ?>
-                        <tr>
-                            <td><?php echo $row['id']; ?></td>
-                            <td><?php echo htmlspecialchars($row['hijo_nombre']) . " " . htmlspecialchars($row['hijo_apellido']); ?></td>
-                            <td><?php echo htmlspecialchars($row['menu_nombre']); ?></td>
-                            <td><?php echo date("d-m-Y", strtotime($row['fecha'])); ?></td>
-                            <td><?php echo $row['estado']; ?></td>
-                        </tr>
-                    <?php endwhile; ?>
-                <?php else : ?>
-                    <tr>
-                        <td colspan='5'>No hay pedidos realizados</td>
-                    </tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
     </div>
 
     <script>
