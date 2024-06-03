@@ -8,8 +8,7 @@
 </head>
 <body>
     <div class="details-card">
-        <h4>Detalles importantes:</h4>
-        <p>Recordá que una vez realizado el pedido, debes transferir el total del importe a la siguiente cuenta:</p>
+        <h4>Datos bancarios</h4>
         <p>CBU: <span id="cbu-text">0340300408300313721004</span></p>
         <p>A nombre de: Federico Figueroa</p>
         <p>Banco: BANCO PATAGONIA</p>
