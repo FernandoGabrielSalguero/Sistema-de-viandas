@@ -30,6 +30,10 @@
             margin-top: 10px;
             display: block;
         }
+        .filter-input {
+            width: 100%;
+            box-sizing: border-box;
+        }
     </style>
 </head>
 <body>
@@ -52,15 +56,23 @@
         </select>
         <label for="saldo" id="saldoLabel" style="display:none;">Saldo:</label>
         <input type="number" id="saldo" name="saldo" style="display:none;" min="0" step="0.01">
+        
+        <div id="childrenContainer" style="display: none;">
+            <h3>Hijos</h3>
+            <button type="button" onclick="addChild()">Agregar Hijo</button>
+            <div id="childrenFields"></div>
+        </div>
+        
         <button type="button" onclick="submitForm()">Guardar Usuario</button>
     </form>
 
     <table>
         <thead>
             <tr>
-                <th>Usuario</th>
-                <th>Email</th>
-                <th>Rol</th>
+                <th>Usuario <input type="text" id="filterUsername" class="filter-input" oninput="filterTable()" placeholder="Buscar por usuario"></th>
+                <th>Email <input type="text" id="filterEmail" class="filter-input" oninput="filterTable()" placeholder="Buscar por email"></th>
+                <th>Rol <input type="text" id="filterRole" class="filter-input" oninput="filterTable()" placeholder="Buscar por rol"></th>
+                <th>Saldo <input type="text" id="filterSaldo" class="filter-input" oninput="filterTable()" placeholder="Buscar por saldo"></th>
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -81,10 +93,16 @@
                         row.insertCell(0).textContent = user.username;
                         row.insertCell(1).textContent = user.email;
                         row.insertCell(2).textContent = user.role;
+                        row.insertCell(3).textContent = user.saldo || '';
+                        const actionsCell = row.insertCell(4);
+                        const editBtn = document.createElement('button');
+                        editBtn.textContent = 'Modificar';
+                        editBtn.onclick = () => editUser(user);
                         const deleteBtn = document.createElement('button');
                         deleteBtn.textContent = 'Eliminar';
                         deleteBtn.onclick = () => deleteUser(user.id);
-                        row.insertCell(3).appendChild(deleteBtn);
+                        actionsCell.appendChild(editBtn);
+                        actionsCell.appendChild(deleteBtn);
                     });
                 });
         }
@@ -97,26 +115,89 @@
             }).then(() => {
                 loadUsers();
                 document.getElementById('userForm').reset();
+                document.getElementById('childrenFields').innerHTML = ''; // Clear children fields
+                toggleSaldoInput();
             });
         }
 
         function deleteUser(userId) {
-            fetch(`../php/manage_users.php?userId=${userId}`, { method: 'DELETE' })
-                .then(() => loadUsers());
+            fetch(`../php/manage_users.php?userId=${userId}`, {
+                method: 'DELETE'
+            }).then(() => loadUsers());
+        }
+
+        function editUser(user) {
+            document.getElementById('userId').value = user.id;
+            document.getElementById('username').value = user.username;
+            document.getElementById('email').value = user.email;
+            document.getElementById('role').value = user.role;
+            document.getElementById('saldo').value = user.saldo || '';
+            toggleSaldoInput();
+            if (user.role === 'colegio') {
+                loadChildren(user.id);
+            }
+        }
+
+        function loadChildren(userId) {
+            fetch(`../php/manage_users.php?action=get_children&userId=${userId}`)
+                .then(response => response.json())
+                .then(children => {
+                    const childrenFields = document.getElementById('childrenFields');
+                    childrenFields.innerHTML = '';
+                    children.forEach(child => {
+                        addChild(child);
+                    });
+                });
+        }
+
+        function addChild(child = {}) {
+            let container = document.getElementById('childrenFields');
+            let childDiv = document.createElement('div');
+            childDiv.innerHTML = `
+                <input type="hidden" name="childId[]" value="${child.id || ''}">
+                <input type="text" name="childName[]" placeholder="Nombre del hijo" value="${child.name || ''}" required>
+                <input type="text" name="school[]" placeholder="Escuela" value="${child.school || ''}" required>
+                <input type="text" name="course[]" placeholder="Curso" value="${child.course || ''}" required>
+            `;
+            container.appendChild(childDiv);
         }
 
         function toggleSaldoInput() {
             var role = document.getElementById('role').value;
             var saldoInput = document.getElementById('saldo');
             var saldoLabel = document.getElementById('saldoLabel');
+            var childrenContainer = document.getElementById('childrenContainer');
             if (role === 'colegio') {
                 saldoInput.style.display = 'block';
                 saldoLabel.style.display = 'block';
+                childrenContainer.style.display = 'block';
             } else {
                 saldoInput.style.display = 'none';
                 saldoLabel.style.display = 'none';
                 saldoInput.value = ''; // Reset saldo when hiding
+                childrenContainer.style.display = 'none';
+                document.getElementById('childrenFields').innerHTML = ''; // Clear children fields
             }
+        }
+
+        function filterTable() {
+            const filterUsername = document.getElementById('filterUsername').value.toLowerCase();
+            const filterEmail = document.getElementById('filterEmail').value.toLowerCase();
+            const filterRole = document.getElementById('filterRole').value.toLowerCase();
+            const filterSaldo = document.getElementById('filterSaldo').value.toLowerCase();
+            const rows = document.querySelectorAll('#usersTableBody tr');
+
+            rows.forEach(row => {
+                const username = row.cells[0].textContent.toLowerCase();
+                const email = row.cells[1].textContent.toLowerCase();
+                const role = row.cells[2].textContent.toLowerCase();
+                const saldo = row.cells[3].textContent.toLowerCase();
+                const match = (!filterUsername || username.includes(filterUsername)) &&
+                              (!filterEmail || email.includes(filterEmail)) &&
+                              (!filterRole || role.includes(filterRole)) &&
+                              (!filterSaldo || saldo.includes(filterSaldo));
+                row.style.display = match ? '' : 'none';
+            });
         }
 
         window.onload = loadUsers;
