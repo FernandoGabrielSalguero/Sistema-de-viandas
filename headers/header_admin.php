@@ -55,10 +55,10 @@ if (!isset($_SESSION['username'])) {
             <h1>¡Qué gusto verte de nuevo, <?php echo htmlspecialchars($_SESSION['username']); ?>!</h1>
             <div class="navigation">
                 <button onclick="location.href='../dashboard/admin.php'">Dashboard</button>
-                <button onclick="location.href='../manage_users.php'">Gestionar Usuarios</button>
-                <button onclick="location.href='../manage_menus.php'">Gestionar Menús</button>
-                <button onclick="location.href='../view_orders.php'">Ver Pedidos</button>
-                <button onclick="location.href='../financial_reports.php'">Reportes Financieros</button>
+                <button onclick="location.href='../php/manage_users.php'">Gestionar Usuarios</button>
+                <button onclick="location.href='../php/manage_menus.php'">Gestionar Menús</button>
+                <button onclick="location.href='../php/view_orders.php'">Ver Pedidos</button>
+                <button onclick="location.href='../php/financial_reports.php'">Reportes Financieros</button>
                 <button onclick="location.href='../php/logout.php'">Cerrar Sesión</button>
             </div>
         </div>
