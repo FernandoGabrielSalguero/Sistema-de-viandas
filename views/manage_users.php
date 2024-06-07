@@ -1,48 +1,35 @@
-<?php include '../headers/header_admin.php'; ?>
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <title>Gestión de Usuarios</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
             font-family: Arial, sans-serif;
             padding: 20px;
             background-color: #f4f4f4;
         }
-
         table {
             width: 100%;
             border-collapse: collapse;
         }
-
-        th,
-        td {
+        th, td {
             border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
         }
-
         th {
             background-color: #f2f2f2;
         }
-
         form {
             margin-bottom: 20px;
         }
-
-        label,
-        input,
-        select,
-        button {
+        label, input, select, button {
             margin-top: 10px;
             display: block;
         }
     </style>
 </head>
-
 <body>
     <h1>Gestión de Usuarios</h1>
     <form id="userForm">
@@ -52,7 +39,7 @@
         <label for="email">Email:</label>
         <input type="email" id="email" name="email" required>
         <label for="password">Contraseña:</label>
-        <input type="password" id="password" name="password" required>
+        <input type="password" id="password" name="password">
         <label for="role">Rol:</label>
         <select id="role" name="role">
             <option value="admin">Administrador</option>
@@ -80,7 +67,7 @@
 
     <script>
         function loadUsers() {
-            fetch('php/manage_users.php')
+            fetch('../php/manage_users.php')
                 .then(response => response.json())
                 .then(data => {
                     const tableBody = document.getElementById('usersTableBody');
@@ -100,25 +87,21 @@
 
         function submitForm() {
             const formData = new FormData(document.getElementById('userForm'));
-            fetch('php/manage_users.php', {
+            fetch('../php/manage_users.php', {
                 method: 'POST',
                 body: formData
             }).then(() => {
-                loadUsers(); // Reload the user list
-                document.getElementById('userForm').reset(); // Reset form fields
+                loadUsers();
+                document.getElementById('userForm').reset();
             });
         }
 
         function deleteUser(userId) {
-            fetch(`php/manage_users.php?userId=${userId}`, {
-                    method: 'DELETE'
-                })
+            fetch(`../php/manage_users.php?userId=${userId}`, { method: 'DELETE' })
                 .then(() => loadUsers());
         }
 
         window.onload = loadUsers;
     </script>
-
 </body>
-
 </html>
