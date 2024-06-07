@@ -1,6 +1,6 @@
-<?php include '../headers/header_admin.php'; ?>
 <?php
 include 'db.php'; // Asegúrate de que este path sea correcto
+include '../headers/header_admin.php';
 
 header('Content-Type: application/json');
 
