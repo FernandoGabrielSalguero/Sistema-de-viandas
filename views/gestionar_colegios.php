@@ -85,6 +85,10 @@
             fetch('../php/gestionar_colegios.php')
                 .then(response => response.json())
                 .then(data => {
+                    if (!data.success && data.message) {
+                        alert(data.message);
+                        return;
+                    }
                     const colegiosTableBody = document.getElementById('colegiosTableBody');
                     const cursoColegioSelect = document.getElementById('curso_colegio');
                     colegiosTableBody.innerHTML = '';
@@ -107,7 +111,8 @@
                         option.textContent = colegio.nombre;
                         cursoColegioSelect.appendChild(option);
                     });
-                });
+                })
+                .catch(error => alert('Error al cargar los colegios: ' + error.message));
         }
 
         function submitColegioForm() {
@@ -115,16 +120,32 @@
             fetch('../php/gestionar_colegios.php', {
                 method: 'POST',
                 body: formData
-            }).then(() => {
-                loadColegios();
-                document.getElementById('colegioForm').reset();
-            });
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadColegios();
+                    document.getElementById('colegioForm').reset();
+                } else {
+                    alert('Error al guardar el colegio: ' + data.message);
+                }
+            })
+            .catch(error => alert('Error al guardar el colegio: ' + error.message));
         }
 
         function deleteColegio(colegio_id) {
             fetch(`../php/gestionar_colegios.php?colegio_id=${colegio_id}`, {
                 method: 'DELETE'
-            }).then(() => loadColegios());
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadColegios();
+                } else {
+                    alert('Error al eliminar el colegio: ' + data.message);
+                }
+            })
+            .catch(error => alert('Error al eliminar el colegio: ' + error.message));
         }
 
         function editColegio(colegio) {
@@ -136,6 +157,10 @@
             fetch('../php/gestionar_colegios.php?action=get_cursos')
                 .then(response => response.json())
                 .then(data => {
+                    if (!data.success && data.message) {
+                        alert(data.message);
+                        return;
+                    }
                     const cursosTableBody = document.getElementById('cursosTableBody');
                     cursosTableBody.innerHTML = '';
                     data.forEach(curso => {
@@ -152,7 +177,8 @@
                         actionsCell.appendChild(editBtn);
                         actionsCell.appendChild(deleteBtn);
                     });
-                });
+                })
+                .catch(error => alert('Error al cargar los cursos: ' + error.message));
         }
 
         function submitCursoForm() {
@@ -160,16 +186,32 @@
             fetch('../php/gestionar_colegios.php', {
                 method: 'POST',
                 body: formData
-            }).then(() => {
-                loadCursos();
-                document.getElementById('cursoForm').reset();
-            });
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadCursos();
+                    document.getElementById('cursoForm').reset();
+                } else {
+                    alert('Error al guardar el curso: ' + data.message);
+                }
+            })
+            .catch(error => alert('Error al guardar el curso: ' + error.message));
         }
 
         function deleteCurso(curso_id) {
             fetch(`../php/gestionar_colegios.php?curso_id=${curso_id}`, {
                 method: 'DELETE'
-            }).then(() => loadCursos());
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadCursos();
+                } else {
+                    alert('Error al eliminar el curso: ' + data.message);
+                }
+            })
+            .catch(error => alert('Error al eliminar el curso: ' + error.message));
         }
 
         function editCurso(curso) {
