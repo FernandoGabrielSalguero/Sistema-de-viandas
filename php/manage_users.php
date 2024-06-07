@@ -1,6 +1,5 @@
 <?php
-include 'db.php'; // Asegúrate de que este path sea correcto
-
+include 'db.php';
 
 header('Content-Type: application/json');
 
@@ -8,7 +7,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
     case 'GET':
-        $query = "SELECT id, username, email, role FROM usuarios";
+        $query = "SELECT id, username, email, role, saldo FROM usuarios";
         $stmt = $pdo->query($query);
         $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
         echo json_encode($users);
@@ -19,15 +18,17 @@ switch ($method) {
         $email = $_POST['email'];
         $password = isset($_POST['password']) ? password_hash($_POST['password'], PASSWORD_DEFAULT) : null;
         $role = $_POST['role'];
+        $saldo = ($_POST['role'] == 'colegio') ? $_POST['saldo'] : 0; // Solo seteamos saldo si el rol es colegio
         $userId = $_POST['userId'] ?? '';
 
         if ($userId) {
-            $query = $password ? "UPDATE usuarios SET username = ?, email = ?, password = ?, role = ? WHERE id = ?" :
-                                 "UPDATE usuarios SET username = ?, email = ?, role = ? WHERE id = ?";
-            $params = $password ? [$username, $email, $password, $role, $userId] : [$username, $email, $role, $userId];
+            $query = "UPDATE usuarios SET username = ?, email = ?, role = ?, saldo = ?" . ($password ? ", password = ?" : "") . " WHERE id = ?";
+            $params = [$username, $email, $role, $saldo];
+            if ($password) $params[] = $password;
+            $params[] = $userId;
         } else {
-            $query = "INSERT INTO usuarios (username, email, password, role) VALUES (?, ?, ?, ?)";
-            $params = [$username, $email, $password, $role];
+            $query = "INSERT INTO usuarios (username, email, password, role, saldo) VALUES (?, ?, ?, ?, ?)";
+            $params = [$username, $email, $password, $role, $saldo];
         }
         $stmt = $pdo->prepare($query);
         $stmt->execute($params);
@@ -35,12 +36,11 @@ switch ($method) {
         break;
 
     case 'DELETE':
-        parse_str(file_get_contents("php://input"), $_DELETE);
-        $userId = $_DELETE['userId'];
+        $userId = json_decode(file_get_contents("php://input"), true)['userId'];
         $query = "DELETE FROM usuarios WHERE id = ?";
         $stmt = $pdo->prepare($query);
         $stmt->execute([$userId]);
-        echo json_encode(['success' => true]);
+        echo json_encode(['success' => $stmt->rowCount() > 0]);
         break;
 
     default:
