@@ -23,7 +23,10 @@ try {
             break;
 
         case 'POST':
-            $nombre = $_POST['nombre'];
+            $nombre = $_POST['nombre'] ?? null;
+            if (!$nombre) {
+                throw new Exception('El nombre es requerido');
+            }
             if (isset($_POST['colegio_id'])) {
                 $colegio_id = $_POST['colegio_id'];
                 $query = "UPDATE colegios SET nombre = ? WHERE id = ?";
@@ -67,6 +70,8 @@ try {
                 $stmt = $pdo->prepare($query);
                 $stmt->execute([$curso_nombre, $curso_id]);
                 echo json_encode(['success' => true]);
+            } else {
+                throw new Exception('Curso ID y nombre son requeridos');
             }
             break;
 

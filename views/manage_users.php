@@ -3,7 +3,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Gestión de Usuarios</title>
+    <title>Gestión de Colegios y Cursos</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
@@ -37,170 +37,193 @@
     </style>
 </head>
 <body>
-    <h1>Gestión de Usuarios</h1>
-    <form id="userForm">
-        <input type="hidden" id="userId" name="userId">
-        <label for="username">Usuario:</label>
-        <input type="text" id="username" name="username" required>
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
-        <label for="password">Contraseña:</label>
-        <input type="password" id="password" name="password">
-        <label for="role">Rol:</label>
-        <select id="role" name="role" onchange="toggleSaldoInput()">
-            <option value="admin">Administrador</option>
-            <option value="colegio">Cliente Colegio</option>
-            <option value="empresa">Cliente Empresa</option>
-            <option value="turismo">Cliente Turismo</option>
-            <option value="particular">Particular</option>
-        </select>
-        <label for="saldo" id="saldoLabel" style="display:none;">Saldo:</label>
-        <input type="number" id="saldo" name="saldo" style="display:none;" min="0" step="0.01">
-        
-        <div id="childrenContainer" style="display: none;">
-            <h3>Hijos</h3>
-            <button type="button" onclick="addChild()">Agregar Hijo</button>
-            <div id="childrenFields"></div>
-        </div>
-        
-        <button type="button" onclick="submitForm()">Guardar Usuario</button>
+    <h1>Gestión de Colegios y Cursos</h1>
+    <form id="colegioForm">
+        <input type="hidden" id="colegio_id" name="colegio_id">
+        <label for="colegio_nombre">Nombre del Colegio:</label>
+        <input type="text" id="colegio_nombre" name="nombre" required>
+        <button type="button" onclick="submitColegioForm()">Guardar Colegio</button>
     </form>
 
     <table>
         <thead>
             <tr>
-                <th>Usuario <input type="text" id="filterUsername" class="filter-input" oninput="filterTable()" placeholder="Buscar por usuario"></th>
-                <th>Email <input type="text" id="filterEmail" class="filter-input" oninput="filterTable()" placeholder="Buscar por email"></th>
-                <th>Rol <input type="text" id="filterRole" class="filter-input" oninput="filterTable()" placeholder="Buscar por rol"></th>
-                <th>Saldo <input type="text" id="filterSaldo" class="filter-input" oninput="filterTable()" placeholder="Buscar por saldo"></th>
+                <th>Colegio</th>
                 <th>Acciones</th>
             </tr>
         </thead>
-        <tbody id="usersTableBody">
-            <!-- Los usuarios se cargarán aquí -->
+        <tbody id="colegiosTableBody">
+            <!-- Los colegios se cargarán aquí -->
+        </tbody>
+    </table>
+
+    <h2>Gestión de Cursos</h2>
+    <form id="cursoForm">
+        <input type="hidden" id="curso_id" name="curso_id">
+        <label for="curso_colegio">Colegio:</label>
+        <select id="curso_colegio" name="colegio_id" required></select>
+        <label for="curso_nombre">Nombre del Curso:</label>
+        <input type="text" id="curso_nombre" name="curso_nombre" required>
+        <button type="button" onclick="submitCursoForm()">Guardar Curso</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Curso</th>
+                <th>Colegio</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="cursosTableBody">
+            <!-- Los cursos se cargarán aquí -->
         </tbody>
     </table>
 
     <script>
-        function loadUsers() {
-            fetch('../php/manage_users.php')
+        function loadColegios() {
+            fetch('../php/gestionar_colegios.php')
                 .then(response => response.json())
                 .then(data => {
-                    const tableBody = document.getElementById('usersTableBody');
-                    tableBody.innerHTML = '';
-                    data.forEach(user => {
-                        const row = tableBody.insertRow();
-                        row.insertCell(0).textContent = user.username;
-                        row.insertCell(1).textContent = user.email;
-                        row.insertCell(2).textContent = user.role;
-                        row.insertCell(3).textContent = user.saldo || '';
-                        const actionsCell = row.insertCell(4);
+                    if (!data.success && data.message) {
+                        alert(data.message);
+                        return;
+                    }
+                    const colegiosTableBody = document.getElementById('colegiosTableBody');
+                    const cursoColegioSelect = document.getElementById('curso_colegio');
+                    colegiosTableBody.innerHTML = '';
+                    cursoColegioSelect.innerHTML = '';
+                    data.forEach(colegio => {
+                        const row = colegiosTableBody.insertRow();
+                        row.insertCell(0).textContent = colegio.nombre;
+                        const actionsCell = row.insertCell(1);
                         const editBtn = document.createElement('button');
                         editBtn.textContent = 'Modificar';
-                        editBtn.onclick = () => editUser(user);
+                        editBtn.onclick = () => editColegio(colegio);
                         const deleteBtn = document.createElement('button');
                         deleteBtn.textContent = 'Eliminar';
-                        deleteBtn.onclick = () => deleteUser(user.id);
+                        deleteBtn.onclick = () => deleteColegio(colegio.id);
+                        actionsCell.appendChild(editBtn);
+                        actionsCell.appendChild(deleteBtn);
+
+                        const option = document.createElement('option');
+                        option.value = colegio.id;
+                        option.textContent = colegio.nombre;
+                        cursoColegioSelect.appendChild(option);
+                    });
+                })
+                .catch(error => alert('Error al cargar los colegios: ' + error.message));
+        }
+
+        function submitColegioForm() {
+            const formData = new FormData(document.getElementById('colegioForm'));
+            fetch('../php/gestionar_colegios.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadColegios();
+                    document.getElementById('colegioForm').reset();
+                } else {
+                    alert('Error al guardar el colegio: ' + data.message);
+                }
+            })
+            .catch(error => alert('Error al guardar el colegio: ' + error.message));
+        }
+
+        function deleteColegio(colegio_id) {
+            fetch(`../php/gestionar_colegios.php?colegio_id=${colegio_id}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadColegios();
+                } else {
+                    alert('Error al eliminar el colegio: ' + data.message);
+                }
+            })
+            .catch(error => alert('Error al eliminar el colegio: ' + error.message));
+        }
+
+        function editColegio(colegio) {
+            document.getElementById('colegio_id').value = colegio.id;
+            document.getElementById('colegio_nombre').value = colegio.nombre;
+        }
+
+        function loadCursos() {
+            fetch('../php/gestionar_colegios.php?action=get_cursos')
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success && data.message) {
+                        alert(data.message);
+                        return;
+                    }
+                    const cursosTableBody = document.getElementById('cursosTableBody');
+                    cursosTableBody.innerHTML = '';
+                    data.forEach(curso => {
+                        const row = cursosTableBody.insertRow();
+                        row.insertCell(0).textContent = curso.nombre;
+                        row.insertCell(1).textContent = curso.colegio_nombre;
+                        const actionsCell = row.insertCell(2);
+                        const editBtn = document.createElement('button');
+                        editBtn.textContent = 'Modificar';
+                        editBtn.onclick = () => editCurso(curso);
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.textContent = 'Eliminar';
+                        deleteBtn.onclick = () => deleteCurso(curso.id);
                         actionsCell.appendChild(editBtn);
                         actionsCell.appendChild(deleteBtn);
                     });
-                });
+                })
+                .catch(error => alert('Error al cargar los cursos: ' + error.message));
         }
 
-        function submitForm() {
-            const formData = new FormData(document.getElementById('userForm'));
-            fetch('../php/manage_users.php', {
+        function submitCursoForm() {
+            const formData = new FormData(document.getElementById('cursoForm'));
+            fetch('../php/gestionar_colegios.php', {
                 method: 'POST',
                 body: formData
-            }).then(() => {
-                loadUsers();
-                document.getElementById('userForm').reset();
-                document.getElementById('childrenFields').innerHTML = ''; // Clear children fields
-                toggleSaldoInput();
-            });
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadCursos();
+                    document.getElementById('cursoForm').reset();
+                } else {
+                    alert('Error al guardar el curso: ' + data.message);
+                }
+            })
+            .catch(error => alert('Error al guardar el curso: ' + error.message));
         }
 
-        function deleteUser(userId) {
-            fetch(`../php/manage_users.php?userId=${userId}`, {
+        function deleteCurso(curso_id) {
+            fetch(`../php/gestionar_colegios.php?curso_id=${curso_id}`, {
                 method: 'DELETE'
-            }).then(() => loadUsers());
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadCursos();
+                } else {
+                    alert('Error al eliminar el curso: ' + data.message);
+                }
+            })
+            .catch(error => alert('Error al eliminar el curso: ' + error.message));
         }
 
-        function editUser(user) {
-            document.getElementById('userId').value = user.id;
-            document.getElementById('username').value = user.username;
-            document.getElementById('email').value = user.email;
-            document.getElementById('role').value = user.role;
-            document.getElementById('saldo').value = user.saldo || '';
-            toggleSaldoInput();
-            if (user.role === 'colegio') {
-                loadChildren(user.id);
-            }
+        function editCurso(curso) {
+            document.getElementById('curso_id').value = curso.id;
+            document.getElementById('curso_nombre').value = curso.nombre;
+            document.getElementById('curso_colegio').value = curso.colegio_id;
         }
 
-        function loadChildren(userId) {
-            fetch(`../php/manage_users.php?action=get_children&userId=${userId}`)
-                .then(response => response.json())
-                .then(children => {
-                    const childrenFields = document.getElementById('childrenFields');
-                    childrenFields.innerHTML = '';
-                    children.forEach(child => {
-                        addChild(child);
-                    });
-                });
+        window.onload = () => {
+            loadColegios();
+            loadCursos();
         }
-
-        function addChild(child = {}) {
-            let container = document.getElementById('childrenFields');
-            let childDiv = document.createElement('div');
-            childDiv.innerHTML = `
-                <input type="hidden" name="childId[]" value="${child.id || ''}">
-                <input type="text" name="childName[]" placeholder="Nombre del hijo" value="${child.name || ''}" required>
-                <input type="text" name="school[]" placeholder="Escuela" value="${child.school || ''}" required>
-                <input type="text" name="course[]" placeholder="Curso" value="${child.course || ''}" required>
-            `;
-            container.appendChild(childDiv);
-        }
-
-        function toggleSaldoInput() {
-            var role = document.getElementById('role').value;
-            var saldoInput = document.getElementById('saldo');
-            var saldoLabel = document.getElementById('saldoLabel');
-            var childrenContainer = document.getElementById('childrenContainer');
-            if (role === 'colegio') {
-                saldoInput.style.display = 'block';
-                saldoLabel.style.display = 'block';
-                childrenContainer.style.display = 'block';
-            } else {
-                saldoInput.style.display = 'none';
-                saldoLabel.style.display = 'none';
-                saldoInput.value = ''; // Reset saldo when hiding
-                childrenContainer.style.display = 'none';
-                document.getElementById('childrenFields').innerHTML = ''; // Clear children fields
-            }
-        }
-
-        function filterTable() {
-            const filterUsername = document.getElementById('filterUsername').value.toLowerCase();
-            const filterEmail = document.getElementById('filterEmail').value.toLowerCase();
-            const filterRole = document.getElementById('filterRole').value.toLowerCase();
-            const filterSaldo = document.getElementById('filterSaldo').value.toLowerCase();
-            const rows = document.querySelectorAll('#usersTableBody tr');
-
-            rows.forEach(row => {
-                const username = row.cells[0].textContent.toLowerCase();
-                const email = row.cells[1].textContent.toLowerCase();
-                const role = row.cells[2].textContent.toLowerCase();
-                const saldo = row.cells[3].textContent.toLowerCase();
-                const match = (!filterUsername || username.includes(filterUsername)) &&
-                              (!filterEmail || email.includes(filterEmail)) &&
-                              (!filterRole || role.includes(filterRole)) &&
-                              (!filterSaldo || saldo.includes(filterSaldo));
-                row.style.display = match ? '' : 'none';
-            });
-        }
-
-        window.onload = loadUsers;
     </script>
 </body>
 </html>
