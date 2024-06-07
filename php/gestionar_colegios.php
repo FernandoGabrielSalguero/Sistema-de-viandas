@@ -25,21 +25,25 @@ try {
 
         case 'POST':
             $nombre = $_POST['nombre'] ?? null;
+            error_log('Received POST request with data: ' . json_encode($_POST)); // Log received data
             if (!$nombre) {
                 throw new Exception('El nombre es requerido');
             }
-            if (isset($_POST['colegio_id'])) {
+            if (isset($_POST['colegio_id']) && !empty($_POST['colegio_id'])) {
                 $colegio_id = $_POST['colegio_id'];
                 $query = "UPDATE colegios SET nombre = ? WHERE id = ?";
                 $params = [$nombre, $colegio_id];
+                error_log('Executing query: ' . $query . ' with params: ' . json_encode($params)); // Log query and params
             } else if (isset($_POST['curso_nombre']) && isset($_POST['colegio_id'])) {
                 $curso_nombre = $_POST['curso_nombre'];
                 $colegio_id = $_POST['colegio_id'];
                 $query = "INSERT INTO cursos (colegio_id, nombre) VALUES (?, ?)";
                 $params = [$colegio_id, $curso_nombre];
+                error_log('Executing query: ' . $query . ' with params: ' . json_encode($params)); // Log query and params
             } else {
                 $query = "INSERT INTO colegios (nombre) VALUES (?)";
                 $params = [$nombre];
+                error_log('Executing query: ' . $query . ' with params: ' . json_encode($params)); // Log query and params
             }
             $stmt = $pdo->prepare($query);
             $stmt->execute($params);
