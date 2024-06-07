@@ -1,6 +1,7 @@
 <?php include '../headers/header_admin.php'; ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Gestión de Usuarios</title>
@@ -11,27 +12,37 @@
             padding: 20px;
             background-color: #f4f4f4;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
         }
-        th, td {
+
+        th,
+        td {
             border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
         }
+
         th {
             background-color: #f2f2f2;
         }
+
         form {
             margin-bottom: 20px;
         }
-        label, input, select, button {
+
+        label,
+        input,
+        select,
+        button {
             margin-top: 10px;
             display: block;
         }
     </style>
 </head>
+
 <body>
     <h1>Gestión de Usuarios</h1>
     <form id="userForm">
@@ -69,7 +80,7 @@
 
     <script>
         function loadUsers() {
-            fetch('api_get_users.php')
+            fetch('php/manage_users.php')
                 .then(response => response.json())
                 .then(data => {
                     const tableBody = document.getElementById('usersTableBody');
@@ -89,7 +100,7 @@
 
         function submitForm() {
             const formData = new FormData(document.getElementById('userForm'));
-            fetch('api_save_user.php', {
+            fetch('php/manage_users.php', {
                 method: 'POST',
                 body: formData
             }).then(() => {
@@ -99,11 +110,15 @@
         }
 
         function deleteUser(userId) {
-            fetch(`api_delete_user.php?userId=${userId}`, { method: 'DELETE' })
+            fetch(`php/manage_users.php?userId=${userId}`, {
+                    method: 'DELETE'
+                })
                 .then(() => loadUsers());
         }
 
         window.onload = loadUsers;
     </script>
+
 </body>
+
 </html>
