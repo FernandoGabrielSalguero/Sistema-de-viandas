@@ -37,7 +37,11 @@ try {
             }
             $stmt = $pdo->prepare($query);
             $stmt->execute($params);
-            echo json_encode(['success' => true]);
+            if ($stmt->rowCount() > 0) {
+                echo json_encode(['success' => true]);
+            } else {
+                throw new Exception('Error al guardar el colegio');
+            }
             break;
 
         case 'DELETE':
@@ -47,16 +51,24 @@ try {
                 $query = "DELETE FROM colegios WHERE id = ?";
                 $stmt = $pdo->prepare($query);
                 $stmt->execute([$colegio_id]);
-                echo json_encode(['success' => true]);
+                if ($stmt->rowCount() > 0) {
+                    echo json_encode(['success' => true]);
+                } else {
+                    throw new Exception('Error al eliminar el colegio');
+                }
             } else {
                 $curso_id = $_DELETE['curso_id'] ?? null;
                 if ($curso_id) {
                     $query = "DELETE FROM cursos WHERE id = ?";
                     $stmt = $pdo->prepare($query);
                     $stmt->execute([$curso_id]);
-                    echo json_encode(['success' => true]);
+                    if ($stmt->rowCount() > 0) {
+                        echo json_encode(['success' => true]);
+                    } else {
+                        throw new Exception('Error al eliminar el curso');
+                    }
                 } else {
-                    echo json_encode(['success' => false, 'message' => 'No ID provided for deletion']);
+                    throw new Exception('No ID provided for deletion');
                 }
             }
             break;
@@ -69,7 +81,11 @@ try {
                 $query = "UPDATE cursos SET nombre = ? WHERE id = ?";
                 $stmt = $pdo->prepare($query);
                 $stmt->execute([$curso_nombre, $curso_id]);
-                echo json_encode(['success' => true]);
+                if ($stmt->rowCount() > 0) {
+                    echo json_encode(['success' => true]);
+                } else {
+                    throw new Exception('Error al actualizar el curso');
+                }
             } else {
                 throw new Exception('Curso ID y nombre son requeridos');
             }
@@ -80,5 +96,6 @@ try {
             exit();
     }
 } catch (Exception $e) {
+    error_log($e->getMessage());
     echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }
