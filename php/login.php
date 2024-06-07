@@ -5,6 +5,7 @@ require 'db.php';
 $username = $_POST['username'];
 $password = $_POST['password'];
 
+// Suponiendo que el password debería ser encriptado, aquí deberías tener una verificación adecuada.
 $query = "SELECT * FROM usuarios WHERE username = :username AND password = :password";
 $stmt = $pdo->prepare($query);
 $stmt->execute(['username' => $username, 'password' => $password]);
@@ -12,6 +13,7 @@ $stmt->execute(['username' => $username, 'password' => $password]);
 if ($stmt->rowCount() == 1) {
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
     $_SESSION['user_id'] = $user['id'];
+    $_SESSION['username'] = $user['username']; // Asegúrate de asignar esta variable
     $_SESSION['role'] = $user['role'];
 
     // Redirigir al usuario a su dashboard correspondiente

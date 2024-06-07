@@ -1,8 +1,7 @@
 <?php
-session_start(); // Asegúrate de iniciar la sesión en cada archivo que use variables de sesión
+session_start();
 if (!isset($_SESSION['username'])) {
-    // Si no hay una sesión iniciada, redirige al login
-    header('Location: ../index.php');
+    header('Location: ../index.php'); // Asegúrate de que la ruta al archivo de login es correcta.
     exit();
 }
 ?>
