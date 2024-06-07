@@ -56,6 +56,7 @@ if (!isset($_SESSION['username'])) {
             <div class="navigation">
                 <button onclick="location.href='../dashboard/admin.php'">Dashboard</button>
                 <button onclick="location.href='../views/manage_users.php'">Gestionar Usuarios</button>
+                <button onclick="location.href='../views/gestionar_colegios.php'">Gestionar Colegios</button>
                 <button onclick="location.href='../php/manage_menus.php'">Gestionar Menús</button>
                 <button onclick="location.href='../php/view_orders.php'">Ver Pedidos</button>
                 <button onclick="location.href='../php/financial_reports.php'">Reportes Financieros</button>
