@@ -81,7 +81,7 @@
             fetch('../php/gestionar_colegios.php')
                 .then(response => response.json())
                 .then(data => {
-                    if (!data.success && data.message) {
+                    if (data.message) {
                         alert(data.message);
                         console.error('Error:', data.message);
                         return;
@@ -165,7 +165,7 @@
             fetch('../php/gestionar_colegios.php?action=get_cursos')
                 .then(response => response.json())
                 .then(data => {
-                    if (!data.success && data.message) {
+                    if (data.message) {
                         alert(data.message);
                         console.error('Error:', data.message);
                         return;
