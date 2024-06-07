@@ -153,7 +153,7 @@
                     />
                 </defs>
             </svg>
-            <h1>¡Ya todo está listo!</h1>
+            <h1>¡tenemos git conectado!</h1>
             <p>Todo lo que tienes que hacer ahora es cargar los archivos de tu sitio web y empezar tu aventura. Mira cómo hacerlo aquí:</p>
             <div class="link-container">
                 <a 
