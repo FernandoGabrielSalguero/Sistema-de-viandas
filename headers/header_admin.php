@@ -11,6 +11,42 @@ if (!isset($_SESSION['username'])) {
     <meta charset="UTF-8">
     <title>Dashboard Administrador | Viandas</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: red;
+            color: white;
+            padding: 10px 20px;
+        }
+        .header-content h1 {
+            margin: 0;
+            padding-bottom: 10px;
+        }
+        .navigation {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        button {
+            background-color: blue;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: darkblue;
+        }
+        .main-content {
+            padding: 20px;
+        }
+    </style>
 </head>
 <body>
     <header>
