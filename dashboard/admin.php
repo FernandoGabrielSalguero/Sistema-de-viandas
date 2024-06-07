@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
+<?php include 'header_admin.php'; ?>
     <h1>Dashboard del Administrador</h1>
     <div>
         <h2>Control de Usuarios</h2>
