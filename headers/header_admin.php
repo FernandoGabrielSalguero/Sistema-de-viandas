@@ -22,7 +22,7 @@ if (!isset($_SESSION['username'])) {
                 <button onclick="location.href='../manage_menus.php'">Gestionar Menús</button>
                 <button onclick="location.href='../view_orders.php'">Ver Pedidos</button>
                 <button onclick="location.href='../financial_reports.php'">Reportes Financieros</button>
-                <button onclick="location.href='../logout.php'">Cerrar Sesión</button>
+                <button onclick="location.href='../php/logout.php'">Cerrar Sesión</button>
             </div>
         </div>
     </header>
