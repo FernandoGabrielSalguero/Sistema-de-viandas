@@ -43,13 +43,15 @@
         <label for="password">Contraseña:</label>
         <input type="password" id="password" name="password">
         <label for="role">Rol:</label>
-        <select id="role" name="role">
+        <select id="role" name="role" onchange="toggleSaldoInput()">
             <option value="admin">Administrador</option>
             <option value="colegio">Cliente Colegio</option>
             <option value="empresa">Cliente Empresa</option>
             <option value="turismo">Cliente Turismo</option>
             <option value="particular">Particular</option>
         </select>
+        <label for="saldo" id="saldoLabel" style="display:none;">Saldo:</label>
+        <input type="number" id="saldo" name="saldo" style="display:none;" min="0" step="0.01">
         <button type="button" onclick="submitForm()">Guardar Usuario</button>
     </form>
 
@@ -101,6 +103,20 @@
         function deleteUser(userId) {
             fetch(`../php/manage_users.php?userId=${userId}`, { method: 'DELETE' })
                 .then(() => loadUsers());
+        }
+
+        function toggleSaldoInput() {
+            var role = document.getElementById('role').value;
+            var saldoInput = document.getElementById('saldo');
+            var saldoLabel = document.getElementById('saldoLabel');
+            if (role === 'colegio') {
+                saldoInput.style.display = 'block';
+                saldoLabel.style.display = 'block';
+            } else {
+                saldoInput.style.display = 'none';
+                saldoLabel.style.display = 'none';
+                saldoInput.value = ''; // Reset saldo when hiding
+            }
         }
 
         window.onload = loadUsers;
