@@ -5,8 +5,6 @@ if ($_SESSION['role'] !== 'admin') {
     exit();
 }
 
-// Asumiremos que aquí incluyes los archivos necesarios para la conexión a base de datos y las funciones relevantes
-
 ?>
 <!DOCTYPE html>
 <html>
