@@ -81,7 +81,7 @@
             fetch('../php/gestionar_colegios.php')
                 .then(response => response.json())
                 .then(data => {
-                    if (data.message) {
+                    if (!data.success && data.message) {
                         alert(data.message);
                         console.error('Error:', data.message);
                         return;
@@ -138,8 +138,9 @@
         }
 
         function deleteColegio(colegio_id) {
-            fetch(`../php/gestionar_colegios.php?colegio_id=${colegio_id}`, {
-                method: 'DELETE'
+            fetch(`../php/gestionar_colegios.php`, {
+                method: 'DELETE',
+                body: new URLSearchParams({colegio_id: colegio_id})
             })
             .then(response => response.json())
             .then(data => {
@@ -165,7 +166,7 @@
             fetch('../php/gestionar_colegios.php?action=get_cursos')
                 .then(response => response.json())
                 .then(data => {
-                    if (data.message) {
+                    if (!data.success && data.message) {
                         alert(data.message);
                         console.error('Error:', data.message);
                         return;
@@ -216,8 +217,9 @@
         }
 
         function deleteCurso(curso_id) {
-            fetch(`../php/gestionar_colegios.php?curso_id=${curso_id}`, {
-                method: 'DELETE'
+            fetch(`../php/gestionar_colegios.php`, {
+                method: 'DELETE',
+                body: new URLSearchParams({curso_id: curso_id})
             })
             .then(response => response.json())
             .then(data => {
