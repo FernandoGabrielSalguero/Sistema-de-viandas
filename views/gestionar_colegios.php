@@ -30,10 +30,6 @@
             margin-top: 10px;
             display: block;
         }
-        .filter-input {
-            width: 100%;
-            box-sizing: border-box;
-        }
     </style>
 </head>
 <body>
@@ -87,6 +83,7 @@
                 .then(data => {
                     if (!data.success && data.message) {
                         alert(data.message);
+                        console.error('Error:', data.message);
                         return;
                     }
                     const colegiosTableBody = document.getElementById('colegiosTableBody');
@@ -112,7 +109,10 @@
                         cursoColegioSelect.appendChild(option);
                     });
                 })
-                .catch(error => alert('Error al cargar los colegios: ' + error.message));
+                .catch(error => {
+                    alert('Error al cargar los colegios: ' + error.message);
+                    console.error('Error:', error);
+                });
         }
 
         function submitColegioForm() {
@@ -128,9 +128,13 @@
                     document.getElementById('colegioForm').reset();
                 } else {
                     alert('Error al guardar el colegio: ' + data.message);
+                    console.error('Error:', data.message);
                 }
             })
-            .catch(error => alert('Error al guardar el colegio: ' + error.message));
+            .catch(error => {
+                alert('Error al guardar el colegio: ' + error.message);
+                console.error('Error:', error);
+            });
         }
 
         function deleteColegio(colegio_id) {
@@ -143,9 +147,13 @@
                     loadColegios();
                 } else {
                     alert('Error al eliminar el colegio: ' + data.message);
+                    console.error('Error:', data.message);
                 }
             })
-            .catch(error => alert('Error al eliminar el colegio: ' + error.message));
+            .catch(error => {
+                alert('Error al eliminar el colegio: ' + error.message);
+                console.error('Error:', error);
+            });
         }
 
         function editColegio(colegio) {
@@ -159,6 +167,7 @@
                 .then(data => {
                     if (!data.success && data.message) {
                         alert(data.message);
+                        console.error('Error:', data.message);
                         return;
                     }
                     const cursosTableBody = document.getElementById('cursosTableBody');
@@ -178,7 +187,10 @@
                         actionsCell.appendChild(deleteBtn);
                     });
                 })
-                .catch(error => alert('Error al cargar los cursos: ' + error.message));
+                .catch(error => {
+                    alert('Error al cargar los cursos: ' + error.message);
+                    console.error('Error:', error);
+                });
         }
 
         function submitCursoForm() {
@@ -194,9 +206,13 @@
                     document.getElementById('cursoForm').reset();
                 } else {
                     alert('Error al guardar el curso: ' + data.message);
+                    console.error('Error:', data.message);
                 }
             })
-            .catch(error => alert('Error al guardar el curso: ' + error.message));
+            .catch(error => {
+                alert('Error al guardar el curso: ' + error.message);
+                console.error('Error:', error);
+            });
         }
 
         function deleteCurso(curso_id) {
@@ -209,9 +225,13 @@
                     loadCursos();
                 } else {
                     alert('Error al eliminar el curso: ' + data.message);
+                    console.error('Error:', data.message);
                 }
             })
-            .catch(error => alert('Error al eliminar el curso: ' + error.message));
+            .catch(error => {
+                alert('Error al eliminar el curso: ' + error.message);
+                console.error('Error:', error);
+            });
         }
 
         function editCurso(curso) {
