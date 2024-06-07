@@ -1,0 +1,12 @@
+/viandas/
+|-- index.php               # Página principal y de login
+|-- /dashboard/             # Carpeta para los dashboards de los distintos roles
+    |-- admin.php           # Dashboard para administrador
+    |-- colegios.php        # Dashboard para clientes de colegios
+|-- /php/                   # Carpeta para scripts PHP
+    |-- db.php              # Conexión a la base de datos
+    |-- login.php           # Procesamiento del login
+|-- /css/                   # Carpeta para hojas de estilo
+    |-- styles.css          # Estilos generales
+|-- /js/                    # Carpeta para JavaScript
+    |-- functions.js        # Funciones generales JS
