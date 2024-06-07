@@ -11,6 +11,7 @@ if (!isset($_SESSION['username'])) {
     <meta charset="UTF-8">
     <title>Dashboard Administrador | Viandas</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
             font-family: Arial, sans-serif;
