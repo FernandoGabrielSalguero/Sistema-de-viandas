@@ -52,6 +52,7 @@ try {
 
         case 'DELETE':
             parse_str(file_get_contents("php://input"), $_DELETE);
+            error_log('Received DELETE request with data: ' . json_encode($_DELETE));
             $colegio_id = $_DELETE['colegio_id'] ?? null;
             $curso_id = $_DELETE['curso_id'] ?? null;
             if ($colegio_id) {
@@ -79,6 +80,7 @@ try {
 
         case 'PUT':
             parse_str(file_get_contents("php://input"), $_PUT);
+            error_log('Received PUT request with data: ' . json_encode($_PUT));
             if (isset($_PUT['curso_id']) && isset($_PUT['curso_nombre'])) {
                 $curso_id = $_PUT['curso_id'];
                 $curso_nombre = $_PUT['curso_nombre'];

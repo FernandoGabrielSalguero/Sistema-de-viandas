@@ -81,7 +81,7 @@
             fetch('../php/gestionar_colegios.php')
                 .then(response => response.json())
                 .then(data => {
-                    if (!data.success && data.message) {
+                    if (data.message) {
                         alert(data.message);
                         console.error('Error:', data.message);
                         return;
@@ -117,6 +117,7 @@
 
         function submitColegioForm() {
             const formData = new FormData(document.getElementById('colegioForm'));
+            console.log('Form Data:', Object.fromEntries(formData.entries())); // Log para confirmar datos
             fetch('../php/gestionar_colegios.php', {
                 method: 'POST',
                 body: formData
@@ -166,7 +167,7 @@
             fetch('../php/gestionar_colegios.php?action=get_cursos')
                 .then(response => response.json())
                 .then(data => {
-                    if (!data.success && data.message) {
+                    if (data.message) {
                         alert(data.message);
                         console.error('Error:', data.message);
                         return;
