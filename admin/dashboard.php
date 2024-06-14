@@ -19,6 +19,12 @@ if ($_SESSION['role'] !== 'admin') {
 <body>
     <h1>Admin Dashboard</h1>
     <p>Welcome, Admin!</p>
-    <!-- Aquí añadiremos más funcionalidades específicas para el administrador -->
+    <nav>
+        <ul>
+            <li><a href="schools.php">Manage Schools</a></li>
+            <li><a href="courses.php">Manage Courses</a></li>
+            <!-- Agrega más enlaces según las funcionalidades disponibles -->
+        </ul>
+    </nav>
 </body>
 </html>
