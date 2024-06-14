@@ -5,17 +5,45 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['recharge'])) {
     $amount = $_POST['amount'];
     $parent_id = $_SESSION['user_id'];
     $receipt = $_FILES['receipt']['name'];
-
-    // Guardar el archivo del comprobante
     $target_dir = "../uploads/";
     $target_file = $target_dir . basename($receipt);
-    move_uploaded_file($_FILES['receipt']['tmp_name'], $target_file);
+    $uploadOk = 1;
+    $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
 
-    // Insertar la recarga en la base de datos
-    $stmt = $pdo->prepare("INSERT INTO recharges (parent_id, amount, receipt, status) VALUES (?, ?, ?, 'pending')");
-    $stmt->execute([$parent_id, $amount, $receipt]);
+    // Verificar si el archivo ya existe
+    if (file_exists($target_file)) {
+        echo "Lo siento, el archivo ya existe.";
+        $uploadOk = 0;
+    }
 
-    echo "Recarga enviada para verificación.";
+    // Verificar tamaño del archivo
+    if ($_FILES['receipt']['size'] > 5000000) { // 5MB
+        echo "Lo siento, el archivo es demasiado grande.";
+        $uploadOk = 0;
+    }
+
+    // Permitir ciertos formatos de archivo
+    $allowed_formats = array("jpg", "png", "jpeg", "pdf");
+    if (!in_array($imageFileType, $allowed_formats)) {
+        echo "Lo siento, solo se permiten archivos JPG, JPEG, PNG y PDF.";
+        $uploadOk = 0;
+    }
+
+    // Verificar si $uploadOk es 0 por un error
+    if ($uploadOk == 0) {
+        echo "Lo siento, tu archivo no fue subido.";
+    // Si todo está bien, intenta subir el archivo
+    } else {
+        if (move_uploaded_file($_FILES['receipt']['tmp_name'], $target_file)) {
+            // Insertar la recarga en la base de datos
+            $stmt = $pdo->prepare("INSERT INTO recharges (parent_id, amount, receipt, status) VALUES (?, ?, ?, 'pending')");
+            $stmt->execute([$parent_id, $amount, $receipt]);
+
+            echo "La recarga ha sido enviada para verificación.";
+        } else {
+            echo "Lo siento, hubo un error al subir tu archivo.";
+        }
+    }
 }
 
 // Obtener el historial de recargas
