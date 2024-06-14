@@ -11,12 +11,14 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../styles.css">
     <title>Dashboard</title>
 </head>
+
 <body>
     <header class="main-header">
         <div class="header-container">
@@ -27,16 +29,18 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
             <nav class="main-nav">
                 <ul class="nav-links">
                     <li><button onclick="window.location.href='../admin/dashboard.php'">Inicio</button></li>
-                    <?php if ($_SESSION['role'] === 'admin'): ?>
+                    <?php if ($_SESSION['role'] === 'admin') : ?>
                         <li><button onclick="window.location.href='../admin/schools.php'">Gestionar Colegios</button></li>
                         <li><button onclick="window.location.href='../admin/courses.php'">Gestionar Cursos</button></li>
                         <li><button onclick="window.location.href='../admin/parents.php'">Gestionar Padres y Hijos</button></li>
                         <li><button onclick="window.location.href='../admin/create_menu.php'">Gestionar Menús</button></li>
                         <li><button onclick="window.location.href='../admin/verify_recharge.php'">Verificar Recargas</button></li>
-                    <?php elseif ($_SESSION['role'] === 'parent'): ?>
+                    <?php elseif ($_SESSION['role'] === 'parent') : ?>
                         <li><button onclick="window.location.href='../parents/dashboard.php'">Inicio</button></li>
                         <li><button onclick="window.location.href='../parents/recharge.php'">Recargar Saldo</button></li>
                         <!-- Agrega más enlaces según las funcionalidades disponibles -->
+                    <?php elseif ($_SESSION['role'] === 'kitchen') : ?>
+                        <li><button onclick="window.location.href='../kitchen/kitchen_dashboard.php'">Dashboard de Cocina</button></li>
                     <?php endif; ?>
                     <li><button onclick="window.location.href='../logout.php'">Cerrar Sesión</button></li>
                 </ul>
@@ -54,4 +58,5 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
         }
     </script>
 </body>
+
 </html>
