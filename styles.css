@@ -103,6 +103,26 @@ button:hover {
     background-color: #45a049;
 }
 
+/* Children container styles */
+#children-container {
+    margin-top: 20px;
+}
+
+.child-entry {
+    margin-bottom: 20px;
+}
+
+.child-entry label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.child-entry input[type="text"], .child-entry select {
+    display: block;
+    width: calc(100% - 10px);
+    margin-bottom: 10px;
+}
+
 /* Table styles */
 table {
     width: 100%;
