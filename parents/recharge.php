@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['recharge'])) {
                 $stmt = $pdo->prepare("INSERT INTO recharges (parent_id, amount, receipt, status) VALUES (?, ?, ?, 'pending')");
                 $stmt->execute([$parent_id, $amount, $receipt]);
 
-                $message = "La recarga ha sido enviada para verificación.";
+                $message = "La recarga ha sido enviada para verificación. Esto puede demorar hasta 72hs habiles";
             } else {
                 $message = "Lo siento, hubo un error al subir tu archivo. Código de error: " . $_FILES['receipt']['error'];
             }

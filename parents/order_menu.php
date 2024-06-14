@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['order_menu'])) {
         }
     } catch (Exception $e) {
         error_log($e->getMessage());
-        $message = "Error: No se pudo realizar el pedido.";
+        $message = "Error: No se pudo realizar el pedido. " . $e->getMessage();
     }
 }
 
