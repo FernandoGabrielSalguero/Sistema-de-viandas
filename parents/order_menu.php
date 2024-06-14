@@ -1,6 +1,9 @@
 <?php
 include '../common/header.php';
 
+$message = "";
+$saldo_insuficiente = false;
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['order_menu'])) {
     $parent_id = $_SESSION['user_id'];
     $child_id = $_POST['child_id'];
@@ -42,7 +45,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['order_menu'])) {
 
         $message = "El pedido ha sido realizado exitosamente.";
     } else {
-        $message = "Saldo insuficiente para realizar el pedido.";
+        $saldo_insuficiente = true;
+        $faltante = $total_price - $parent_saldo;
+        $message = "Saldo insuficiente. Necesitas $".$faltante." más para realizar este pedido.";
     }
 }
 
@@ -63,7 +68,11 @@ foreach ($menus as $menu) {
 ?>
 
 <div class="container">
-    <div id="toast" class="toast"><?php echo $message; ?></div>
+    <div id="toast" class="toast"><?php echo $message; ?>
+        <?php if ($saldo_insuficiente): ?>
+            <button onclick="window.location.href='../parents/recharge.php'">Recargar Saldo</button>
+        <?php endif; ?>
+    </div>
     <form action="order_menu.php" method="post" onsubmit="return calculateTotal()">
         <h2>Realizar Pedido</h2>
         <label for="child_id">Hijo:</label>
@@ -84,7 +93,7 @@ foreach ($menus as $menu) {
             </fieldset>
         <?php endforeach; ?>
         <p>Total: $<span id="total_price">0.00</span></p>
-        <button type="submit" name="order_menu">Realizar Pedido</button>
+        <button type="submit" name="order_menu">Realizar Pedido ($<span id="total_button">0.00</span>)</button>
     </form>
     
     <h2>Pedidos Realizados</h2>
@@ -171,6 +180,7 @@ function calculateTotal() {
         total += parseFloat(radio.getAttribute('data-price'));
     });
     document.getElementById('total_price').textContent = total.toFixed(2);
+    document.getElementById('total_button').textContent = total.toFixed(2);
     return true;
 }
 
@@ -184,7 +194,7 @@ function showToast(message) {
     toast.className = "toast show";
     setTimeout(function() {
         toast.className = toast.className.replace("show", "");
-    }, 3000);
+    }, 5000);
 }
 
 // Mostrar el mensaje de toast si hay uno
