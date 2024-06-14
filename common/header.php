@@ -33,6 +33,7 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
                         <li><button onclick="window.location.href='../admin/school_profile.php'">Escuela</button></li>
                         <li><button onclick="window.location.href='../admin/parents.php'">Gestionar Padres y Hijos</button></li>
                         <li><button onclick="window.location.href='../admin/create_menu.php'">Gestionar Menús</button></li>
+                        <li><button onclick="window.location.href='../admin/create_user.php'">Crear Usuario</button></li>
                         <li><button onclick="window.location.href='../admin/verify_recharge.php'">Verificar Recargas</button></li>
                     <?php elseif ($_SESSION['role'] === 'parent') : ?>
                         <li><button onclick="window.location.href='../parents/dashboard.php'">Inicio</button></li>
