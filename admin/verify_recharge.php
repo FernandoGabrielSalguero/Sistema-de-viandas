@@ -1,48 +1,62 @@
 <?php
 include '../common/header.php';
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['verify_recharge'])) {
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['approve_recharge'])) {
     $recharge_id = $_POST['recharge_id'];
-    $status = $_POST['status'];
 
-    // Actualizar el estado de la recarga
-    $stmt = $pdo->prepare("UPDATE recharges SET status = ? WHERE id = ?");
-    $stmt->execute([$status, $recharge_id]);
+    // Obtener la recarga
+    $stmt = $pdo->prepare("SELECT * FROM recharges WHERE id = ?");
+    $stmt->execute([$recharge_id]);
+    $recharge = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    echo "Recarga actualizada.";
+    if ($recharge && $recharge['status'] == 'pending') {
+        $parent_id = $recharge['parent_id'];
+        $amount = $recharge['amount'];
+
+        // Actualizar el saldo del padre
+        $stmt = $pdo->prepare("UPDATE parents SET saldo = saldo + ? WHERE id = ?");
+        $stmt->execute([$amount, $parent_id]);
+
+        // Marcar la recarga como aprobada
+        $stmt = $pdo->prepare("UPDATE recharges SET status = 'approved' WHERE id = ?");
+        $stmt->execute([$recharge_id]);
+
+        $message = "La recarga ha sido aprobada exitosamente.";
+    } else {
+        $message = "Error: No se pudo aprobar la recarga.";
+    }
 }
 
 // Obtener todas las recargas pendientes
-$stmt = $pdo->prepare("SELECT recharges.*, parents.username FROM recharges JOIN parents ON recharges.parent_id = parents.id WHERE recharges.status = 'pending'");
+$stmt = $pdo->prepare("SELECT * FROM recharges WHERE status = 'pending'");
 $stmt->execute();
 $recharges = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <div class="container">
+    <div id="toast" class="toast"><?php echo $message; ?></div>
     <h2>Verificar Recargas</h2>
-    <table id="verifyTable">
+    <table id="rechargesTable">
         <thead>
             <tr>
-                <th onclick="sortTable(0)">Usuario</th>
-                <th onclick="sortTable(1)">Monto</th>
-                <th onclick="sortTable(2)">Comprobante</th>
-                <th onclick="sortTable(3)">Acciones</th>
+                <th>ID</th>
+                <th>Padre</th>
+                <th>Monto</th>
+                <th>Comprobante</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
             <?php foreach ($recharges as $recharge): ?>
             <tr>
-                <td><?php echo htmlspecialchars($recharge['username']); ?></td>
+                <td><?php echo htmlspecialchars($recharge['id']); ?></td>
+                <td><?php echo htmlspecialchars($recharge['parent_id']); ?></td>
                 <td><?php echo htmlspecialchars($recharge['amount']); ?></td>
                 <td><a href="../uploads/<?php echo htmlspecialchars($recharge['receipt']); ?>" target="_blank">Ver Comprobante</a></td>
                 <td>
                     <form action="verify_recharge.php" method="post">
                         <input type="hidden" name="recharge_id" value="<?php echo $recharge['id']; ?>">
-                        <select name="status">
-                            <option value="approved">Aprobar</option>
-                            <option value="rejected">Rechazar</option>
-                        </select>
-                        <button type="submit" name="verify_recharge">Actualizar</button>
+                        <button type="submit" name="approve_recharge">Aprobar</button>
                     </form>
                 </td>
             </tr>
@@ -52,42 +66,18 @@ $recharges = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </div>
 
 <script>
-function sortTable(columnIndex) {
-    const table = document.getElementById('verifyTable');
-    let rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-    switching = true;
-    dir = "asc"; 
-    while (switching) {
-        switching = false;
-        rows = table.rows;
-        for (i = 1; i < (rows.length - 1); i++) {
-            shouldSwitch = false;
-            x = rows[i].getElementsByTagName("TD")[columnIndex];
-            y = rows[i].getElementsByTagName("TD")[columnIndex + 1];
-            if (dir === "asc") {
-                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-                    shouldSwitch = true;
-                    break;
-                }
-            } else if (dir === "desc") {
-                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-                    shouldSwitch = true;
-                    break;
-                }
-            }
-        }
-        if (shouldSwitch) {
-            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-            switching = true;
-            switchcount++; 
-        } else {
-            if (switchcount === 0 && dir === "asc") {
-                dir = "desc";
-                switching = true;
-            }
-        }
-    }
+function showToast(message) {
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.className = "toast show";
+    setTimeout(function() {
+        toast.className = toast.className.replace("show", "");
+    }, 5000);
 }
+
+<?php if (isset($message) && $message): ?>
+    showToast("<?php echo $message; ?>");
+<?php endif; ?>
 </script>
 </body>
 </html>
