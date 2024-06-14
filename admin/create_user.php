@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user_id = $pdo->lastInsertId();
 
         // Asignar el representante a la escuela si el rol es school
-        if ($role === 'school') {
+        if ($role === 'school' && $school_id) {
             $stmt = $pdo->prepare("UPDATE schools SET rep_id = ? WHERE id = ?");
             $stmt->execute([$user_id, $school_id]);
         }
