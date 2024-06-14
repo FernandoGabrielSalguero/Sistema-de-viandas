@@ -1,0 +1,16 @@
+/project-root
+    /admin
+        dashboard.php
+    /common
+        db_connect.php
+        session.php
+    /kitchen
+        dashboard.php
+    /parents
+        dashboard.php
+    /school
+        dashboard.php
+    index.php
+    login.php
+    login_process.php
+    styles.css
