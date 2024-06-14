@@ -16,15 +16,6 @@ try {
     $total_users = 0;
 }
 
-// Obtener la cantidad de pedidos realizados
-try {
-    $stmt = $pdo->query("SELECT COUNT(*) AS total_orders FROM orders");
-    $total_orders = $stmt->fetch(PDO::FETCH_ASSOC)['total_orders'];
-} catch (Exception $e) {
-    error_log($e->getMessage());
-    $total_orders = 0;
-}
-
 // Obtener la cantidad de dinero aprobado en saldo
 try {
     $stmt = $pdo->query("SELECT SUM(amount) AS total_approved FROM recharges WHERE status = 'approved'");
@@ -41,20 +32,6 @@ try {
 } catch (Exception $e) {
     error_log($e->getMessage());
     $total_pending = 0;
-}
-
-// Obtener los usuarios que no han realizado pedidos
-try {
-    $stmt = $pdo->query("
-        SELECT parents.name, parents.email 
-        FROM parents 
-        LEFT JOIN orders ON parents.id = orders.parent_id 
-        WHERE orders.id IS NULL
-    ");
-    $no_orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (Exception $e) {
-    error_log($e->getMessage());
-    $no_orders = [];
 }
 
 // Obtener todos los menús
@@ -77,12 +54,6 @@ try {
             <p><?php echo $total_users; ?></p>
         </div>
         <div class="kpi-card">
-            <h3>Pedidos Realizados</h3>
-            <p id="total_orders_kpi"><?php echo $total_orders; ?></p>
-            <label for="order_filter_date">Filtrar por fecha:</label>
-            <input type="date" id="order_filter_date" name="order_filter_date" onchange="filterOrdersByDate()">
-        </div>
-        <div class="kpi-card">
             <h3>Saldo Aprobado</h3>
             <p>$<?php echo number_format($total_approved, 2); ?></p>
         </div>
@@ -92,26 +63,6 @@ try {
         </div>
     </div>
     
-    <div class="admin-section">
-        <h3>Usuarios que No Han Realizado Pedidos</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Email</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($no_orders as $parent): ?>
-                <tr>
-                    <td><?php echo htmlspecialchars($parent['name']); ?></td>
-                    <td><?php echo htmlspecialchars($parent['email']); ?></td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-
     <div class="admin-section">
         <h3>Menús</h3>
         <table id="menusTable">
@@ -212,21 +163,6 @@ function sortTable(columnIndex) {
             }
         }
     }
-}
-
-function filterOrdersByDate() {
-    const filterDate = document.getElementById('order_filter_date').value;
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', 'filter_orders.php', true);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    xhr.onload = function() {
-        if (this.status === 200) {
-            const response = JSON.parse(this.responseText);
-            document.getElementById('ordersTableBody').innerHTML = response.html;
-            document.getElementById('total_orders_kpi').textContent = response.total_orders;
-        }
-    };
-    xhr.send('filter_date=' + filterDate);
 }
 </script>
 
