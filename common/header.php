@@ -19,6 +19,14 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
 </head>
 <body>
     <header class="main-header">
-        <h1>Que gusto verte de nuevo, <?php echo htmlspecialchars($user['username']); ?>!</h1>
-        <p>Email: <?php echo htmlspecialchars($user['email']); ?></p>
+        <div class="user-info">
+            <h1>Que gusto verte de nuevo, <?php echo htmlspecialchars($user['username']); ?>!</h1>
+            <p>Email: <?php echo htmlspecialchars($user['email']); ?></p>
+        </div>
+        <nav class="main-nav">
+            <button onclick="window.location.href='../admin/dashboard.php'">Home</button>
+            <button onclick="window.location.href='../admin/schools.php'">Manage Schools</button>
+            <button onclick="window.location.href='../admin/courses.php'">Manage Courses</button>
+            <button onclick="window.location.href='../logout.php'">Logout</button>
+        </nav>
     </header>
