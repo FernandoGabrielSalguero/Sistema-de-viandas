@@ -5,69 +5,88 @@ $message = "";
 $saldo_insuficiente = false;
 
 // Obtener el saldo del padre
-$stmt = $pdo->prepare("SELECT saldo FROM parents WHERE id = ?");
-$stmt->execute([$_SESSION['user_id']]);
-$parent = $stmt->fetch(PDO::FETCH_ASSOC);
-$parent_saldo = $parent['saldo'];
+try {
+    $stmt = $pdo->prepare("SELECT saldo FROM parents WHERE id = ?");
+    $stmt->execute([$_SESSION['user_id']]);
+    $parent = $stmt->fetch(PDO::FETCH_ASSOC);
+    $parent_saldo = $parent['saldo'];
+} catch (Exception $e) {
+    error_log($e->getMessage());
+    $parent_saldo = 0;
+}
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['order_menu'])) {
-    $parent_id = $_SESSION['user_id'];
-    $child_id = $_POST['child_id'];
-    $menus_selected = isset($_POST['menus']) ? $_POST['menus'] : [];
+    try {
+        $parent_id = $_SESSION['user_id'];
+        $child_id = $_POST['child_id'];
+        $menus_selected = isset($_POST['menus']) ? $_POST['menus'] : [];
 
-    $total_price = 0;
-    foreach ($menus_selected as $menu_id) {
-        if ($menu_id != 'none') {
-            // Obtener el precio del menú seleccionado
-            $stmt = $pdo->prepare("SELECT price FROM menus WHERE id = ?");
-            $stmt->execute([$menu_id]);
-            $menu = $stmt->fetch(PDO::FETCH_ASSOC);
-            $menu_price = $menu['price'];
-            $total_price += $menu_price;
-        }
-    }
-
-    if ($parent_saldo >= $total_price) {
-        // Descontar el saldo
-        $new_saldo = $parent_saldo - $total_price;
-        $stmt = $pdo->prepare("UPDATE parents SET saldo = ? WHERE id = ?");
-        $stmt->execute([$new_saldo, $parent_id]);
-
-        // Insertar los pedidos en la base de datos
+        $total_price = 0;
         foreach ($menus_selected as $menu_id) {
-            // Obtener la fecha del menú
             if ($menu_id != 'none') {
-                $stmt = $pdo->prepare("SELECT date FROM menus WHERE id = ?");
+                // Obtener el precio del menú seleccionado
+                $stmt = $pdo->prepare("SELECT price FROM menus WHERE id = ?");
                 $stmt->execute([$menu_id]);
                 $menu = $stmt->fetch(PDO::FETCH_ASSOC);
-                $order_date = $menu['date'];
-
-                $stmt = $pdo->prepare("INSERT INTO orders (parent_id, child_id, menu_id, order_date) VALUES (?, ?, ?, ?)");
-                $stmt->execute([$parent_id, $child_id, $menu_id, $order_date]);
+                $menu_price = $menu['price'];
+                $total_price += $menu_price;
             }
         }
 
-        $message = "El pedido ha sido realizado exitosamente.";
-    } else {
-        $saldo_insuficiente = true;
-        $faltante = $total_price - $parent_saldo;
-        $message = "Saldo insuficiente. Necesitas $" . number_format($faltante, 2) . " más para realizar este pedido.";
+        if ($parent_saldo >= $total_price) {
+            // Descontar el saldo
+            $new_saldo = $parent_saldo - $total_price;
+            $stmt = $pdo->prepare("UPDATE parents SET saldo = ? WHERE id = ?");
+            $stmt->execute([$new_saldo, $parent_id]);
+
+            // Insertar los pedidos en la base de datos
+            foreach ($menus_selected as $menu_id) {
+                if ($menu_id != 'none') {
+                    $stmt = $pdo->prepare("SELECT date FROM menus WHERE id = ?");
+                    $stmt->execute([$menu_id]);
+                    $menu = $stmt->fetch(PDO::FETCH_ASSOC);
+                    $order_date = $menu['date'];
+
+                    $stmt = $pdo->prepare("INSERT INTO orders (parent_id, child_id, menu_id, order_date) VALUES (?, ?, ?, ?)");
+                    $stmt->execute([$parent_id, $child_id, $menu_id, $order_date]);
+                }
+            }
+
+            $message = "El pedido ha sido realizado exitosamente.";
+        } else {
+            $saldo_insuficiente = true;
+            $faltante = $total_price - $parent_saldo;
+            $message = "Saldo insuficiente. Necesitas $" . number_format($faltante, 2) . " más para realizar este pedido.";
+        }
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        $message = "Error: No se pudo realizar el pedido.";
     }
 }
 
 // Obtener los hijos del padre
-$stmt = $pdo->prepare("SELECT * FROM children WHERE parent_id = ?");
-$stmt->execute([$_SESSION['user_id']]);
-$children = $stmt->fetchAll(PDO::FETCH_ASSOC);
+try {
+    $stmt = $pdo->prepare("SELECT * FROM children WHERE parent_id = ?");
+    $stmt->execute([$_SESSION['user_id']]);
+    $children = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    error_log($e->getMessage());
+    $children = [];
+}
 
 // Obtener los menús disponibles, agrupados por fecha
-$stmt = $pdo->prepare("SELECT * FROM menus ORDER BY date DESC");
-$stmt->execute();
-$menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
+try {
+    $stmt = $pdo->prepare("SELECT * FROM menus ORDER BY date DESC");
+    $stmt->execute();
+    $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$menus_by_date = [];
-foreach ($menus as $menu) {
-    $menus_by_date[$menu['date']][] = $menu;
+    $menus_by_date = [];
+    foreach ($menus as $menu) {
+        $menus_by_date[$menu['date']][] = $menu;
+    }
+} catch (Exception $e) {
+    error_log($e->getMessage());
+    $menus_by_date = [];
 }
 ?>
 
@@ -117,16 +136,21 @@ foreach ($menus as $menu) {
         <tbody>
             <?php
             // Obtener los pedidos realizados
-            $stmt = $pdo->prepare("
-                SELECT orders.id, children.name as child_name, menus.name as menu_name, orders.order_date
-                FROM orders
-                JOIN children ON orders.child_id = children.id
-                JOIN menus ON orders.menu_id = menus.id
-                WHERE orders.parent_id = ?
-                ORDER BY orders.order_date DESC
-            ");
-            $stmt->execute([$_SESSION['user_id']]);
-            $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            try {
+                $stmt = $pdo->prepare("
+                    SELECT orders.id, children.name as child_name, menus.name as menu_name, orders.order_date
+                    FROM orders
+                    JOIN children ON orders.child_id = children.id
+                    JOIN menus ON orders.menu_id = menus.id
+                    WHERE orders.parent_id = ?
+                    ORDER BY orders.order_date DESC
+                ");
+                $stmt->execute([$_SESSION['user_id']]);
+                $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            } catch (Exception $e) {
+                error_log($e->getMessage());
+                $orders = [];
+            }
             ?>
             <?php foreach ($orders as $order): ?>
             <tr>
@@ -196,11 +220,7 @@ document.querySelectorAll('input[type="radio"]').forEach(radio => {
 
 function checkTotal() {
     const total = parseFloat(document.getElementById('total_button').textContent);
-    if (total === 0) {
-        alert("Debes seleccionar al menos una opción.");
-        return false;
-    }
-    return true;
+    return total >= 0;
 }
 
 function showToast(message) {
