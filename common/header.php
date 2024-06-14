@@ -19,23 +19,39 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
 </head>
 <body>
     <header class="main-header">
-        <div class="user-info">
-            <h1>¡Qué gusto verte de nuevo, <?php echo htmlspecialchars($user['username']); ?>!</h1>
-            <p>Email: <?php echo htmlspecialchars($user['email']); ?></p>
+        <div class="header-container">
+            <div class="user-info">
+                <h1>¡Qué gusto verte de nuevo, <?php echo htmlspecialchars($user['username']); ?>!</h1>
+                <p>Email: <?php echo htmlspecialchars($user['email']); ?></p>
+            </div>
+            <nav class="main-nav">
+                <ul class="nav-links">
+                    <li><button onclick="window.location.href='../admin/dashboard.php'">Inicio</button></li>
+                    <?php if ($_SESSION['role'] === 'admin'): ?>
+                        <li><button onclick="window.location.href='../admin/schools.php'">Gestionar Colegios</button></li>
+                        <li><button onclick="window.location.href='../admin/courses.php'">Gestionar Cursos</button></li>
+                        <li><button onclick="window.location.href='../admin/parents.php'">Gestionar Padres y Hijos</button></li>
+                        <li><button onclick="window.location.href='../admin/create_menu.php'">Gestionar Menús</button></li>
+                        <li><button onclick="window.location.href='../admin/verify_recharge.php'">Verificar Recargas</button></li>
+                    <?php elseif ($_SESSION['role'] === 'parent'): ?>
+                        <li><button onclick="window.location.href='../parents/dashboard.php'">Inicio</button></li>
+                        <li><button onclick="window.location.href='../parents/recharge.php'">Recargar Saldo</button></li>
+                        <!-- Agrega más enlaces según las funcionalidades disponibles -->
+                    <?php endif; ?>
+                    <li><button onclick="window.location.href='../logout.php'">Cerrar Sesión</button></li>
+                </ul>
+                <div class="menu-icon" onclick="toggleMenu()">
+                    &#9776; <!-- Ícono de menú -->
+                </div>
+            </nav>
         </div>
-        <nav class="main-nav">
-            <button onclick="window.location.href='../admin/dashboard.php'">Inicio</button>
-            <?php if ($_SESSION['role'] === 'admin'): ?>
-                <button onclick="window.location.href='../admin/schools.php'">Gestionar Colegios</button>
-                <button onclick="window.location.href='../admin/courses.php'">Gestionar Cursos</button>
-                <button onclick="window.location.href='../admin/parents.php'">Gestionar Padres y Hijos</button>
-                <button onclick="window.location.href='../admin/create_menu.php'">Gestionar Menús</button>
-                <button onclick="window.location.href='../admin/verify_recharge.php'">Verificar Recargas</button>
-            <?php elseif ($_SESSION['role'] === 'parent'): ?>
-                <button onclick="window.location.href='../parents/dashboard.php'">Inicio</button>
-                <button onclick="window.location.href='../parents/recharge.php'">Recargar Saldo</button>
-                <!-- Agrega más enlaces según las funcionalidades disponibles -->
-            <?php endif; ?>
-            <button onclick="window.location.href='../logout.php'">Cerrar Sesión</button>
-        </nav>
     </header>
+
+    <script>
+        function toggleMenu() {
+            const nav = document.querySelector('.nav-links');
+            nav.classList.toggle('nav-active');
+        }
+    </script>
+</body>
+</html>
