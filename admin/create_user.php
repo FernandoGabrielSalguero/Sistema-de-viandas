@@ -11,6 +11,13 @@ if ($_SESSION['role'] !== 'admin') {
 try {
     $stmt = $pdo->query("SELECT id, name FROM schools ORDER BY name");
     $schools = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Depuración: Verificar si se están obteniendo los datos
+    if (empty($schools)) {
+        echo "No se encontraron escuelas.";
+    } else {
+        echo "Escuelas obtenidas correctamente.";
+    }
 } catch (Exception $e) {
     error_log($e->getMessage());
     $schools = [];
