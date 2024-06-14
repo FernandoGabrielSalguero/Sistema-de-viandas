@@ -4,9 +4,6 @@ body {
     background-color: #f2f2f2;
     margin: 0;
     padding: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
 }
 
 header.main-header {
@@ -14,17 +11,44 @@ header.main-header {
     background-color: #4CAF50;
     color: white;
     padding: 20px;
-    text-align: center;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-header.main-header h1 {
+header.main-header .user-info {
+    flex: 1;
+}
+
+header.main-header .user-info h1 {
     margin: 0;
     font-size: 24px;
 }
 
-header.main-header p {
+header.main-header .user-info p {
     margin: 5px 0 0 0;
+}
+
+header.main-header .main-nav {
+    display: flex;
+    gap: 10px;
+}
+
+header.main-header .main-nav button {
+    background-color: white;
+    color: #4CAF50;
+    border: none;
+    border-radius: 3px;
+    padding: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+header.main-header .main-nav button:hover {
+    background-color: #45a049;
+    color: white;
 }
 
 /* Form and table container */
