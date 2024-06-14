@@ -38,6 +38,7 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
                     <?php elseif ($_SESSION['role'] === 'parent') : ?>
                         <li><button onclick="window.location.href='../parents/dashboard.php'">Inicio</button></li>
                         <li><button onclick="window.location.href='../parents/recharge.php'">Recargar Saldo</button></li>
+                        <li><button onclick="window.location.href='../parents/order_menu.php'">Pedir viandas</button></li>
                         <!-- Agrega más enlaces según las funcionalidades disponibles -->
                     <?php elseif ($_SESSION['role'] === 'kitchen') : ?>
                         <li><button onclick="window.location.href='../kitchen/kitchen_dashboard.php'">Dashboard de Cocina</button></li>
