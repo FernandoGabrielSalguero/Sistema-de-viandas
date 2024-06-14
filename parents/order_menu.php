@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['order_menu'])) {
     } else {
         $saldo_insuficiente = true;
         $faltante = $total_price - $parent_saldo;
-        $message = "Saldo insuficiente. Necesitas $".$faltante." más para realizar este pedido.";
+        $message = "Saldo insuficiente. Necesitas $" . number_format($faltante, 2) . " más para realizar este pedido.";
     }
 }
 
