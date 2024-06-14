@@ -4,14 +4,17 @@ include '../common/header.php';
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['order_menu'])) {
     $parent_id = $_SESSION['user_id'];
     $child_id = $_POST['child_id'];
-    $menu_id = $_POST['menu_id'];
-    $order_date = $_POST['order_date'];
+    $menus_selected = $_POST['menus'];
 
-    // Obtener el precio del menú seleccionado
-    $stmt = $pdo->prepare("SELECT price FROM menus WHERE id = ?");
-    $stmt->execute([$menu_id]);
-    $menu = $stmt->fetch(PDO::FETCH_ASSOC);
-    $menu_price = $menu['price'];
+    $total_price = 0;
+    foreach ($menus_selected as $menu_id) {
+        // Obtener el precio del menú seleccionado
+        $stmt = $pdo->prepare("SELECT price FROM menus WHERE id = ?");
+        $stmt->execute([$menu_id]);
+        $menu = $stmt->fetch(PDO::FETCH_ASSOC);
+        $menu_price = $menu['price'];
+        $total_price += $menu_price;
+    }
 
     // Obtener el saldo del padre
     $stmt = $pdo->prepare("SELECT saldo FROM parents WHERE id = ?");
@@ -19,15 +22,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['order_menu'])) {
     $parent = $stmt->fetch(PDO::FETCH_ASSOC);
     $parent_saldo = $parent['saldo'];
 
-    if ($parent_saldo >= $menu_price) {
+    if ($parent_saldo >= $total_price) {
         // Descontar el saldo
-        $new_saldo = $parent_saldo - $menu_price;
+        $new_saldo = $parent_saldo - $total_price;
         $stmt = $pdo->prepare("UPDATE parents SET saldo = ? WHERE id = ?");
         $stmt->execute([$new_saldo, $parent_id]);
 
-        // Insertar el nuevo pedido en la base de datos
-        $stmt = $pdo->prepare("INSERT INTO orders (parent_id, child_id, menu_id, order_date) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$parent_id, $child_id, $menu_id, $order_date]);
+        // Insertar los pedidos en la base de datos
+        foreach ($menus_selected as $menu_id) {
+            // Obtener la fecha del menú
+            $stmt = $pdo->prepare("SELECT date FROM menus WHERE id = ?");
+            $stmt->execute([$menu_id]);
+            $menu = $stmt->fetch(PDO::FETCH_ASSOC);
+            $order_date = $menu['date'];
+
+            $stmt = $pdo->prepare("INSERT INTO orders (parent_id, child_id, menu_id, order_date) VALUES (?, ?, ?, ?)");
+            $stmt->execute([$parent_id, $child_id, $menu_id, $order_date]);
+        }
 
         $message = "El pedido ha sido realizado exitosamente.";
     } else {
@@ -40,15 +51,20 @@ $stmt = $pdo->prepare("SELECT * FROM children WHERE parent_id = ?");
 $stmt->execute([$_SESSION['user_id']]);
 $children = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Obtener los menús disponibles
+// Obtener los menús disponibles, agrupados por fecha
 $stmt = $pdo->prepare("SELECT * FROM menus ORDER BY date DESC");
 $stmt->execute();
 $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$menus_by_date = [];
+foreach ($menus as $menu) {
+    $menus_by_date[$menu['date']][] = $menu;
+}
 ?>
 
 <div class="container">
     <div id="toast" class="toast"><?php echo $message; ?></div>
-    <form action="order_menu.php" method="post">
+    <form action="order_menu.php" method="post" onsubmit="return calculateTotal()">
         <h2>Realizar Pedido</h2>
         <label for="child_id">Hijo:</label>
         <select id="child_id" name="child_id" required>
@@ -56,14 +72,18 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <option value="<?php echo $child['id']; ?>"><?php echo htmlspecialchars($child['name']); ?></option>
             <?php endforeach; ?>
         </select>
-        <label for="menu_id">Menú:</label>
-        <select id="menu_id" name="menu_id" required>
-            <?php foreach ($menus as $menu): ?>
-                <option value="<?php echo $menu['id']; ?>"><?php echo htmlspecialchars($menu['date'] . ' - ' . $menu['name']); ?></option>
-            <?php endforeach; ?>
-        </select>
-        <label for="order_date">Fecha del Pedido:</label>
-        <input type="date" id="order_date" name="order_date" required>
+        <?php foreach ($menus_by_date as $date => $menus): ?>
+            <fieldset>
+                <legend><?php echo htmlspecialchars($date); ?></legend>
+                <?php foreach ($menus as $menu): ?>
+                    <div>
+                        <input type="radio" id="menu_<?php echo $menu['id']; ?>" name="menus[<?php echo $date; ?>]" value="<?php echo $menu['id']; ?>" data-price="<?php echo $menu['price']; ?>" required>
+                        <label for="menu_<?php echo $menu['id']; ?>"><?php echo htmlspecialchars($menu['name'] . ' - $' . $menu['price']); ?></label>
+                    </div>
+                <?php endforeach; ?>
+            </fieldset>
+        <?php endforeach; ?>
+        <p>Total: $<span id="total_price">0.00</span></p>
         <button type="submit" name="order_menu">Realizar Pedido</button>
     </form>
     
@@ -143,6 +163,20 @@ function sortTable(columnIndex) {
         }
     }
 }
+
+function calculateTotal() {
+    const radios = document.querySelectorAll('input[type="radio"]:checked');
+    let total = 0;
+    radios.forEach(radio => {
+        total += parseFloat(radio.getAttribute('data-price'));
+    });
+    document.getElementById('total_price').textContent = total.toFixed(2);
+    return true;
+}
+
+document.querySelectorAll('input[type="radio"]').forEach(radio => {
+    radio.addEventListener('change', calculateTotal);
+});
 
 function showToast(message) {
     const toast = document.getElementById("toast");
