@@ -1,24 +1,23 @@
 <?php
-include '../common/session.php';
-check_login();
+include '../common/header.php';
 
+// Verificar si el usuario tiene el rol de padre
 if ($_SESSION['role'] !== 'parent') {
     header("Location: ../login.php");
     exit();
 }
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Parent Dashboard</title>
-    <link rel="stylesheet" href="../styles.css">
-</head>
-<body>
-    <h1>Parent Dashboard</h1>
-    <p>Welcome, Parent!</p>
-    <!-- Aquí añadiremos más funcionalidades específicas para los padres -->
+<div class="container">
+    <h1>Dashboard del Padre</h1>
+    <p>¡Bienvenido, <?php echo htmlspecialchars($user['username']); ?>!</p>
+    <nav>
+        <ul>
+            <li><button onclick="window.location.href='dashboard.php'">Inicio</button></li>
+            <li><button onclick="window.location.href='recharge.php'">Recargar Saldo</button></li>
+            <!-- Agrega más enlaces según las funcionalidades disponibles -->
+        </ul>
+    </nav>
+</div>
 </body>
 </html>

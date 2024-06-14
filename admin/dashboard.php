@@ -17,6 +17,7 @@ if ($_SESSION['role'] !== 'admin') {
             <li><button onclick="window.location.href='courses.php'">Manage Courses</button></li>
             <li><button onclick="window.location.href='parents.php'">Manage Parents</button></li>
             <li><button onclick="window.location.href='children.php'">Manage Children</button></li>
+            <li><button onclick="window.location.href='verify_recharge.php'">Verificar Recargas</button></li>
         </ul>
     </nav>
 </div>
