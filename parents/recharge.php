@@ -42,6 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['recharge'])) {
             echo "La recarga ha sido enviada para verificación.";
         } else {
             echo "Lo siento, hubo un error al subir tu archivo.";
+            echo "Error de subida: " . $_FILES['receipt']['error']; // Mostrar error de PHP
         }
     }
 }
