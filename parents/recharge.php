@@ -3,7 +3,6 @@ include '../common/header.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['recharge'])) {
     $amount = $_POST['amount'];
-    $note = $_POST['note'];
     $parent_id = $_SESSION['user_id'];
     $receipt = $_FILES['receipt']['name'];
 
@@ -13,8 +12,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['recharge'])) {
     move_uploaded_file($_FILES['receipt']['tmp_name'], $target_file);
 
     // Insertar la recarga en la base de datos
-    $stmt = $pdo->prepare("INSERT INTO recharges (parent_id, amount, note, receipt, status) VALUES (?, ?, ?, ?, 'pending')");
-    $stmt->execute([$parent_id, $amount, $note, $receipt]);
+    $stmt = $pdo->prepare("INSERT INTO recharges (parent_id, amount, receipt, status) VALUES (?, ?, ?, 'pending')");
+    $stmt->execute([$parent_id, $amount, $receipt]);
 
     echo "Recarga enviada para verificación.";
 }
@@ -28,10 +27,32 @@ $recharges = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <div class="container">
     <form action="recharge.php" method="post" enctype="multipart/form-data">
         <h2>Recargar Saldo</h2>
+        <p><strong>Información Bancaria:</strong></p>
+        <ul>
+            <li>CBU: 1234567890123456789012</li>
+            <li>Nombre de la Cuenta: Juan Pérez</li>
+            <li>Nombre del Banco: Banco Nación</li>
+            <li>Alias: JUANPEREZ.BANCO</li>
+            <li>CUIL: 20-12345678-9</li>
+        </ul>
         <label for="amount">Monto:</label>
-        <input type="number" id="amount" name="amount" required>
-        <label for="note">Nota:</label>
-        <input type="text" id="note" name="note" required>
+        <select id="amount" name="amount" required>
+            <option value="3000">3000</option>
+            <option value="5000">5000</option>
+            <option value="7000">7000</option>
+            <option value="10000">10000</option>
+            <option value="15000">15000</option>
+            <option value="17000">17000</option>
+            <option value="20000">20000</option>
+            <option value="25000">25000</option>
+            <option value="30000">30000</option>
+            <option value="45000">45000</option>
+            <option value="55000">55000</option>
+            <option value="60000">60000</option>
+            <option value="75000">75000</option>
+            <option value="90000">90000</option>
+            <option value="100000">100000</option>
+        </select>
         <label for="receipt">Comprobante:</label>
         <input type="file" id="receipt" name="receipt" required>
         <button type="submit" name="recharge">Enviar Recarga</button>
@@ -42,17 +63,15 @@ $recharges = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <thead>
             <tr>
                 <th onclick="sortTable(0)">Monto</th>
-                <th onclick="sortTable(1)">Nota</th>
-                <th onclick="sortTable(2)">Comprobante</th>
-                <th onclick="sortTable(3)">Estado</th>
-                <th onclick="sortTable(4)">Fecha</th>
+                <th onclick="sortTable(1)">Comprobante</th>
+                <th onclick="sortTable(2)">Estado</th>
+                <th onclick="sortTable(3)">Fecha</th>
             </tr>
         </thead>
         <tbody>
             <?php foreach ($recharges as $recharge): ?>
             <tr>
                 <td><?php echo htmlspecialchars($recharge['amount']); ?></td>
-                <td><?php echo htmlspecialchars($recharge['note']); ?></td>
                 <td><a href="../uploads/<?php echo htmlspecialchars($recharge['receipt']); ?>" target="_blank">Ver Comprobante</a></td>
                 <td><?php echo htmlspecialchars($recharge['status']); ?></td>
                 <td><?php echo htmlspecialchars($recharge['created_at']); ?></td>

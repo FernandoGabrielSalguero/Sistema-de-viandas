@@ -25,9 +25,8 @@ $recharges = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <tr>
                 <th onclick="sortTable(0)">Usuario</th>
                 <th onclick="sortTable(1)">Monto</th>
-                <th onclick="sortTable(2)">Nota</th>
-                <th onclick="sortTable(3)">Comprobante</th>
-                <th onclick="sortTable(4)">Acciones</th>
+                <th onclick="sortTable(2)">Comprobante</th>
+                <th onclick="sortTable(3)">Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -35,7 +34,6 @@ $recharges = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <tr>
                 <td><?php echo htmlspecialchars($recharge['username']); ?></td>
                 <td><?php echo htmlspecialchars($recharge['amount']); ?></td>
-                <td><?php echo htmlspecialchars($recharge['note']); ?></td>
                 <td><a href="../uploads/<?php echo htmlspecialchars($recharge['receipt']); ?>" target="_blank">Ver Comprobante</a></td>
                 <td>
                     <form action="verify_recharge.php" method="post">
