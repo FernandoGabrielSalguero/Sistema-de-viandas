@@ -79,7 +79,7 @@ label {
     font-size: 16px;
 }
 
-input[type="text"], input[type="password"], input[type="email"], select {
+input[type="text"], input[type="password"], input[type="email"], input[type="number"], select, input[type="file"] {
     padding: 10px;
     margin-bottom: 10px;
     border: 1px solid #ccc;
