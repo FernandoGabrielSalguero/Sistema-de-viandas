@@ -1,6 +1,7 @@
 <?php
 include '../common/header.php';
 
+$message = "";
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['recharge'])) {
     $amount = $_POST['amount'];
     $parent_id = $_SESSION['user_id'];
@@ -10,43 +11,47 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['recharge'])) {
     $uploadOk = 1;
     $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
 
-    // Verificar si el archivo ya existe
-    if (file_exists($target_file)) {
-        echo "Lo siento, el archivo ya existe.";
+    // Verificar si la carpeta uploads existe y tiene permisos de escritura
+    if (!is_dir($target_dir)) {
+        $message = "La carpeta de destino no existe.";
         $uploadOk = 0;
-    }
-
-    // Verificar tamaño del archivo
-    if ($_FILES['receipt']['size'] > 5000000) { // 5MB
-        echo "Lo siento, el archivo es demasiado grande.";
+    } elseif (!is_writable($target_dir)) {
+        $message = "La carpeta de destino no tiene permisos de escritura.";
         $uploadOk = 0;
-    }
-
-    // Permitir ciertos formatos de archivo
-    $allowed_formats = array("jpg", "png", "jpeg", "pdf");
-    if (!in_array($imageFileType, $allowed_formats)) {
-        echo "Lo siento, solo se permiten archivos JPG, JPEG, PNG y PDF.";
-        $uploadOk = 0;
-    }
-
-    // Verificar si $uploadOk es 0 por un error
-    if ($uploadOk == 0) {
-        echo "Lo siento, tu archivo no fue subido.";
-    // Si todo está bien, intenta subir el archivo
     } else {
-        if (move_uploaded_file($_FILES['receipt']['tmp_name'], $target_file)) {
-            // Insertar la recarga en la base de datos
-            $stmt = $pdo->prepare("INSERT INTO recharges (parent_id, amount, receipt, status) VALUES (?, ?, ?, 'pending')");
-            $stmt->execute([$parent_id, $amount, $receipt]);
+        // Verificar si el archivo ya existe
+        if (file_exists($target_file)) {
+            $message = "Lo siento, el archivo ya existe.";
+            $uploadOk = 0;
+        }
 
-            echo "La recarga ha sido enviada para verificación.";
+        // Verificar tamaño del archivo
+        if ($_FILES['receipt']['size'] > 5000000) { // 5MB
+            $message = "Lo siento, el archivo es demasiado grande.";
+            $uploadOk = 0;
+        }
+
+        // Permitir ciertos formatos de archivo
+        $allowed_formats = array("jpg", "png", "jpeg", "pdf");
+        if (!in_array($imageFileType, $allowed_formats)) {
+            $message = "Lo siento, solo se permiten archivos JPG, JPEG, PNG y PDF.";
+            $uploadOk = 0;
+        }
+
+        // Verificar si $uploadOk es 0 por un error
+        if ($uploadOk == 0) {
+            $message = "Lo siento, tu archivo no fue subido.";
+        // Si todo está bien, intenta subir el archivo
         } else {
-            echo "Lo siento, hubo un error al subir tu archivo. ";
-            echo "Código de error: " . $_FILES['receipt']['error'];
-            echo "<br>Información adicional: ";
-            echo "<br>Nombre del archivo temporal: " . $_FILES['receipt']['tmp_name'];
-            echo "<br>Ruta de destino: " . $target_file;
-            echo "<br>Permisos de la carpeta de destino: " . substr(sprintf('%o', fileperms($target_dir)), -4);
+            if (move_uploaded_file($_FILES['receipt']['tmp_name'], $target_file)) {
+                // Insertar la recarga en la base de datos
+                $stmt = $pdo->prepare("INSERT INTO recharges (parent_id, amount, receipt, status) VALUES (?, ?, ?, 'pending')");
+                $stmt->execute([$parent_id, $amount, $receipt]);
+
+                $message = "La recarga ha sido enviada para verificación.";
+            } else {
+                $message = "Lo siento, hubo un error al subir tu archivo. Código de error: " . $_FILES['receipt']['error'];
+            }
         }
     }
 }
@@ -58,6 +63,7 @@ $recharges = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <div class="container">
+    <div id="toast" class="toast"><?php echo $message; ?></div>
     <form action="recharge.php" method="post" enctype="multipart/form-data">
         <h2>Recargar Saldo</h2>
         <p><strong>Información Bancaria:</strong></p>
@@ -123,7 +129,14 @@ function copiarCBU() {
     window.getSelection().addRange(range); 
     document.execCommand("copy");
     window.getSelection().removeAllRanges(); 
-    alert("CBU copiado: " + cbuElement.textContent);
+    showToast("CBU copiado: " + cbuElement.textContent);
+}
+
+function showToast(message) {
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.className = "toast show";
+    setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
 }
 
 function sortTable(columnIndex) {
@@ -162,6 +175,11 @@ function sortTable(columnIndex) {
         }
     }
 }
+
+// Mostrar el mensaje de éxito o error si hay uno
+<?php if (!empty($message)): ?>
+showToast("<?php echo $message; ?>");
+<?php endif; ?>
 </script>
 </body>
 </html>
