@@ -7,17 +7,18 @@ if ($_SESSION['role'] !== 'kitchen') {
     exit;
 }
 
-// Obtener los pedidos realizados, organizados por colegio y curso
+// Obtener los pedidos realizados, organizados por colegio, curso y vianda
 try {
     $stmt = $pdo->prepare("
-        SELECT orders.id, schools.name as school_name, courses.name as course_name, menus.name as menu_name, menus.date as menu_date, parents.name as parent_name, children.name as child_name
+        SELECT orders.id, schools.name as school_name, courses.name as course_name, menus.name as menu_name, menus.date as menu_date, COUNT(orders.id) as total_orders
         FROM orders
         JOIN children ON orders.child_id = children.id
-        JOIN parents ON orders.parent_id = parents.id
         JOIN courses ON children.course_id = courses.id
         JOIN schools ON courses.school_id = schools.id
         JOIN menus ON orders.menu_id = menus.id
-        ORDER BY schools.name, courses.name, menus.date
+        WHERE menus.date >= CURDATE()
+        GROUP BY schools.name, courses.name, menus.name, menus.date
+        ORDER BY menus.date, schools.name, courses.name
     ");
     $stmt->execute();
     $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -25,38 +26,36 @@ try {
     error_log($e->getMessage());
     $orders = [];
 }
+
+// Agrupar pedidos por fecha y colegio
+$grouped_orders = [];
+foreach ($orders as $order) {
+    $grouped_orders[$order['menu_date']][$order['school_name']][] = $order;
+}
 ?>
 
 <div class="container">
     <h2>Dashboard de Cocina</h2>
 
-    <div class="kitchen-section">
-        <h3>Pedidos Realizados</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Colegio</th>
-                    <th>Curso</th>
-                    <th>Menú</th>
-                    <th>Fecha</th>
-                    <th>Padre</th>
-                    <th>Hijo</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($orders as $order): ?>
-                <tr>
-                    <td><?php echo htmlspecialchars($order['school_name']); ?></td>
-                    <td><?php echo htmlspecialchars($order['course_name']); ?></td>
-                    <td><?php echo htmlspecialchars($order['menu_name']); ?></td>
-                    <td><?php echo date('d/m/Y', strtotime($order['menu_date'])); ?></td>
-                    <td><?php echo htmlspecialchars($order['parent_name']); ?></td>
-                    <td><?php echo htmlspecialchars($order['child_name']); ?></td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
+    <?php foreach ($grouped_orders as $date => $schools): ?>
+        <div class="date-section">
+            <h3><?php echo date('d/m/Y', strtotime($date)); ?></h3>
+            <?php foreach ($schools as $school_name => $orders): ?>
+                <div class="school-section">
+                    <h4><?php echo htmlspecialchars($school_name); ?></h4>
+                    <div class="kpi-container">
+                        <?php foreach ($orders as $order): ?>
+                            <div class="kpi-card">
+                                <h5><?php echo htmlspecialchars($order['course_name']); ?></h5>
+                                <p><?php echo htmlspecialchars($order['menu_name']); ?></p>
+                                <p>Pedidos: <?php echo $order['total_orders']; ?></p>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    <?php endforeach; ?>
 </div>
 
 <style>
@@ -64,36 +63,40 @@ try {
     padding: 20px;
 }
 
-.kitchen-section {
+.date-section {
     margin-bottom: 40px;
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
+.school-section {
+    margin-bottom: 20px;
+    background-color: #f9f9f9;
+    padding: 10px;
+    border-radius: 5px;
 }
 
-table thead {
+.kpi-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.kpi-card {
     background-color: #ff0000;
     color: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: calc(33.333% - 20px);
 }
 
-table th, table td {
-    padding: 10px;
-    border: 1px solid #ddd;
-    text-align: left;
+.kpi-card h5 {
+    margin: 0;
+    font-size: 18px;
 }
 
-table tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-table tr:hover {
-    background-color: #f1f1f1;
-}
-
-table th {
-    font-weight: bold;
+.kpi-card p {
+    margin: 5px 0 0;
+    font-size: 16px;
 }
 </style>
 
