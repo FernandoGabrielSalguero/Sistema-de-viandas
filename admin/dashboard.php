@@ -1,30 +1,24 @@
 <?php
-include '../common/session.php';
-check_login();
+include '../common/header.php';
 
+// Verificar si el usuario tiene el rol de administrador
 if ($_SESSION['role'] !== 'admin') {
     header("Location: ../login.php");
     exit();
 }
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
-    <link rel="stylesheet" href="../styles.css">
-</head>
-<body>
+<div class="container">
     <h1>Admin Dashboard</h1>
     <p>Welcome, Admin!</p>
     <nav>
         <ul>
-            <li><a href="schools.php">Escuelas</a></li>
-            <li><a href="courses.php">Cursos</a></li>
-            <!-- Agrega más enlaces según las funcionalidades disponibles -->
+            <li><button onclick="window.location.href='schools.php'">Manage Schools</button></li>
+            <li><button onclick="window.location.href='courses.php'">Manage Courses</button></li>
+            <li><button onclick="window.location.href='parents.php'">Manage Parents</button></li>
+            <li><button onclick="window.location.href='children.php'">Manage Children</button></li>
         </ul>
     </nav>
+</div>
 </body>
 </html>
