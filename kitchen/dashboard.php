@@ -32,6 +32,15 @@ $grouped_orders = [];
 foreach ($orders as $order) {
     $grouped_orders[$order['menu_date']][$order['school_name']][] = $order;
 }
+
+// Calcular el total de viandas por día
+$total_viandas_por_dia = [];
+foreach ($orders as $order) {
+    if (!isset($total_viandas_por_dia[$order['menu_date']])) {
+        $total_viandas_por_dia[$order['menu_date']] = 0;
+    }
+    $total_viandas_por_dia[$order['menu_date']] += $order['total_orders'];
+}
 ?>
 
 <div class="container">
@@ -39,7 +48,7 @@ foreach ($orders as $order) {
 
     <?php foreach ($grouped_orders as $date => $schools): ?>
         <div class="date-section">
-            <h3><?php echo date('d/m/Y', strtotime($date)); ?></h3>
+            <h3>Total de viandas día <?php echo date('d/m/Y', strtotime($date)); ?>: <?php echo $total_viandas_por_dia[$date]; ?></h3>
             <?php foreach ($schools as $school_name => $orders): ?>
                 <div class="school-section">
                     <h4><?php echo htmlspecialchars($school_name); ?></h4>
