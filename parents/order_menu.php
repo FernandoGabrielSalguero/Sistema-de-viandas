@@ -4,6 +4,12 @@ include '../common/header.php';
 $message = "";
 $saldo_insuficiente = false;
 
+// Obtener el saldo del padre
+$stmt = $pdo->prepare("SELECT saldo FROM parents WHERE id = ?");
+$stmt->execute([$_SESSION['user_id']]);
+$parent = $stmt->fetch(PDO::FETCH_ASSOC);
+$parent_saldo = $parent['saldo'];
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['order_menu'])) {
     $parent_id = $_SESSION['user_id'];
     $child_id = $_POST['child_id'];
@@ -18,12 +24,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['order_menu'])) {
         $menu_price = $menu['price'];
         $total_price += $menu_price;
     }
-
-    // Obtener el saldo del padre
-    $stmt = $pdo->prepare("SELECT saldo FROM parents WHERE id = ?");
-    $stmt->execute([$parent_id]);
-    $parent = $stmt->fetch(PDO::FETCH_ASSOC);
-    $parent_saldo = $parent['saldo'];
 
     if ($parent_saldo >= $total_price) {
         // Descontar el saldo
@@ -73,8 +73,9 @@ foreach ($menus as $menu) {
             <button onclick="window.location.href='../parents/recharge.php'">Recargar Saldo</button>
         <?php endif; ?>
     </div>
-    <form action="order_menu.php" method="post" onsubmit="return calculateTotal()">
+    <form action="order_menu.php" method="post" onsubmit="return checkTotal()">
         <h2>Realizar Pedido</h2>
+        <p>Saldo disponible: $<?php echo number_format($parent_saldo, 2); ?></p>
         <label for="child_id">Hijo:</label>
         <select id="child_id" name="child_id" required>
             <?php foreach ($children as $child): ?>
@@ -181,12 +182,20 @@ function calculateTotal() {
     });
     document.getElementById('total_price').textContent = total.toFixed(2);
     document.getElementById('total_button').textContent = total.toFixed(2);
-    return true;
 }
 
 document.querySelectorAll('input[type="radio"]').forEach(radio => {
     radio.addEventListener('change', calculateTotal);
 });
+
+function checkTotal() {
+    const total = parseFloat(document.getElementById('total_price').textContent);
+    if (total === 0) {
+        alert("Debes seleccionar al menos una opción.");
+        return false;
+    }
+    return true;
+}
 
 function showToast(message) {
     const toast = document.getElementById("toast");
