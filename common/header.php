@@ -1,18 +1,31 @@
+<?php
+include 'session.php';
+check_login();
+include 'db_connect.php';
+
+// Obtener los datos del usuario
+$stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
+$stmt->execute([$_SESSION['user_id']]);
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
+?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../styles.css">
-    <title>Gestión de Viandas Escolares</title>
+    <title>Dashboard</title>
 </head>
 <body>
-    <header>
-        <div class="header-container">
-            <h1>Gestión de Viandas Escolares</h1>
-            <nav>
+    <header class="main-header">
+        <div class="user-info">
+            <h1>¡Qué gusto verte de nuevo, <?php echo htmlspecialchars($user['username']); ?>!</h1>
+            <p>Email: <?php echo htmlspecialchars($user['email']); ?></p>
+        </div>
+        <nav class="main-nav">
+            <button onclick="window.location.href='../admin/dashboard.php'">Inicio</button>
             <?php if ($_SESSION['role'] === 'admin'): ?>
-                <button onclick="window.location.href='../admin/dashboard.php'">Inicio</button>
                 <button onclick="window.location.href='../admin/schools.php'">Gestionar Colegios</button>
                 <button onclick="window.location.href='../admin/courses.php'">Gestionar Cursos</button>
                 <button onclick="window.location.href='../admin/parents.php'">Gestionar Padres y Hijos</button>
@@ -21,20 +34,8 @@
             <?php elseif ($_SESSION['role'] === 'parent'): ?>
                 <button onclick="window.location.href='../parents/dashboard.php'">Inicio</button>
                 <button onclick="window.location.href='../parents/recharge.php'">Recargar Saldo</button>
-                <button onclick="window.location.href='../parents/order_menu.php'">Realizar Pedido</button>
+                <!-- Agrega más enlaces según las funcionalidades disponibles -->
             <?php endif; ?>
             <button onclick="window.location.href='../logout.php'">Cerrar Sesión</button>
         </nav>
-        </div>
     </header>
-    <script>
-        function toggleMenu() {
-            const nav = document.querySelector('.nav-links');
-            nav.classList.toggle('nav-active');
-        }
-    </script>
-</body>
-</html>
-
-
-
