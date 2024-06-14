@@ -24,8 +24,8 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
             <p>Email: <?php echo htmlspecialchars($user['email']); ?></p>
         </div>
         <nav class="main-nav">
-            <button onclick="window.location.href='../admin/dashboard.php'">Inicio</button>
             <?php if ($_SESSION['role'] === 'admin'): ?>
+                <button onclick="window.location.href='../admin/dashboard.php'">Inicio</button>
                 <button onclick="window.location.href='../admin/schools.php'">Gestionar Colegios</button>
                 <button onclick="window.location.href='../admin/courses.php'">Gestionar Cursos</button>
                 <button onclick="window.location.href='../admin/parents.php'">Gestionar Padres y Hijos</button>
@@ -34,7 +34,7 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
             <?php elseif ($_SESSION['role'] === 'parent'): ?>
                 <button onclick="window.location.href='../parents/dashboard.php'">Inicio</button>
                 <button onclick="window.location.href='../parents/recharge.php'">Recargar Saldo</button>
-                <!-- Agrega más enlaces según las funcionalidades disponibles -->
+                <button onclick="window.location.href='../parents/order_menu.php'">Realizar Pedido</button>
             <?php endif; ?>
             <button onclick="window.location.href='../logout.php'">Cerrar Sesión</button>
         </nav>
