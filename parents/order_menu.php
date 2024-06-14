@@ -129,7 +129,7 @@ try {
             <tr>
                 <th onclick="sortTable(0)">Hijo</th>
                 <th onclick="sortTable(1)">Menú</th>
-                <th onclick="sortTable(2)">Fecha del Pedido</th>
+                <th onclick="sortTable(2)">Fecha del entrega</th>
                 <th>Acciones</th>
             </tr>
         </thead>
