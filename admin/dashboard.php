@@ -21,8 +21,8 @@ if ($_SESSION['role'] !== 'admin') {
     <p>Welcome, Admin!</p>
     <nav>
         <ul>
-            <li><a href="schools.php">Manage Schools</a></li>
-            <li><a href="courses.php">Manage Courses</a></li>
+            <li><a href="schools.php">Escuelas</a></li>
+            <li><a href="courses.php">Cursos</a></li>
             <!-- Agrega más enlaces según las funcionalidades disponibles -->
         </ul>
     </nav>

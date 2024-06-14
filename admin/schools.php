@@ -26,20 +26,20 @@ $schools = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <div class="container">
     <form action="schools.php" method="post">
-        <h2>Add School</h2>
-        <label for="name">Name:</label>
+        <h2>Añadir escuelas</h2>
+        <label for="name">Nombre:</label>
         <input type="text" id="name" name="name" required>
-        <label for="address">Address:</label>
+        <label for="address">Direccion:</label>
         <input type="text" id="address" name="address" required>
-        <button type="submit" name="add_school">Add School</button>
+        <button type="submit" name="add_school">Añadir escuela</button>
     </form>
-    <h2>Schools List</h2>
+    <h2>Listado de escuelas</h2>
     <table>
         <thead>
             <tr>
-                <th>Name</th>
-                <th>Address</th>
-                <th>Actions</th>
+                <th>Nombre</th>
+                <th>Direccion</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>

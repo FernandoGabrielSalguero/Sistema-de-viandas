@@ -31,8 +31,8 @@ $schools = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <div class="container">
     <form action="courses.php" method="post">
-        <h2>Add Course</h2>
-        <label for="name">Course Name:</label>
+        <h2>Añadir curso</h2>
+        <label for="name">Nombre del curso:</label>
         <input type="text" id="name" name="name" required>
         <label for="school_id">School:</label>
         <select id="school_id" name="school_id" required>
@@ -40,15 +40,15 @@ $schools = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <option value="<?php echo $school['id']; ?>"><?php echo htmlspecialchars($school['name']); ?></option>
             <?php endforeach; ?>
         </select>
-        <button type="submit" name="add_course">Add Course</button>
+        <button type="submit" name="add_course">Añadir cursos</button>
     </form>
-    <h2>Courses List</h2>
+    <h2>Listado de cursos</h2>
     <table>
         <thead>
             <tr>
-                <th>Course Name</th>
-                <th>School Name</th>
-                <th>Actions</th>
+                <th>Curso</th>
+                <th>Escuela</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
