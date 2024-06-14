@@ -1,12 +1,5 @@
 <?php
-include '../common/session.php';
-include '../common/db_connect.php';
-check_login();
-
-if ($_SESSION['role'] !== 'admin') {
-    header("Location: ../login.php");
-    exit();
-}
+include '../common/header.php';
 
 // Agregar un curso
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_course'])) {
@@ -36,16 +29,7 @@ $stmt->execute();
 $schools = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Courses</title>
-    <link rel="stylesheet" href="../styles.css">
-</head>
-<body>
-    <h1>Manage Courses</h1>
+<div class="container">
     <form action="courses.php" method="post">
         <h2>Add Course</h2>
         <label for="name">Course Name:</label>
@@ -79,5 +63,6 @@ $schools = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <?php endforeach; ?>
         </tbody>
     </table>
+</div>
 </body>
 </html>

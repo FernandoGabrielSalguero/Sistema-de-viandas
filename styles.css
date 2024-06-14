@@ -5,32 +5,49 @@ body {
     margin: 0;
     padding: 0;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    height: 100vh;
 }
 
-/* Login container styles */
-.login-container {
-    background-color: white;
+header.main-header {
+    width: 100%;
+    background-color: #4CAF50;
+    color: white;
     padding: 20px;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+header.main-header h1 {
+    margin: 0;
+    font-size: 24px;
+}
+
+header.main-header p {
+    margin: 5px 0 0 0;
+}
+
+/* Form and table container */
+.container {
+    width: 100%;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: white;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 400px;
-    box-sizing: border-box;
 }
 
 /* Form styles */
 form {
     display: flex;
     flex-direction: column;
+    margin-bottom: 20px;
 }
 
-h2 {
+form h2 {
     margin-bottom: 20px;
     font-size: 24px;
-    text-align: center;
 }
 
 label {
@@ -38,7 +55,7 @@ label {
     font-size: 16px;
 }
 
-input[type="text"], input[type="password"] {
+input[type="text"], input[type="password"], select {
     padding: 10px;
     margin-bottom: 10px;
     border: 1px solid #ccc;
@@ -62,45 +79,41 @@ button:hover {
     background-color: #45a049;
 }
 
-/* Media queries for responsiveness */
-@media (max-width: 768px) {
-    body {
-        padding: 20px;
-    }
-
-    .login-container {
-        padding: 15px;
-    }
-
-    h2 {
-        font-size: 20px;
-    }
-
-    label {
-        font-size: 14px;
-    }
-
-    input[type="text"], input[type="password"], button {
-        font-size: 14px;
-        padding: 8px;
-    }
+/* Table styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
 }
 
-@media (max-width: 480px) {
-    .login-container {
-        padding: 10px;
-    }
+table thead {
+    background-color: #4CAF50;
+    color: white;
+}
 
-    h2 {
-        font-size: 18px;
-    }
+table th, table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
 
-    label {
-        font-size: 12px;
-    }
+table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
 
-    input[type="text"], input[type="password"], button {
-        font-size: 12px;
-        padding: 6px;
-    }
+table tr:hover {
+    background-color: #f1f1f1;
+}
+
+table th {
+    font-weight: bold;
+}
+
+a {
+    color: #4CAF50;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
 }
