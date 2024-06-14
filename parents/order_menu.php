@@ -158,7 +158,6 @@ try {
                 <td><?php echo htmlspecialchars($order['menu_name']); ?></td>
                 <td><?php echo date('d/m/Y', strtotime($order['order_date'])); ?></td>
                 <td>
-                    <a href="update_order.php?id=<?php echo $order['id']; ?>">Actualizar</a>
                     <a href="cancel_order.php?id=<?php echo $order['id']; ?>" onclick="return confirm('¿Estás seguro de que quieres cancelar este pedido?')">Cancelar</a>
                 </td>
             </tr>
