@@ -13,7 +13,7 @@ $parent_saldo = $parent['saldo'];
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['order_menu'])) {
     $parent_id = $_SESSION['user_id'];
     $child_id = $_POST['child_id'];
-    $menus_selected = $_POST['menus'];
+    $menus_selected = isset($_POST['menus']) ? $_POST['menus'] : [];
 
     $total_price = 0;
     foreach ($menus_selected as $menu_id) {
@@ -84,10 +84,10 @@ foreach ($menus as $menu) {
         </select>
         <?php foreach ($menus_by_date as $date => $menus): ?>
             <fieldset>
-                <legend><?php echo htmlspecialchars($date); ?></legend>
+                <legend><?php echo date('d/m/Y', strtotime($date)); ?></legend>
                 <?php foreach ($menus as $menu): ?>
                     <div>
-                        <input type="radio" id="menu_<?php echo $menu['id']; ?>" name="menus[<?php echo $date; ?>]" value="<?php echo $menu['id']; ?>" data-price="<?php echo $menu['price']; ?>" required>
+                        <input type="checkbox" id="menu_<?php echo $menu['id']; ?>" name="menus[]" value="<?php echo $menu['id']; ?>" data-price="<?php echo $menu['price']; ?>">
                         <label for="menu_<?php echo $menu['id']; ?>"><?php echo htmlspecialchars($menu['name'] . ' - $' . $menu['price']); ?></label>
                     </div>
                 <?php endforeach; ?>
@@ -125,7 +125,7 @@ foreach ($menus as $menu) {
             <tr>
                 <td><?php echo htmlspecialchars($order['child_name']); ?></td>
                 <td><?php echo htmlspecialchars($order['menu_name']); ?></td>
-                <td><?php echo htmlspecialchars($order['order_date']); ?></td>
+                <td><?php echo date('d/m/Y', strtotime($order['order_date'])); ?></td>
                 <td>
                     <a href="update_order.php?id=<?php echo $order['id']; ?>">Actualizar</a>
                     <a href="cancel_order.php?id=<?php echo $order['id']; ?>" onclick="return confirm('¿Estás seguro de que quieres cancelar este pedido?')">Cancelar</a>
@@ -175,17 +175,17 @@ function sortTable(columnIndex) {
 }
 
 function calculateTotal() {
-    const radios = document.querySelectorAll('input[type="radio"]:checked');
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
     let total = 0;
-    radios.forEach(radio => {
-        total += parseFloat(radio.getAttribute('data-price'));
+    checkboxes.forEach(checkbox => {
+        total += parseFloat(checkbox.getAttribute('data-price'));
     });
     document.getElementById('total_price').textContent = total.toFixed(2);
     document.getElementById('total_button').textContent = total.toFixed(2);
 }
 
-document.querySelectorAll('input[type="radio"]').forEach(radio => {
-    radio.addEventListener('change', calculateTotal);
+document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+    checkbox.addEventListener('change', calculateTotal);
 });
 
 function checkTotal() {
