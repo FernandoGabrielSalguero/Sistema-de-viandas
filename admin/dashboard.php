@@ -143,6 +143,7 @@ try {
     display: flex;
     justify-content: space-around;
     margin-bottom: 40px;
+    flex-wrap: wrap; /* Para hacer el contenido responsive */
 }
 .kpi-card {
     background-color: #f4f4f4;
@@ -151,6 +152,7 @@ try {
     text-align: center;
     width: 18%;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin: 10px; /* Para evitar que los elementos se solapen */
 }
 .kpi-card h3 {
     margin-top: 0;
