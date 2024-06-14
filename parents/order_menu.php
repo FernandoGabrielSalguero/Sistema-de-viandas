@@ -17,12 +17,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['order_menu'])) {
 
     $total_price = 0;
     foreach ($menus_selected as $menu_id) {
-        // Obtener el precio del menú seleccionado
-        $stmt = $pdo->prepare("SELECT price FROM menus WHERE id = ?");
-        $stmt->execute([$menu_id]);
-        $menu = $stmt->fetch(PDO::FETCH_ASSOC);
-        $menu_price = $menu['price'];
-        $total_price += $menu_price;
+        if ($menu_id != 'none') {
+            // Obtener el precio del menú seleccionado
+            $stmt = $pdo->prepare("SELECT price FROM menus WHERE id = ?");
+            $stmt->execute([$menu_id]);
+            $menu = $stmt->fetch(PDO::FETCH_ASSOC);
+            $menu_price = $menu['price'];
+            $total_price += $menu_price;
+        }
     }
 
     if ($parent_saldo >= $total_price) {
@@ -34,13 +36,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['order_menu'])) {
         // Insertar los pedidos en la base de datos
         foreach ($menus_selected as $menu_id) {
             // Obtener la fecha del menú
-            $stmt = $pdo->prepare("SELECT date FROM menus WHERE id = ?");
-            $stmt->execute([$menu_id]);
-            $menu = $stmt->fetch(PDO::FETCH_ASSOC);
-            $order_date = $menu['date'];
+            if ($menu_id != 'none') {
+                $stmt = $pdo->prepare("SELECT date FROM menus WHERE id = ?");
+                $stmt->execute([$menu_id]);
+                $menu = $stmt->fetch(PDO::FETCH_ASSOC);
+                $order_date = $menu['date'];
 
-            $stmt = $pdo->prepare("INSERT INTO orders (parent_id, child_id, menu_id, order_date) VALUES (?, ?, ?, ?)");
-            $stmt->execute([$parent_id, $child_id, $menu_id, $order_date]);
+                $stmt = $pdo->prepare("INSERT INTO orders (parent_id, child_id, menu_id, order_date) VALUES (?, ?, ?, ?)");
+                $stmt->execute([$parent_id, $child_id, $menu_id, $order_date]);
+            }
         }
 
         $message = "El pedido ha sido realizado exitosamente.";
@@ -85,15 +89,18 @@ foreach ($menus as $menu) {
         <?php foreach ($menus_by_date as $date => $menus): ?>
             <fieldset>
                 <legend><?php echo date('d/m/Y', strtotime($date)); ?></legend>
+                <div>
+                    <input type="radio" id="menu_none_<?php echo $date; ?>" name="menus[<?php echo $date; ?>]" value="none" data-price="0" checked>
+                    <label for="menu_none_<?php echo $date; ?>">Sin Vianda</label>
+                </div>
                 <?php foreach ($menus as $menu): ?>
                     <div>
-                        <input type="checkbox" id="menu_<?php echo $menu['id']; ?>" name="menus[]" value="<?php echo $menu['id']; ?>" data-price="<?php echo $menu['price']; ?>">
+                        <input type="radio" id="menu_<?php echo $menu['id']; ?>" name="menus[<?php echo $date; ?>]" value="<?php echo $menu['id']; ?>" data-price="<?php echo $menu['price']; ?>">
                         <label for="menu_<?php echo $menu['id']; ?>"><?php echo htmlspecialchars($menu['name'] . ' - $' . $menu['price']); ?></label>
                     </div>
                 <?php endforeach; ?>
             </fieldset>
         <?php endforeach; ?>
-        <p>Total: $<span id="total_price">0.00</span></p>
         <button type="submit" name="order_menu">Realizar Pedido ($<span id="total_button">0.00</span>)</button>
     </form>
     
@@ -175,21 +182,20 @@ function sortTable(columnIndex) {
 }
 
 function calculateTotal() {
-    const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+    const radios = document.querySelectorAll('input[type="radio"]:checked');
     let total = 0;
-    checkboxes.forEach(checkbox => {
-        total += parseFloat(checkbox.getAttribute('data-price'));
+    radios.forEach(radio => {
+        total += parseFloat(radio.getAttribute('data-price'));
     });
-    document.getElementById('total_price').textContent = total.toFixed(2);
     document.getElementById('total_button').textContent = total.toFixed(2);
 }
 
-document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-    checkbox.addEventListener('change', calculateTotal);
+document.querySelectorAll('input[type="radio"]').forEach(radio => {
+    radio.addEventListener('change', calculateTotal);
 });
 
 function checkTotal() {
-    const total = parseFloat(document.getElementById('total_price').textContent);
+    const total = parseFloat(document.getElementById('total_button').textContent);
     if (total === 0) {
         alert("Debes seleccionar al menos una opción.");
         return false;
