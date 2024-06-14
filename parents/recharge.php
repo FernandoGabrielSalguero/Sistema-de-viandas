@@ -29,7 +29,7 @@ $recharges = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <h2>Recargar Saldo</h2>
         <p><strong>Información Bancaria:</strong></p>
         <ul>
-            <li>CBU: 1234567890123456789012</li>
+            <li>CBU: <span id="cbu">1234567890123456789012</span> <button type="button" onclick="copiarCBU()">Copiar CBU</button></li>
             <li>Nombre de la Cuenta: Juan Pérez</li>
             <li>Nombre del Banco: Banco Nación</li>
             <li>Alias: JUANPEREZ.BANCO</li>
@@ -82,6 +82,17 @@ $recharges = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </div>
 
 <script>
+function copiarCBU() {
+    const cbuElement = document.getElementById("cbu");
+    const range = document.createRange();
+    range.selectNode(cbuElement);
+    window.getSelection().removeAllRanges(); 
+    window.getSelection().addRange(range); 
+    document.execCommand("copy");
+    window.getSelection().removeAllRanges(); 
+    alert("CBU copiado: " + cbuElement.textContent);
+}
+
 function sortTable(columnIndex) {
     const table = document.getElementById('rechargeTable');
     let rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
