@@ -78,7 +78,7 @@ try {
         </div>
         <div class="kpi-card">
             <h3>Pedidos Realizados</h3>
-            <p><?php echo $total_orders; ?></p>
+            <p id="total_orders_kpi"><?php echo $total_orders; ?></p>
             <label for="order_filter_date">Filtrar por fecha:</label>
             <input type="date" id="order_filter_date" name="order_filter_date" onchange="filterOrdersByDate()">
         </div>
@@ -219,7 +219,9 @@ function filterOrdersByDate() {
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.onload = function() {
         if (this.status === 200) {
-            document.getElementById('ordersTableBody').innerHTML = this.responseText;
+            const response = JSON.parse(this.responseText);
+            document.getElementById('ordersTableBody').innerHTML = response.html;
+            document.getElementById('total_orders_kpi').textContent = response.total_orders;
         }
     };
     xhr.send('filter_date=' + filterDate);

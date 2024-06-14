@@ -17,18 +17,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['filter_date'])) {
         $stmt->execute([$filter_date]);
         $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+        $html = '';
         foreach ($orders as $order) {
-            echo "<tr>";
-            echo "<td>" . htmlspecialchars($order['parent_name']) . "</td>";
-            echo "<td>" . htmlspecialchars($order['child_name']) . "</td>";
-            echo "<td>" . htmlspecialchars($order['menu_name']) . "</td>";
-            echo "<td>" . date('d/m/Y', strtotime($order['order_date'])) . "</td>";
-            echo "</tr>";
+            $html .= "<tr>";
+            $html .= "<td>" . htmlspecialchars($order['parent_name']) . "</td>";
+            $html .= "<td>" . htmlspecialchars($order['child_name']) . "</td>";
+            $html .= "<td>" . htmlspecialchars($order['menu_name']) . "</td>";
+            $html .= "<td>" . date('d/m/Y', strtotime($order['order_date'])) . "</td>";
+            $html .= "</tr>";
         }
+
+        $stmt = $pdo->prepare("SELECT COUNT(*) AS total_orders FROM orders WHERE order_date = ?");
+        $stmt->execute([$filter_date]);
+        $total_orders = $stmt->fetch(PDO::FETCH_ASSOC)['total_orders'];
+
+        echo json_encode(['html' => $html, 'total_orders' => $total_orders]);
     } catch (Exception $e) {
         error_log($e->getMessage());
-        echo "<tr><td colspan='4'>Error al filtrar los pedidos.</td></tr>";
+        echo json_encode(['html' => "<tr><td colspan='4'>Error al filtrar los pedidos.</td></tr>", 'total_orders' => 0]);
     }
 } else {
-    echo "<tr><td colspan='4'>No se proporcionó una fecha de filtro válida.</td></tr>";
+    echo json_encode(['html' => "<tr><td colspan='4'>No se proporcionó una fecha de filtro válida.</td></tr>", 'total_orders' => 0]);
 }
