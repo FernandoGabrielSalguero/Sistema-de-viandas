@@ -41,8 +41,8 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
                         <!-- Agrega más enlaces según las funcionalidades disponibles -->
                     <?php elseif ($_SESSION['role'] === 'kitchen') : ?>
                         <li><button onclick="window.location.href='../kitchen/kitchen_dashboard.php'">Dashboard de Cocina</button></li>
-                    <?php elseif ($_SESSION['role'] === 'school_rep') : ?>
-                        <li><button onclick="window.location.href='../school_rep/school_rep_profile.php'">Perfil del Representante</button></li>
+                    <?php elseif ($_SESSION['role'] === 'school') : ?>
+                        <li><button onclick="window.location.href='../school/school_rep_profile.php'">Perfil del Representante</button></li>
                     <?php endif; ?>
                     <li><button onclick="window.location.href='../logout.php'">Cerrar Sesión</button></li>
                 </ul>
