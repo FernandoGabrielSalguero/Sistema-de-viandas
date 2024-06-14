@@ -47,7 +47,7 @@ header.main-header .main-nav button {
 }
 
 header.main-header .main-nav button:hover {
-    background-color: #45a049;
+    background-color: #fe0000;
     color: white;
 }
 
@@ -91,7 +91,7 @@ input[type="text"], input[type="password"], input[type="email"], input[type="num
 
 button {
     padding: 10px;
-    background-color: #4CAF50;
+    background-color: #ff0000;
     color: white;
     border: none;
     border-radius: 3px;
@@ -100,7 +100,7 @@ button {
 }
 
 button:hover {
-    background-color: #45a049;
+    background-color: #a04545;
 }
 
 /* Children container styles */
@@ -131,7 +131,7 @@ table {
 }
 
 table thead {
-    background-color: #4CAF50;
+    background-color: #af4c4c;
     color: white;
 }
 
@@ -155,7 +155,7 @@ table th {
 }
 
 a {
-    color: #4CAF50;
+    color: #af4c4c;
     text-decoration: none;
 }
 
