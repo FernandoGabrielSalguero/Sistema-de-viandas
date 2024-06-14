@@ -43,6 +43,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['recharge'])) {
         } else {
             echo "Lo siento, hubo un error al subir tu archivo. ";
             echo "Código de error: " . $_FILES['receipt']['error'];
+            echo "<br>Información adicional: ";
+            echo "<br>Nombre del archivo temporal: " . $_FILES['receipt']['tmp_name'];
+            echo "<br>Ruta de destino: " . $target_file;
+            echo "<br>Permisos de la carpeta de destino: " . substr(sprintf('%o', fileperms($target_dir)), -4);
         }
     }
 }
