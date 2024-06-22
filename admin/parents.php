@@ -54,22 +54,22 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <div class="container">
     <form action="parents.php" method="post">
-        <h2>Add Parent and Children</h2>
-        <label for="username">Username:</label>
+        <h2>Añadir padres e hijos</h2>
+        <label for="username">Usuario:</label>
         <input type="text" id="username" name="username" required>
-        <label for="password">Password:</label>
+        <label for="password">Contraseña:</label>
         <input type="password" id="password" name="password" required>
-        <label for="email">Email:</label>
+        <label for="email">Correo:</label>
         <input type="email" id="email" name="email" required>
-        <label for="phone">Phone:</label>
+        <label for="phone">WhatsApp:</label>
         <input type="text" id="phone" name="phone" required>
 
         <div id="children-container">
-            <h3>Children</h3>
+            <h3>Hijo</h3>
             <div class="child-entry">
-                <label for="child_name">Child Name:</label>
+                <label for="child_name">Nombre Hijo:</label>
                 <input type="text" id="child_name" name="children[]" required>
-                <label for="course_id">Course:</label>
+                <label for="course_id">Curso:</label>
                 <select id="course_id" name="course_id[]" required>
                     <?php foreach ($courses as $course): ?>
                         <option value="<?php echo $course['course_id']; ?>"><?php echo htmlspecialchars($course['course_name'] . ' - ' . $course['school_name']); ?></option>
@@ -78,21 +78,21 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
         </div>
 
-        <button type="button" onclick="addChild()">Add Another Child</button>
-        <button type="submit" name="add_parent">Add Parent and Children</button>
+        <button type="button" onclick="addChild()">Añadir un hijo más</button>
+        <button type="submit" name="add_parent">Agregar usuario</button>
     </form>
     
     <h2>Parents and Children List</h2>
     <table>
         <thead>
             <tr>
-                <th>Parent Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Child Name</th>
-                <th>School</th>
+                <th>Nombre Padre</th>
+                <th>Correo</th>
+                <th>Celular</th>
+                <th>Nombre Hijo</th>
+                <th>Escuela</th>
                 <th>Course</th>
-                <th>Actions</th>
+                <th>Curso</th>
             </tr>
         </thead>
         <tbody>

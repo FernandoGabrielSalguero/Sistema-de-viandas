@@ -29,9 +29,9 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
                     <!-- <li><button onclick="window.location.href='../admin/dashboard.php'">Inicio</button></li> -->
                     <?php if ($_SESSION['role'] === 'admin') : ?>
                         <li><button onclick="window.location.href='../admin/dashboard.php'">Inicio</button></li>
-                        <li><button onclick="window.location.href='../admin/courses.php'">Gestionar Cursos</button></li>
-                        <li><button onclick="window.location.href='../admin/school_profile.php'">Gestionar Colegios</button></li>
                         <li><button onclick="window.location.href='../admin/parents.php'">Gestionar Padres y Hijos</button></li>
+                        <li><button onclick="window.location.href='../admin/school_profile.php'">Gestionar Colegios</button></li>
+                        <li><button onclick="window.location.href='../admin/courses.php'">Gestionar Cursos</button></li>
                         <li><button onclick="window.location.href='../admin/create_menu.php'">Gestionar Menús</button></li>
                         <li><button onclick="window.location.href='../admin/create_user.php'">Crear Usuario</button></li>
                         <li><button onclick="window.location.href='../admin/verify_recharge.php'">Verificar Recargas</button></li>
