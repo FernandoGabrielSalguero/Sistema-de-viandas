@@ -2,7 +2,7 @@
 include '../common/header.php';
 
 // Verificar si el usuario tiene rol de representante de la escuela
-if ($_SESSION['role'] !== 'school') {
+if ($_SESSION['role'] !== 'kitchen') {
     header("Location: ../login.php");
     exit;
 }
