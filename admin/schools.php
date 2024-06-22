@@ -1,13 +1,13 @@
 <?php
 include '../common/header.php';
 
-// Verificar si el usuario tiene rol de administrador
+
 if ($_SESSION['role'] !== 'admin') {
     header("Location: ../login.php");
     exit;
 }
 
-// Obtener la lista de colegios
+
 try {
     $stmt = $pdo->query("SELECT * FROM schools ORDER BY name");
     $schools = $stmt->fetchAll(PDO::FETCH_ASSOC);

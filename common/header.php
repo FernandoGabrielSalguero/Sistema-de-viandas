@@ -14,7 +14,107 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .main-header {
+            background-color: #f4f4f4;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: auto;
+            padding: 0 20px;
+        }
+
+        .user-info h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .user-info p {
+            margin: 5px 0 0;
+            color: #555;
+        }
+
+        .main-nav {
+            position: relative;
+        }
+
+        .nav-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-links li {
+            display: inline;
+        }
+
+        .nav-links button {
+            background: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .nav-links button:hover {
+            background: #0056b3;
+        }
+
+        .menu-icon {
+            display: none;
+            font-size: 30px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                gap: 0;
+                background: #f4f4f4;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                width: 100%;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+
+            .nav-links.nav-active {
+                display: flex;
+            }
+
+            .nav-links button {
+                width: 100%;
+                text-align: left;
+                padding: 15px;
+                border-bottom: 1px solid #ddd;
+            }
+
+            .nav-links button:last-child {
+                border-bottom: none;
+            }
+
+            .menu-icon {
+                display: block;
+            }
+        }
+    </style>
     <title>Dashboard</title>
 </head>
 <body>
@@ -26,7 +126,6 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
             </div>
             <nav class="main-nav">
                 <ul class="nav-links">
-                    <!-- <li><button onclick="window.location.href='../admin/dashboard.php'">Inicio</button></li> -->
                     <?php if ($_SESSION['role'] === 'admin') : ?>
                         <li><button onclick="window.location.href='../admin/dashboard.php'">Inicio</button></li>
                         <li><button onclick="window.location.href='../admin/parents.php'">Gestionar Padres y Hijos</button></li>
