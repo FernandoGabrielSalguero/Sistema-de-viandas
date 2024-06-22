@@ -105,7 +105,7 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <td><?php echo htmlspecialchars($parent_child['school_name']); ?></td>
                 <td><?php echo htmlspecialchars($parent_child['course_name']); ?></td>
                 <td>
-                    <a href="parents.php?delete_id=<?php echo $parent_child['parent_id']; ?>" onclick="return confirm('Are you sure you want to delete this parent and their children?')">Delete</a>
+                    <a href="parents.php?delete_id=<?php echo $parent_child['parent_id']; ?>" onclick="return confirm('¿Estas seguro de eliminar este usuario?')">Eliminar</a>
                 </td>
             </tr>
             <?php endforeach; ?>
