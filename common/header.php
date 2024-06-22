@@ -87,18 +87,12 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
                     <?php endif; ?>
                     <li><button onclick="window.location.href='../logout.php'">Cerrar Sesión</button></li>
                 </ul>
-                <div class="menu-icon" onclick="toggleMenu()">
-                    &#9776; <!-- Ícono de menú -->
-                </div>
             </nav>
         </div>
     </header>
 
     <script>
-        function toggleMenu() {
-            const nav = document.querySelector('.nav-links');
-            nav.classList.toggle('nav-active');
-        }
+
     </script>
 </body>
 </html>
