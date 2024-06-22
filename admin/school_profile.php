@@ -86,6 +86,25 @@ if ($school_id) {
         }
     }
 }
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete'])) {
+    $school_id_to_delete = $_POST['school_id'];
+
+    try {
+        // Primero eliminar todas las relaciones dependientes
+        $stmt = $pdo->prepare("DELETE FROM courses WHERE school_id = ?");
+        $stmt->execute([$school_id_to_delete]);
+
+        $stmt = $pdo->prepare("DELETE FROM schools WHERE id = ?");
+        $stmt->execute([$school_id_to_delete]);
+        $message = "El colegio ha sido eliminado.";
+        header("Location: schools.php");
+        exit;
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        $message = "Error al eliminar el colegio.";
+    }
+}
 ?>
 
 <div class="container">
@@ -149,6 +168,12 @@ if ($school_id) {
                 <?php endforeach; ?>
             </tbody>
         </table>
+
+        <h3>Eliminar Colegio</h3>
+        <form action="school_profile.php" method="post">
+            <input type="hidden" name="school_id" value="<?php echo $school_id; ?>">
+            <button type="submit" name="delete" onclick="return confirm('¿Estás seguro de que deseas eliminar este colegio?')">Eliminar Colegio</button>
+        </form>
     <?php endif; ?>
 </div>
 
