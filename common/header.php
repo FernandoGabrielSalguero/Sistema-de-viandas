@@ -26,7 +26,7 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
             </div>
             <nav class="main-nav">
                 <ul class="nav-links">
-                    <li><button onclick="window.location.href='../admin/dashboard.php'">Inicio</button></li>
+                    <!-- <li><button onclick="window.location.href='../admin/dashboard.php'">Inicio</button></li> -->
                     <?php if ($_SESSION['role'] === 'admin') : ?>
                         <li><button onclick="window.location.href='../admin/schools.php'">Gestionar Colegios</button></li>
                         <li><button onclick="window.location.href='../admin/courses.php'">Gestionar Cursos</button></li>
