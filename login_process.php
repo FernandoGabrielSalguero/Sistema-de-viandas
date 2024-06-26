@@ -1,19 +1,35 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 include 'Common/db_connect.php';
 
-$username = $_POST['username'];
-$password = $_POST['password'];
+session_start();
 
-$query = "SELECT * FROM usuarios WHERE username='$username' AND password='$password'";
-$result = $conn->query($query);
+$username = $_POST['username'] ?? '';
+$password = $_POST['password'] ?? '';
+
+if (empty($username) || empty($password)) {
+    die("Usuario y contraseña son requeridos.");
+}
+
+$query = "SELECT * FROM usuarios WHERE usuario=? AND password=?";
+$stmt = $conn->prepare($query);
+if (!$stmt) {
+    die("Error en la preparación de la consulta: " . $conn->error);
+}
+
+$stmt->bind_param("ss", $username, $password);
+$stmt->execute();
+$result = $stmt->get_result();
 
 if ($result->num_rows > 0) {
     $row = $result->fetch_assoc();
-    session_start();
-    $_SESSION['username'] = $row['username'];
-    $_SESSION['role'] = $row['role'];
+    $_SESSION['username'] = $row['usuario'];
+    $_SESSION['role'] = $row['rol'];
 
-    switch ($row['role']) {
+    switch ($row['rol']) {
         case 'Administrador':
             header('Location: Admin/admin_dashboard.php');
             break;
@@ -36,3 +52,6 @@ if ($result->num_rows > 0) {
     header('Location: login.php');
     exit();
 }
+
+$stmt->close();
+$conn->close();
