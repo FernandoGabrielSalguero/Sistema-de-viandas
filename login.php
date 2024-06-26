@@ -1,21 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>¡Que bueno verte de nuevo!</title>
+    <title>Login</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="login-container">
+        <h2>Inicio de Sesión</h2>
         <form action="login_process.php" method="post">
-            <h2>Ingresa</h2>
             <label for="username">Usuario:</label>
             <input type="text" id="username" name="username" required>
             <label for="password">Contraseña:</label>
             <input type="password" id="password" name="password" required>
-            <button type="submit">Ingresar</button>
+            <button type="submit">Iniciar Sesión</button>
         </form>
     </div>
+    <script src="notifications_service.js"></script>
 </body>
 </html>

@@ -1,7 +1,13 @@
 
-admin1', MD5 admin123
-kitchen1', MD5 kitchen123
-parent1', MD5 parent123'
-parent2', MD5 parent123'
-parent3', MD5 parent123'
-school1', MD5 school123'
+admin1'
+admin123
+
+kitchen1' 
+kitchen123
+
+parent1' 
+parent123'
+
+
+school1' 
+school123'
