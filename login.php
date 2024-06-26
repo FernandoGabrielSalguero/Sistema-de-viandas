@@ -16,6 +16,6 @@
             <button type="submit">Iniciar Sesión</button>
         </form>
     </div>
-    <script src="notifications_service.js"></script>
+    <script src="Common/notifications_service.js"></script>
 </body>
 </html>
