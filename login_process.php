@@ -3,7 +3,7 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-include 'Common/db_connect.php';
+include $_SERVER['DOCUMENT_ROOT'] . '/viandas/Common/db_connect.php';
 
 session_start();
 
@@ -43,13 +43,13 @@ if ($result->num_rows > 0) {
             header('Location: School Leader/school_leader_dashboard.php');
             break;
         default:
-            header('Location: login.php');
+            header('Location: index.php');
             break;
     }
     exit();
 } else {
     echo "<script>alert('Usuario o contraseña incorrectos');</script>";
-    header('Location: login.php');
+    header('Location: index.php');
     exit();
 }
 
