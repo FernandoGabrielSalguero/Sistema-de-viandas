@@ -2,6 +2,9 @@
 session_start();
 require_once '../config/database.php';
 
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
 // Obtener la acción del formulario
 $action = $_POST['action'] ?? '';
 
