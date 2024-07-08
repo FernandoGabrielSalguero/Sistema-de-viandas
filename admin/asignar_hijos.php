@@ -7,7 +7,7 @@ error_reporting(E_ALL);
 include '../includes/header_admin.php';
 include '../includes/db.php';
 
-// Procesar el formulario cuando se envíe
+// Procesar el formulario cuando se envíe para asignar un hijo
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['asignar_hijo'])) {
     $usuario_id = $_POST['usuario_id'];
     $hijo_id = $_POST['hijo_id'];
@@ -26,6 +26,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['asignar_hijo'])) {
     }
 }
 
+// Procesar el formulario cuando se envíe para crear un hijo
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['crear_hijo'])) {
+    $nombre_hijo = $_POST['nombre_hijo'];
+    $colegio_id = $_POST['colegio_id'];
+    $curso_id = $_POST['curso_id'];
+    $preferencias = $_POST['preferencias'];
+
+    // Validar que todos los campos estén llenos
+    if (empty($nombre_hijo) || empty($colegio_id) || empty($curso_id)) {
+        $error = "Todos los campos son obligatorios.";
+    } else {
+        // Insertar el nuevo hijo en la base de datos
+        $stmt = $pdo->prepare("INSERT INTO Hijos (Nombre, Colegio_Id, Curso_Id, Preferencias_Alimenticias) VALUES (?, ?, ?, ?)");
+        if ($stmt->execute([$nombre_hijo, $colegio_id, $curso_id, $preferencias])) {
+            $success = "Hijo creado con éxito.";
+        } else {
+            $error = "Hubo un error al crear el hijo.";
+        }
+    }
+}
+
 // Obtener todos los usuarios con rol "Papás"
 $stmt = $pdo->prepare("SELECT Id, Nombre FROM Usuarios WHERE Rol = 'papas'");
 $stmt->execute();
@@ -38,6 +59,15 @@ $stmt = $pdo->prepare("SELECT h.Id, h.Nombre, c.Nombre AS Colegio, cu.Nombre AS 
                        JOIN Cursos cu ON h.Curso_Id = cu.Id");
 $stmt->execute();
 $hijos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Obtener todos los colegios y cursos para el formulario de creación de hijos
+$stmt = $pdo->prepare("SELECT Id, Nombre FROM Colegios");
+$stmt->execute();
+$colegios = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$stmt = $pdo->prepare("SELECT Id, Nombre FROM Cursos");
+$stmt->execute();
+$cursos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -58,6 +88,7 @@ $hijos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     ?>
     <form method="post" action="asignar_hijos.php">
+        <h2>Asignar Hijo a Papá</h2>
         <label for="usuario_id">Seleccionar Papá</label>
         <select id="usuario_id" name="usuario_id" required>
             <option value="">Seleccione un papá</option>
@@ -77,6 +108,33 @@ $hijos = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </select>
         
         <button type="submit" name="asignar_hijo">Asignar Hijo</button>
+    </form>
+
+    <form method="post" action="asignar_hijos.php">
+        <h2>Crear Hijo</h2>
+        <label for="nombre_hijo">Nombre del Hijo</label>
+        <input type="text" id="nombre_hijo" name="nombre_hijo" required>
+        
+        <label for="colegio_id">Seleccionar Colegio</label>
+        <select id="colegio_id" name="colegio_id" required>
+            <option value="">Seleccione un colegio</option>
+            <?php foreach ($colegios as $colegio) : ?>
+                <option value="<?php echo htmlspecialchars($colegio['Id']); ?>"><?php echo htmlspecialchars($colegio['Nombre']); ?></option>
+            <?php endforeach; ?>
+        </select>
+
+        <label for="curso_id">Seleccionar Curso</label>
+        <select id="curso_id" name="curso_id" required>
+            <option value="">Seleccione un curso</option>
+            <?php foreach ($cursos as $curso) : ?>
+                <option value="<?php echo htmlspecialchars($curso['Id']); ?>"><?php echo htmlspecialchars($curso['Nombre']); ?></option>
+            <?php endforeach; ?>
+        </select>
+
+        <label for="preferencias">Preferencias Alimenticias</label>
+        <input type="text" id="preferencias" name="preferencias">
+
+        <button type="submit" name="crear_hijo">Crear Hijo</button>
     </form>
 
     <h2>Lista de Hijos Asignados</h2>
