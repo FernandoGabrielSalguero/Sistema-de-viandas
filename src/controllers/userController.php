@@ -2,38 +2,29 @@
 session_start();
 require_once '../config/database.php';
 
-// Capturar la acción del formulario
 $action = $_POST['action'] ?? '';
 
 if ($action == 'login') {
     $username = $_POST['username'];
     $password = $_POST['password'];
 
+    // Función para autenticar usuario
     $user = authenticateUser($username, $password);
     if ($user) {
-        // Configurar variables de sesión
+        // Establecer variables de sesión
         $_SESSION['user_id'] = $user['Id'];
         $_SESSION['username'] = $user['Usuario'];
         $_SESSION['role'] = $user['Rol'];
 
-        // Redirigir según el rol
-        if ($user['Rol'] == 'administrador') {
-            header('Location: ../views/dashboardAdmin.php');
-        } elseif ($user['Rol'] == 'papas') {
-            header('Location: ../views/dashboardPapas.php');
-        } elseif ($user['Rol'] == 'cocina') {
-            header('Location: ../views/dashboardCocina.php');
-        } elseif ($user['Rol'] == 'representante') {
-            header('Location: ../views/dashboardRepresentante.php');
-        }
-        exit();
+        // Redirigir al dashboard correspondiente al rol
+        redirectBasedOnRole($user['Rol']);
     } else {
-        // Autenticación fallida, redirigir a la página de login con un mensaje de error
+        // Redirigir de nuevo al login con un mensaje de error
         header('Location: ../views/login.php?error=loginFailed');
         exit();
     }
 }
-// Función de autenticación como la definida anteriormente
+
 function authenticateUser($username, $password) {
     $pdo = getDB();
     $sql = "SELECT * FROM Usuarios WHERE Usuario = ?";
@@ -42,7 +33,28 @@ function authenticateUser($username, $password) {
     $user = $stmt->fetch();
 
     if ($user && password_verify($password, $user['Contrasena'])) {
-        return $user; // Autenticación exitosa
+        return $user;
     }
-    return false; // Falla la autenticación
+    return false;
+}
+
+function redirectBasedOnRole($role) {
+    switch ($role) {
+        case 'administrador':
+            header('Location: src/views/dashboardAdmin.php');
+            break;
+        case 'papas':
+            header('Location: ../views/dashboardPapas.php');
+            break;
+        case 'cocina':
+            header('Location: ../views/dashboardCocina.php');
+            break;
+        case 'representante':
+            header('Location: ../views/dashboardRepresentante.php');
+            break;
+        default:
+            header('Location: ../views/login.php?error=roleNotFound');
+            break;
+    }
+    exit();
 }
