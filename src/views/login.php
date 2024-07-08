@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Iniciar Sesión</title>
-    <link rel="stylesheet" href="../../public/css/style.css"> <!-- Ajusta la ruta según sea necesario -->
+    <link rel="stylesheet" href="../../public/css/style.css">
 </head>
 <body>
     <div class="container">
@@ -20,6 +20,9 @@
             </div>
             <button type="submit">Iniciar Sesión</button>
         </form>
+        <?php if (isset($_GET['error'])): ?>
+            <p style="color: red;">Usuario o contraseña incorrectos.</p>
+        <?php endif; ?>
     </div>
 </body>
 </html>
