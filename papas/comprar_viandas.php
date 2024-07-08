@@ -20,27 +20,39 @@ $stmt = $pdo->prepare("SELECT m.Id, m.Nombre, m.Fecha_entrega, m.Precio FROM Men
 $stmt->execute();
 $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+$menus_por_dia = [];
+foreach ($menus as $menu) {
+    $menus_por_dia[$menu['Fecha_entrega']][] = $menu;
+}
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $menu_id = $_POST['menu_id'];
-    $stmt = $pdo->prepare("SELECT Precio FROM Menu WHERE Id = ?");
-    $stmt->execute([$menu_id]);
-    $precio = $stmt->fetch(PDO::FETCH_ASSOC)['Precio'];
+    $menu_ids = $_POST['menu_ids'];
+    $total_precio = 0;
+
+    foreach ($menu_ids as $menu_id) {
+        $stmt = $pdo->prepare("SELECT Precio FROM Menu WHERE Id = ?");
+        $stmt->execute([$menu_id]);
+        $precio = $stmt->fetch(PDO::FETCH_ASSOC)['Precio'];
+        $total_precio += $precio;
+    }
 
     // Verificar si el usuario tiene saldo suficiente
     $stmt = $pdo->prepare("SELECT Saldo FROM Usuarios WHERE Id = ?");
     $stmt->execute([$usuario_id]);
     $saldo = $stmt->fetch(PDO::FETCH_ASSOC)['Saldo'];
 
-    if ($saldo >= $precio) {
-        // Realizar el pedido
-        $stmt = $pdo->prepare("INSERT INTO Pedidos_Comida (Hijo_Id, Menu_Id, Fecha_pedido, Estado) VALUES (?, ?, NOW(), 'Procesando')");
-        if ($stmt->execute([$hijo_id, $menu_id])) {
-            // Actualizar el saldo del usuario
-            $stmt = $pdo->prepare("UPDATE Usuarios SET Saldo = Saldo - ? WHERE Id = ?");
-            $stmt->execute([$precio, $usuario_id]);
-            $success = "Pedido realizado con éxito.";
-        } else {
-            $error = "Error al realizar el pedido.";
+    if ($saldo >= $total_precio) {
+        foreach ($menu_ids as $menu_id) {
+            // Realizar el pedido
+            $stmt = $pdo->prepare("INSERT INTO Pedidos_Comida (Hijo_Id, Menu_Id, Fecha_pedido, Estado) VALUES (?, ?, NOW(), 'Procesando')");
+            if ($stmt->execute([$hijo_id, $menu_id])) {
+                // Actualizar el saldo del usuario
+                $stmt = $pdo->prepare("UPDATE Usuarios SET Saldo = Saldo - ? WHERE Id = ?");
+                $stmt->execute([$total_precio, $usuario_id]);
+                $success = "Pedido realizado con éxito.";
+            } else {
+                $error = "Error al realizar el pedido.";
+            }
         }
     } else {
         $error = "Saldo insuficiente.";
@@ -54,6 +66,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <title>Comprar Viandas</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <script>
+        function actualizarTotal() {
+            let total = 0;
+            document.querySelectorAll('input[name="menu_ids[]"]:checked').forEach((checkbox) => {
+                total += parseFloat(checkbox.dataset.precio);
+            });
+            document.getElementById('total').innerText = total.toFixed(2) + " ARS";
+        }
+    </script>
 </head>
 <body>
     <h1>Comprar Viandas</h1>
@@ -66,15 +87,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     ?>
     <form method="post" action="comprar_viandas.php">
-        <label for="menu_id">Seleccione una vianda:</label>
-        <select id="menu_id" name="menu_id" required>
-            <option value="">Seleccione una vianda</option>
+        <?php foreach ($menus_por_dia as $fecha => $menus) : ?>
+            <h2><?php echo htmlspecialchars($fecha); ?></h2>
             <?php foreach ($menus as $menu) : ?>
-                <option value="<?php echo htmlspecialchars($menu['Id']); ?>"><?php echo htmlspecialchars($menu['Nombre'] . " - " . $menu['Fecha_entrega'] . " - " . number_format($menu['Precio'], 2) . " ARS"); ?></option>
+                <div>
+                    <label>
+                        <input type="checkbox" name="menu_ids[]" value="<?php echo $menu['Id']; ?>" data-precio="<?php echo $menu['Precio']; ?>" onchange="actualizarTotal()">
+                        <?php echo htmlspecialchars($menu['Nombre']) . " - " . number_format($menu['Precio'], 2) . " ARS"; ?>
+                    </label>
+                </div>
             <?php endforeach; ?>
-        </select>
+        <?php endforeach; ?>
         <br>
-        <button type="submit">Comprar Vianda</button>
+        <p>Total: <span id="total">0.00 ARS</span></p>
+        <button type="submit">Comprar Viandas</button>
     </form>
 </body>
 </html>
