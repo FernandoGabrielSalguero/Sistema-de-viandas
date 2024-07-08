@@ -24,7 +24,8 @@ $stmt = $pdo->prepare("SELECT pc.Id, h.Nombre as Hijo, m.Nombre as Menú, m.Fech
                        FROM Pedidos_Comida pc
                        JOIN Hijos h ON pc.Hijo_Id = h.Id
                        JOIN `Menú` m ON pc.Menú_Id = m.Id
-                       WHERE h.Usuario_Id = ?");
+                       JOIN Usuarios_Hijos uh ON h.Id = uh.Hijo_Id
+                       WHERE uh.Usuario_Id = ?");
 $stmt->execute([$usuario_id]);
 $pedidos_viandas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
