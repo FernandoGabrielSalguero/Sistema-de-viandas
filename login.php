@@ -23,13 +23,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 header("Location: admin/dashboard.php");
                 break;
             case 'cocina':
-                header("Location: cocina/pedidos.php");
+                header("Location: cocina/dashboard.php");
                 break;
             case 'papas':
-                header("Location: papas/cargar_saldo.php");
+                header("Location: papas/dashboard.php");
                 break;
             case 'representante':
-                header("Location: representante/pedidos.php");
+                header("Location: representante/dashboard.php");
                 break;
         }
         exit();
