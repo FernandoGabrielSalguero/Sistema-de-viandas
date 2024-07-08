@@ -45,7 +45,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 header("Location: dashboard.php?error=Error al cancelar el pedido.");
             }
         } else {
-            $mensaje_error = "La vianda se podia cancelar hasta: " . $fecha_hora_cancelacion;
+            $mensaje_error = "La vianda se podia cancelar hasta el: " . $fecha_hora_cancelacion;
             header("Location: dashboard.php?error=" . urlencode($mensaje_error));
         }
     } else {

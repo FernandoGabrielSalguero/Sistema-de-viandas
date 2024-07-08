@@ -5,7 +5,6 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-
 session_start();
 include '../includes/header_papas.php';
 include '../includes/db.php';
@@ -15,14 +14,20 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'papas') {
     exit();
 }
 
-if (!isset($_SESSION['hijo_id'])) {
-    header("Location: seleccionar_hijo.php");
-    exit();
-}
-
-$hijo_id = $_SESSION['hijo_id'];
 $usuario_id = $_SESSION['usuario_id'];
 
+// Obtener saldo del usuario
+$stmt = $pdo->prepare("SELECT Saldo FROM Usuarios WHERE Id = ?");
+$stmt->execute([$usuario_id]);
+$usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+$saldo_disponible = $usuario['Saldo'];
+
+// Obtener hijos del usuario
+$stmt = $pdo->prepare("SELECT h.Id, h.Nombre FROM Hijos h JOIN Usuarios_Hijos uh ON h.Id = uh.Hijo_Id WHERE uh.Usuario_Id = ?");
+$stmt->execute([$usuario_id]);
+$hijos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Obtener menús disponibles
 $stmt = $pdo->prepare("SELECT m.Id, m.Nombre, m.Fecha_entrega, m.Precio FROM `Menú` m WHERE m.Estado = 'En venta'");
 $stmt->execute();
 $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -33,6 +38,7 @@ foreach ($menus as $menu) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $hijo_id = $_POST['hijo_id'];
     $menu_ids = $_POST['menu_ids'];
     $total_precio = 0;
 
@@ -44,11 +50,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Verificar si el usuario tiene saldo suficiente
-    $stmt = $pdo->prepare("SELECT Saldo FROM Usuarios WHERE Id = ?");
-    $stmt->execute([$usuario_id]);
-    $saldo = $stmt->fetch(PDO::FETCH_ASSOC)['Saldo'];
-
-    if ($saldo >= $total_precio) {
+    if ($saldo_disponible >= $total_precio) {
         foreach ($menu_ids as $menu_id) {
             // Realizar el pedido
             $stmt = $pdo->prepare("INSERT INTO Pedidos_Comida (Hijo_Id, Menú_Id, Fecha_pedido, Estado) VALUES (?, ?, NOW(), 'Procesando')");
@@ -85,6 +87,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </head>
 <body>
     <h1>Comprar Viandas</h1>
+    <p>Saldo disponible: <?php echo number_format($saldo_disponible, 2); ?> ARS</p>
     <?php
     if (isset($error)) {
         echo "<p class='error'>$error</p>";
@@ -94,6 +97,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     ?>
     <form method="post" action="comprar_viandas.php">
+        <label for="hijo_id">Seleccionar Hijo:</label>
+        <select id="hijo_id" name="hijo_id" required>
+            <option value="">Seleccione un hijo</option>
+            <?php foreach ($hijos as $hijo) : ?>
+                <option value="<?php echo $hijo['Id']; ?>"><?php echo htmlspecialchars($hijo['Nombre']); ?></option>
+            <?php endforeach; ?>
+        </select>
+        <br><br>
         <?php foreach ($menus_por_dia as $fecha => $menus) : ?>
             <h2><?php echo htmlspecialchars($fecha); ?></h2>
             <?php foreach ($menus as $menu) : ?>
