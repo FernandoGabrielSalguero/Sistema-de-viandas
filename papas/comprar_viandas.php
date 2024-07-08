@@ -1,4 +1,11 @@
 <?php
+
+// Habilitar la muestra de errores
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+
 session_start();
 include '../includes/header_papas.php';
 include '../includes/db.php';
@@ -16,7 +23,7 @@ if (!isset($_SESSION['hijo_id'])) {
 $hijo_id = $_SESSION['hijo_id'];
 $usuario_id = $_SESSION['usuario_id'];
 
-$stmt = $pdo->prepare("SELECT m.Id, m.Nombre, m.Fecha_entrega, m.Precio FROM Menu m WHERE m.Estado = 'En venta'");
+$stmt = $pdo->prepare("SELECT m.Id, m.Nombre, m.Fecha_entrega, m.Precio FROM `Menú` m WHERE m.Estado = 'En venta'");
 $stmt->execute();
 $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -30,7 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $total_precio = 0;
 
     foreach ($menu_ids as $menu_id) {
-        $stmt = $pdo->prepare("SELECT Precio FROM Menu WHERE Id = ?");
+        $stmt = $pdo->prepare("SELECT Precio FROM `Menú` WHERE Id = ?");
         $stmt->execute([$menu_id]);
         $precio = $stmt->fetch(PDO::FETCH_ASSOC)['Precio'];
         $total_precio += $precio;
@@ -44,7 +51,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($saldo >= $total_precio) {
         foreach ($menu_ids as $menu_id) {
             // Realizar el pedido
-            $stmt = $pdo->prepare("INSERT INTO Pedidos_Comida (Hijo_Id, Menu_Id, Fecha_pedido, Estado) VALUES (?, ?, NOW(), 'Procesando')");
+            $stmt = $pdo->prepare("INSERT INTO Pedidos_Comida (Hijo_Id, Menú_Id, Fecha_pedido, Estado) VALUES (?, ?, NOW(), 'Procesando')");
             if ($stmt->execute([$hijo_id, $menu_id])) {
                 // Actualizar el saldo del usuario
                 $stmt = $pdo->prepare("UPDATE Usuarios SET Saldo = Saldo - ? WHERE Id = ?");
