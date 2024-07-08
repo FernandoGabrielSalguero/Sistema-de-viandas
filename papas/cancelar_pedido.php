@@ -45,7 +45,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 header("Location: dashboard.php?error=Error al cancelar el pedido.");
             }
         } else {
-            header("Location: dashboard.php?error=No se puede cancelar el pedido porque la fecha límite ha pasado.");
+            $mensaje_error = "La vianda se puede cancelar solo hasta esta fecha y hora: " . $fecha_hora_cancelacion;
+            header("Location: dashboard.php?error=" . urlencode($mensaje_error));
         }
     } else {
         header("Location: dashboard.php?error=Pedido no encontrado.");

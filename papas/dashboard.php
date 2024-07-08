@@ -47,6 +47,15 @@ $pedidos_saldo = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <p>Correo: <?php echo htmlspecialchars($usuario['Correo']); ?></p>
     <p>Saldo disponible: <?php echo number_format($usuario['Saldo'], 2); ?> ARS</p>
 
+    <?php
+    if (isset($_GET['error'])) {
+        echo "<p class='error'>" . htmlspecialchars($_GET['error']) . "</p>";
+    }
+    if (isset($_GET['success'])) {
+        echo "<p class='success'>" . htmlspecialchars($_GET['success']) . "</p>";
+    }
+    ?>
+
     <h2>Historial de Pedidos de Viandas</h2>
     <table>
         <tr>
