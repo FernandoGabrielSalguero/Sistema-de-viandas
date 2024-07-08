@@ -75,7 +75,7 @@ $stmt->execute();
 $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Obtener todos los hijos
-$stmt = $pdo->prepare("SELECT h.Id, h.Nombre, c.Nombre AS Colegio, cu.Nombre AS Curso
+$stmt = $pdo->prepare("SELECT h.Id, h.Nombre, h.Colegio_Id, h.Curso_Id, h.Preferencias_Alimenticias, c.Nombre AS Colegio, cu.Nombre AS Curso
                        FROM Hijos h
                        JOIN Colegios c ON h.Colegio_Id = c.Id
                        JOIN Cursos cu ON h.Curso_Id = cu.Id");
@@ -181,7 +181,7 @@ $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </tr>
         <?php
         // Obtener la lista de hijos asignados a cada usuario
-        $stmt = $pdo->prepare("SELECT uh.Usuario_Id, uh.Hijo_Id, u.Nombre AS NombrePapa, h.Nombre AS NombreHijo, c.Nombre AS Colegio, cu.Nombre AS Curso, p.Nombre AS Preferencia
+        $stmt = $pdo->prepare("SELECT uh.Usuario_Id, uh.Hijo_Id, u.Nombre AS NombrePapa, h.Nombre AS NombreHijo, h.Colegio_Id, h.Curso_Id, h.Preferencias_Alimenticias, c.Nombre AS Colegio, cu.Nombre AS Curso, p.Nombre AS Preferencia
                                FROM Usuarios_Hijos uh
                                JOIN Usuarios u ON uh.Usuario_Id = u.Id
                                JOIN Hijos h ON uh.Hijo_Id = h.Id
@@ -217,7 +217,7 @@ $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <td>
                         <select name="preferencia_id" required>
                             <?php foreach ($preferencias as $preferencia) : ?>
-                                <option value="<?php echo htmlspecialchars($preferencia['Id']); ?>" <?php echo ($preferencia['Id'] == $asignacion['Preferencia_Id']) ? 'selected' : ''; ?>>
+                                <option value="<?php echo htmlspecialchars($preferencia['Id']); ?>" <?php echo ($preferencia['Id'] == $asignacion['Preferencias_Alimenticias']) ? 'selected' : ''; ?>>
                                     <?php echo htmlspecialchars($preferencia['Nombre']); ?>
                                 </option>
                             <?php endforeach; ?>
