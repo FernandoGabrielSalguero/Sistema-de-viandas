@@ -8,7 +8,7 @@ include '../includes/header_admin.php';
 include '../includes/db.php';
 
 // Obtener los saldos pendientes de aprobación
-$stmt = $pdo->prepare("SELECT ps.Id, ps.Saldo, ps.Usuario_Id, u.Usuario FROM Pedidos_Saldo ps JOIN Usuarios u ON ps.Usuario_Id = u.Id WHERE ps.Estado = 'Pendiente de aprobación'");
+$stmt = $pdo->prepare("SELECT ps.Id, ps.Saldo, ps.Usuario_Id, u.Usuario, ps.Estado FROM Pedidos_Saldo ps JOIN Usuarios u ON ps.Usuario_Id = u.Id WHERE ps.Estado = 'Pendiente de aprobación'");
 $stmt->execute();
 $pendientes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -43,7 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['aprobar'])) {
     }
 
     // Obtener los saldos pendientes de nuevo después de la aprobación
-    $stmt = $pdo->prepare("SELECT ps.Id, ps.Saldo, ps.Usuario_Id, u.Usuario FROM Pedidos_Saldo ps JOIN Usuarios u ON ps.Usuario_Id = u.Id WHERE ps.Estado = 'Pendiente de aprobación'");
+    $stmt = $pdo->prepare("SELECT ps.Id, ps.Saldo, ps.Usuario_Id, u.Usuario, ps.Estado FROM Pedidos_Saldo ps JOIN Usuarios u ON ps.Usuario_Id = u.Id WHERE ps.Estado = 'Pendiente de aprobación'");
     $stmt->execute();
     $pendientes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
@@ -76,13 +76,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['aprobar'])) {
         </tr>
         <?php foreach ($pendientes as $pendiente) : ?>
         <tr>
-            <td><?php echo htmlspecialchars($pendiente['Id']); ?></td>
-            <td><?php echo htmlspecialchars($pendiente['Usuario']); ?></td>
-            <td><?php echo htmlspecialchars($pendiente['Saldo']); ?></td>
-            <td><?php echo htmlspecialchars($pendiente['Estado']); ?></td>
+            <td><?php echo htmlspecialchars($pendiente['Id'] ?? ''); ?></td>
+            <td><?php echo htmlspecialchars($pendiente['Usuario'] ?? ''); ?></td>
+            <td><?php echo htmlspecialchars($pendiente['Saldo'] ?? ''); ?></td>
+            <td><?php echo htmlspecialchars($pendiente['Estado'] ?? ''); ?></td>
             <td>
                 <form method="post" action="gestion_saldo.php">
-                    <input type="hidden" name="id" value="<?php echo htmlspecialchars($pendiente['Id']); ?>">
+                    <input type="hidden" name="id" value="<?php echo htmlspecialchars($pendiente['Id'] ?? ''); ?>">
                     <button type="submit" name="aprobar">Aprobar</button>
                 </form>
             </td>
