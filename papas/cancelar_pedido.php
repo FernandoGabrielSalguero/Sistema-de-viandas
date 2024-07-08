@@ -16,14 +16,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $pedido_id = $_POST['pedido_id'];
 
     // Obtener el precio del pedido
-    $stmt = $pdo->prepare("SELECT pc.Menu_Id, m.Precio 
+    $stmt = $pdo->prepare("SELECT pc.Menú_Id, m.Precio 
                            FROM Pedidos_Comida pc 
-                           JOIN Menu m ON pc.Menu_Id = m.Id 
+                           JOIN `Menú` m ON pc.Menú_Id = m.Id 
                            WHERE pc.Id = ?");
     $stmt->execute([$pedido_id]);
     $pedido = $stmt->fetch(PDO::FETCH_ASSOC);
     $precio = $pedido['Precio'];
-    $menu_id = $pedido['Menu_Id'];
+    $menu_id = $pedido['Menú_Id'];
 
     // Cancelar el pedido
     $stmt = $pdo->prepare("UPDATE Pedidos_Comida SET Estado = 'Cancelado' WHERE Id = ?");
