@@ -47,6 +47,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['crear_hijo'])) {
     }
 }
 
+// Procesar el formulario cuando se envíe para actualizar un hijo
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['actualizar_hijo'])) {
+    $hijo_id = $_POST['hijo_id'];
+    $nombre_hijo = $_POST['nombre_hijo'];
+    $colegio_id = $_POST['colegio_id'];
+    $curso_id = $_POST['curso_id'];
+    $preferencia_id = $_POST['preferencia_id'];
+
+    // Validar que todos los campos estén llenos
+    if (empty($nombre_hijo) || empty($colegio_id) || empty($curso_id) || empty($preferencia_id)) {
+        $error = "Todos los campos son obligatorios.";
+    } else {
+        // Actualizar el hijo en la base de datos
+        $stmt = $pdo->prepare("UPDATE Hijos SET Nombre = ?, Colegio_Id = ?, Curso_Id = ?, Preferencias_Alimenticias = ? WHERE Id = ?");
+        if ($stmt->execute([$nombre_hijo, $colegio_id, $curso_id, $preferencia_id, $hijo_id])) {
+            $success = "Hijo actualizado con éxito.";
+        } else {
+            $error = "Hubo un error al actualizar el hijo.";
+        }
+    }
+}
+
 // Obtener todos los usuarios con rol "Papás"
 $stmt = $pdo->prepare("SELECT Id, Nombre FROM Usuarios WHERE Rol = 'papas'");
 $stmt->execute();
@@ -60,7 +82,7 @@ $stmt = $pdo->prepare("SELECT h.Id, h.Nombre, c.Nombre AS Colegio, cu.Nombre AS 
 $stmt->execute();
 $hijos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Obtener todos los colegios y cursos para el formulario de creación de hijos
+// Obtener todos los colegios y cursos para el formulario de creación y actualización de hijos
 $stmt = $pdo->prepare("SELECT Id, Nombre FROM Colegios");
 $stmt->execute();
 $colegios = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -154,32 +176,59 @@ $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <th>Nombre del Hijo</th>
             <th>Colegio</th>
             <th>Curso</th>
+            <th>Preferencias Alimenticias</th>
             <th>Acción</th>
         </tr>
         <?php
         // Obtener la lista de hijos asignados a cada usuario
-        $stmt = $pdo->prepare("SELECT uh.Usuario_Id, uh.Hijo_Id, u.Nombre AS NombrePapa, h.Nombre AS NombreHijo, c.Nombre AS Colegio, cu.Nombre AS Curso
+        $stmt = $pdo->prepare("SELECT uh.Usuario_Id, uh.Hijo_Id, u.Nombre AS NombrePapa, h.Nombre AS NombreHijo, c.Nombre AS Colegio, cu.Nombre AS Curso, p.Nombre AS Preferencia
                                FROM Usuarios_Hijos uh
                                JOIN Usuarios u ON uh.Usuario_Id = u.Id
                                JOIN Hijos h ON uh.Hijo_Id = h.Id
                                JOIN Colegios c ON h.Colegio_Id = c.Id
-                               JOIN Cursos cu ON h.Curso_Id = cu.Id");
+                               JOIN Cursos cu ON h.Curso_Id = cu.Id
+                               JOIN Preferencias_Alimenticias p ON h.Preferencias_Alimenticias = p.Id");
         $stmt->execute();
         $asignaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         foreach ($asignaciones as $asignacion) : ?>
             <tr>
-                <td><?php echo htmlspecialchars($asignacion['NombrePapa']); ?></td>
-                <td><?php echo htmlspecialchars($asignacion['NombreHijo']); ?></td>
-                <td><?php echo htmlspecialchars($asignacion['Colegio']); ?></td>
-                <td><?php echo htmlspecialchars($asignacion['Curso']); ?></td>
-                <td>
-                    <form method="post" action="asignar_hijos.php">
-                        <input type="hidden" name="usuario_id" value="<?php echo htmlspecialchars($asignacion['Usuario_Id']); ?>">
+                <form method="post" action="asignar_hijos.php">
+                    <td><?php echo htmlspecialchars($asignacion['NombrePapa']); ?></td>
+                    <td><input type="text" name="nombre_hijo" value="<?php echo htmlspecialchars($asignacion['NombreHijo']); ?>" required></td>
+                    <td>
+                        <select name="colegio_id" required>
+                            <?php foreach ($colegios as $colegio) : ?>
+                                <option value="<?php echo htmlspecialchars($colegio['Id']); ?>" <?php echo ($colegio['Id'] == $asignacion['Colegio_Id']) ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($colegio['Nombre']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </td>
+                    <td>
+                        <select name="curso_id" required>
+                            <?php foreach ($cursos as $curso) : ?>
+                                <option value="<?php echo htmlspecialchars($curso['Id']); ?>" <?php echo ($curso['Id'] == $asignacion['Curso_Id']) ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($curso['Nombre']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </td>
+                    <td>
+                        <select name="preferencia_id" required>
+                            <?php foreach ($preferencias as $preferencia) : ?>
+                                <option value="<?php echo htmlspecialchars($preferencia['Id']); ?>" <?php echo ($preferencia['Id'] == $asignacion['Preferencia_Id']) ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($preferencia['Nombre']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </td>
+                    <td>
                         <input type="hidden" name="hijo_id" value="<?php echo htmlspecialchars($asignacion['Hijo_Id']); ?>">
+                        <button type="submit" name="actualizar_hijo">Actualizar</button>
                         <button type="submit" name="eliminar_asignacion" onclick="return confirm('¿Está seguro de que desea eliminar esta asignación?');">Eliminar</button>
-                    </form>
-                </td>
+                    </td>
+                </form>
             </tr>
         <?php endforeach; ?>
     </table>
