@@ -31,15 +31,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['crear_hijo'])) {
     $nombre_hijo = $_POST['nombre_hijo'];
     $colegio_id = $_POST['colegio_id'];
     $curso_id = $_POST['curso_id'];
-    $preferencias = $_POST['preferencias'];
+    $preferencia_id = $_POST['preferencia_id'];
 
     // Validar que todos los campos estén llenos
-    if (empty($nombre_hijo) || empty($colegio_id) || empty($curso_id)) {
+    if (empty($nombre_hijo) || empty($colegio_id) || empty($curso_id) || empty($preferencia_id)) {
         $error = "Todos los campos son obligatorios.";
     } else {
         // Insertar el nuevo hijo en la base de datos
         $stmt = $pdo->prepare("INSERT INTO Hijos (Nombre, Colegio_Id, Curso_Id, Preferencias_Alimenticias) VALUES (?, ?, ?, ?)");
-        if ($stmt->execute([$nombre_hijo, $colegio_id, $curso_id, $preferencias])) {
+        if ($stmt->execute([$nombre_hijo, $colegio_id, $curso_id, $preferencia_id])) {
             $success = "Hijo creado con éxito.";
         } else {
             $error = "Hubo un error al crear el hijo.";
@@ -68,6 +68,11 @@ $colegios = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $stmt = $pdo->prepare("SELECT Id, Nombre FROM Cursos");
 $stmt->execute();
 $cursos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Obtener todas las preferencias alimenticias
+$stmt = $pdo->prepare("SELECT Id, Nombre FROM Preferencias_Alimenticias");
+$stmt->execute();
+$preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -131,8 +136,13 @@ $cursos = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <?php endforeach; ?>
         </select>
 
-        <label for="preferencias">Preferencias Alimenticias</label>
-        <input type="text" id="preferencias" name="preferencias">
+        <label for="preferencia_id">Preferencias Alimenticias</label>
+        <select id="preferencia_id" name="preferencia_id" required>
+            <option value="">Seleccione una preferencia</option>
+            <?php foreach ($preferencias as $preferencia) : ?>
+                <option value="<?php echo htmlspecialchars($preferencia['Id']); ?>"><?php echo htmlspecialchars($preferencia['Nombre']); ?></option>
+            <?php endforeach; ?>
+        </select>
 
         <button type="submit" name="crear_hijo">Crear Hijo</button>
     </form>
