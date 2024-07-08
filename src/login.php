@@ -24,23 +24,24 @@ if ($result->num_rows == 1) {
     // Redirección por rol
     switch ($row['rol']) {
         case 'administrador':
-            header('Location: /templates/admin_dashboard.php');
+            header('Location: ../templates/admin_dashboard.php');
             break;
         case 'papas':
-            header('Location: /templates/papas_dashboard.php');
+            header('Location: ../templates/papas_dashboard.php');
             break;
         case 'cocina':
-            header('Location: /templates/cocina_dashboard.php');
+            header('Location: ../templates/cocina_dashboard.php');
             break;
         case 'representante':
-            header('Location: /templates/representante_dashboard.php');
+            header('Location: ../templates/representante_dashboard.php');
             break;
         default:
-            header('Location: /login.php?error=rol_desconocido');
+            header('Location: ../login.php?error=rol_desconocido');
             break;
     }
     exit();
 } else {
-    header('Location: /login.php?error=credenciales_invalidas');
+    header('Location: ../login.php?error=credenciales_invalidas');
     exit();
 }
+
