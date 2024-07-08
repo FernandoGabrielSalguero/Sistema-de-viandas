@@ -4,7 +4,7 @@ include '../includes/header_papas.php';
 include '../includes/db.php';
 
 if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'papas') {
-    header("Location: ../index.php");
+    header("Location: ../login.php");
     exit();
 }
 

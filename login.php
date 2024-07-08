@@ -1,6 +1,7 @@
 <?php
 session_start();
 include 'includes/db.php';
+
 // Habilitar la muestra de errores
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -15,8 +16,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($user && password_verify($contrasena, $user['Contrasena'])) {
-        $_SESSION['user_id'] = $user['Id'];
-        $_SESSION['user_role'] = $user['Rol'];
+        $_SESSION['usuario_id'] = $user['Id'];
+        $_SESSION['rol'] = $user['Rol'];
         
         switch ($user['Rol']) {
             case 'administrador':
@@ -42,7 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-<title>¡Que gusto verde de nuevo!</title>
+    <title>¡Que gusto verde de nuevo!</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
