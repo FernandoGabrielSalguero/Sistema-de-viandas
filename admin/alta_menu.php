@@ -8,7 +8,7 @@ include '../includes/header_admin.php';
 include '../includes/db.php';
 
 // Procesar el formulario cuando se envíe
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['crear_menu'])) {
     $nombre_menu = $_POST['nombre_menu'];
     $fecha_entrega = $_POST['fecha_entrega'];
     $fecha_hora_compra = $_POST['fecha_hora_compra'];
@@ -29,6 +29,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 }
+
+// Procesar la actualización del menú
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['actualizar_menu'])) {
+    $menu_id = $_POST['menu_id'];
+    $nombre_menu = $_POST['nombre_menu'];
+    $fecha_entrega = $_POST['fecha_entrega'];
+    $fecha_hora_compra = $_POST['fecha_hora_compra'];
+    $fecha_hora_cancelacion = $_POST['fecha_hora_cancelacion'];
+    $precio = $_POST['precio'];
+    $estado = $_POST['estado'];
+
+    // Validar que todos los campos estén llenos
+    if (empty($nombre_menu) || empty($fecha_entrega) || empty($fecha_hora_compra) || empty($fecha_hora_cancelacion) || empty($precio) || empty($estado)) {
+        $error = "Todos los campos son obligatorios.";
+    } else {
+        // Actualizar el menú en la base de datos
+        $stmt = $pdo->prepare("UPDATE Menú SET Nombre = ?, Fecha_entrega = ?, Fecha_hora_compra = ?, Fecha_hora_cancelacion = ?, Precio = ?, Estado = ? WHERE Id = ?");
+        if ($stmt->execute([$nombre_menu, $fecha_entrega, $fecha_hora_compra, $fecha_hora_cancelacion, $precio, $estado, $menu_id])) {
+            $success = "Menú actualizado con éxito.";
+        } else {
+            $error = "Hubo un error al actualizar el menú.";
+        }
+    }
+}
+
+// Obtener todos los menús
+$stmt = $pdo->prepare("SELECT * FROM Menú");
+$stmt->execute();
+$menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -70,7 +99,43 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <option value="Sin stock">Sin stock</option>
         </select>
         
-        <button type="submit">Crear Menú</button>
+        <button type="submit" name="crear_menu">Crear Menú</button>
     </form>
+
+    <h2>Lista de Menús</h2>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Fecha de Entrega</th>
+            <th>Fecha y Hora Límite de Compra</th>
+            <th>Fecha y Hora Límite de Cancelación</th>
+            <th>Precio</th>
+            <th>Estado</th>
+            <th>Acción</th>
+        </tr>
+        <?php foreach ($menus as $menu) : ?>
+        <tr>
+            <form method="post" action="alta_menu.php">
+                <td><?php echo htmlspecialchars($menu['Id']); ?></td>
+                <td><input type="text" name="nombre_menu" value="<?php echo htmlspecialchars($menu['Nombre']); ?>" required></td>
+                <td><input type="date" name="fecha_entrega" value="<?php echo htmlspecialchars($menu['Fecha_entrega']); ?>" required></td>
+                <td><input type="datetime-local" name="fecha_hora_compra" value="<?php echo date('Y-m-d\TH:i', strtotime($menu['Fecha_hora_compra'])); ?>" required></td>
+                <td><input type="datetime-local" name="fecha_hora_cancelacion" value="<?php echo date('Y-m-d\TH:i', strtotime($menu['Fecha_hora_cancelacion'])); ?>" required></td>
+                <td><input type="number" name="precio" step="0.01" value="<?php echo htmlspecialchars($menu['Precio']); ?>" required></td>
+                <td>
+                    <select name="estado" required>
+                        <option value="En venta" <?php echo ($menu['Estado'] == 'En venta') ? 'selected' : ''; ?>>En venta</option>
+                        <option value="Sin stock" <?php echo ($menu['Estado'] == 'Sin stock') ? 'selected' : ''; ?>>Sin stock</option>
+                    </select>
+                </td>
+                <td>
+                    <input type="hidden" name="menu_id" value="<?php echo htmlspecialchars($menu['Id']); ?>">
+                    <button type="submit" name="actualizar_menu">Actualizar</button>
+                </td>
+            </form>
+        </tr>
+        <?php endforeach; ?>
+    </table>
 </body>
 </html>
