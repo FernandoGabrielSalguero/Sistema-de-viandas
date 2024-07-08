@@ -4,13 +4,13 @@ include 'includes/db.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $usuario = $_POST['usuario'];
-    $contraseña = $_POST['contraseña'];
+    $contrasena = $_POST['contrasena'];
 
-    $stmt = $pdo->prepare("SELECT Id, Contraseña, Rol FROM Usuarios WHERE Usuario = ?");
+    $stmt = $pdo->prepare("SELECT Id, Contrasena, Rol FROM Usuarios WHERE Usuario = ?");
     $stmt->execute([$usuario]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($user && password_verify($contraseña, $user['Contraseña'])) {
+    if ($user && password_verify($contrasena, $user['Contrasena'])) {
         $_SESSION['user_id'] = $user['Id'];
         $_SESSION['user_role'] = $user['Rol'];
         
@@ -47,8 +47,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <?php if (isset($error)) { echo "<p class='error'>$error</p>"; } ?>
         <label for="usuario">Usuario</label>
         <input type="text" id="usuario" name="usuario" required>
-        <label for="contraseña">Contraseña</label>
-        <input type="password" id="contraseña" name="contraseña" required>
+        <label for="contrasena">Contraseña</label>
+        <input type="password" id="contrasena" name="contrasena" required>
         <button type="submit">Ingresar</button>
     </form>
 </body>
