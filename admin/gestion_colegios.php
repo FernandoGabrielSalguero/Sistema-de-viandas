@@ -33,8 +33,77 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update'])) {
     $stmt->execute([$curso_nombre, $curso_id]);
 
     $success = "Colegio y curso actualizados con éxito.";
+
+    // Recargar los datos después de la actualización
+    $stmt = $pdo->prepare("SELECT c.Id as ColegioId, c.Nombre as ColegioNombre, c.Dirección, cu.Id as CursoId, cu.Nombre as CursoNombre
+                            FROM Colegios c
+                            LEFT JOIN Cursos cu ON c.Id = cu.Colegio_Id
+                            ORDER BY c.Id, cu.Id");
+    $stmt->execute();
+    $colegios = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
+// Agregar un nuevo curso a un colegio
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_course'])) {
+    $colegio_id = $_POST['colegio_id'];
+    $curso_nombre = $_POST['nuevo_curso'];
+
+    // Insertar nuevo curso
+    $stmt = $pdo->prepare("INSERT INTO Cursos (Nombre, Colegio_Id) VALUES (?, ?)");
+    $stmt->execute([$curso_nombre, $colegio_id]);
+
+    $success = "Nuevo curso agregado con éxito.";
+
+    // Recargar los datos después de agregar el curso
+    $stmt = $pdo->prepare("SELECT c.Id as ColegioId, c.Nombre as ColegioNombre, c.Dirección, cu.Id as CursoId, cu.Nombre as CursoNombre
+                            FROM Colegios c
+                            LEFT JOIN Cursos cu ON c.Id = cu.Colegio_Id
+                            ORDER BY c.Id, cu.Id");
+    $stmt->execute();
+    $colegios = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// Eliminar un colegio
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_colegio'])) {
+    $colegio_id = $_POST['colegio_id'];
+
+    // Eliminar los cursos asociados al colegio
+    $stmt = $pdo->prepare("DELETE FROM Cursos WHERE Colegio_Id = ?");
+    $stmt->execute([$colegio_id]);
+
+    // Eliminar el colegio
+    $stmt = $pdo->prepare("DELETE FROM Colegios WHERE Id = ?");
+    $stmt->execute([$colegio_id]);
+
+    $success = "Colegio y cursos asociados eliminados con éxito.";
+
+    // Recargar los datos después de la eliminación
+    $stmt = $pdo->prepare("SELECT c.Id as ColegioId, c.Nombre as ColegioNombre, c.Dirección, cu.Id as CursoId, cu.Nombre as CursoNombre
+                            FROM Colegios c
+                            LEFT JOIN Cursos cu ON c.Id = cu.Colegio_Id
+                            ORDER BY c.Id, cu.Id");
+    $stmt->execute();
+    $colegios = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// Eliminar un curso
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_curso'])) {
+    $curso_id = $_POST['curso_id'];
+
+    // Eliminar el curso
+    $stmt = $pdo->prepare("DELETE FROM Cursos WHERE Id = ?");
+    $stmt->execute([$curso_id]);
+
+    $success = "Curso eliminado con éxito.";
+
+    // Recargar los datos después de la eliminación
+    $stmt = $pdo->prepare("SELECT c.Id as ColegioId, c.Nombre as ColegioNombre, c.Dirección, cu.Id as CursoId, cu.Nombre as CursoNombre
+                            FROM Colegios c
+                            LEFT JOIN Cursos cu ON c.Id = cu.Colegio_Id
+                            ORDER BY c.Id, cu.Id");
+    $stmt->execute();
+    $colegios = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 ?>
 
 <!DOCTYPE html>
@@ -74,10 +143,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update'])) {
                 </td>
                 <td>
                     <button type="submit" name="update">Actualizar</button>
+                    <button type="submit" name="delete_colegio" onclick="return confirm('¿Está seguro de que desea eliminar este colegio y sus cursos asociados?');">Eliminar Colegio</button>
+                    <button type="submit" name="delete_curso" onclick="return confirm('¿Está seguro de que desea eliminar este curso?');">Eliminar Curso</button>
                 </td>
             </form>
         </tr>
         <?php endforeach; ?>
     </table>
+    <h2>Agregar Nuevo Curso</h2>
+    <form method="post" action="gestion_colegios.php">
+        <label for="colegio_id">Colegio</label>
+        <select id="colegio_id" name="colegio_id" required>
+            <?php
+            $stmt = $pdo->query("SELECT Id, Nombre FROM Colegios");
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                echo "<option value=\"{$row['Id']}\">{$row['Nombre']}</option>";
+            }
+            ?>
+        </select>
+        <label for="nuevo_curso">Nombre del Nuevo Curso</label>
+        <input type="text" id="nuevo_curso" name="nuevo_curso" required>
+        <button type="submit" name="add_course">Agregar Curso</button>
+    </form>
 </body>
 </html>
