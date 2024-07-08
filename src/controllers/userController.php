@@ -41,7 +41,7 @@ function authenticateUser($username, $password) {
 function redirectBasedOnRole($role) {
     switch ($role) {
         case 'administrador':
-            header('Location: src/views/dashboardAdmin.php');
+            header('Location: ../views/dashboardAdmin.php');
             break;
         case 'papas':
             header('Location: ../views/dashboardPapas.php');
