@@ -12,6 +12,6 @@
             <li><a href="cargar_saldo.php">Cargar Saldo</a></li>
             <li><a href="historial_pedidos.php">Historial de Pedidos</a></li>
             <li><a href="comprar_viandas.php">Comprar Viandas</a></li>
-            <li><a href="../logout.php">Salir</a></li>
+            <li><a href="../papas/logout.php">Salir</a></li>
         </ul>
     </nav>
