@@ -43,6 +43,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <title>Cargar Saldo</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .bank-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .bank-info-item {
+            display: flex;
+            align-items: center;
+        }
+        .bank-info-label {
+            margin-right: 10px;
+        }
+        .copy-button {
+            margin-left: 10px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
     <h1>Cargar Saldo</h1>
@@ -58,7 +75,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <label for="monto">Monto a recargar:</label>
         <select id="monto" name="monto" required>
             <option value="">Seleccione un monto</option>
-            <?php foreach ($montos_validos as $monto) : ?>
+            <?php foreach ([3000, 5000, 10000, 15000, 20000, 50000, 100000, 120000, 150000, 200000] as $monto) : ?>
                 <option value="<?php echo $monto; ?>"><?php echo number_format($monto, 2); ?> ARS</option>
             <?php endforeach; ?>
         </select>
@@ -68,11 +85,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <br>
         <button type="submit">Cargar Saldo</button>
     </form>
-    <p>Información bancaria: CUIT: 20273627651 - CBU: 0340300408300313721004 – Banco: BANCO PATAGONIA – Titular de la cuenta: Federico Figueroa – Alias: ROJO.GENIO.CASINO</p>
-    <button onclick="copiarCBU()">Copiar CBU</button>
+    <div class="bank-info">
+        <div class="bank-info-item">
+            <span class="bank-info-label">CUIT:</span>
+            <span>20273627651</span>
+        </div>
+        <div class="bank-info-item">
+            <span class="bank-info-label">CBU:</span>
+            <span id="cbu">0340300408300313721004</span>
+            <button class="copy-button" onclick="copiarCBU()">Copiar</button>
+        </div>
+        <div class="bank-info-item">
+            <span class="bank-info-label">Banco:</span>
+            <span>BANCO PATAGONIA</span>
+        </div>
+        <div class="bank-info-item">
+            <span class="bank-info-label">Titular de la cuenta:</span>
+            <span>Federico Figueroa</span>
+        </div>
+        <div class="bank-info-item">
+            <span class="bank-info-label">Alias:</span>
+            <span>ROJO.GENIO.CASINO</span>
+        </div>
+    </div>
     <script>
         function copiarCBU() {
-            const cbu = "0340300408300313721004";
+            const cbu = document.getElementById('cbu').innerText;
             navigator.clipboard.writeText(cbu).then(() => {
                 alert("CBU copiado al portapapeles");
             });
