@@ -78,6 +78,32 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <title>Dashboard Papás</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .filter-item {
+            flex: 1 1 calc(25% - 10px);
+            min-width: 200px;
+        }
+        @media (max-width: 768px) {
+            .filter-item {
+                flex: 1 1 calc(50% - 10px);
+            }
+        }
+        @media (max-width: 480px) {
+            .filter-item {
+                flex: 1 1 100%;
+            }
+        }
+        .filters form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+    </style>
 </head>
 <body>
     <h1>Bienvenido, <?php echo htmlspecialchars($usuario['Nombre']); ?></h1>
@@ -94,34 +120,44 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
     ?>
 
     <h2>Historial de Pedidos de Viandas</h2>
-    <form method="get" action="dashboard.php">
-        <label for="fecha_entrega">Fecha de Entrega:</label>
-        <input type="date" id="fecha_entrega" name="fecha_entrega" value="<?php echo htmlspecialchars($filtro_fecha_entrega); ?>">
+    <form method="get" action="dashboard.php" class="filters">
+        <div class="filter-item">
+            <label for="fecha_entrega">Fecha de Entrega:</label>
+            <input type="date" id="fecha_entrega" name="fecha_entrega" value="<?php echo htmlspecialchars($filtro_fecha_entrega); ?>">
+        </div>
         
-        <label for="estado">Estado:</label>
-        <select id="estado" name="estado">
-            <option value="">Todos</option>
-            <option value="Procesando" <?php if ($filtro_estado == 'Procesando') echo 'selected'; ?>>Procesando</option>
-            <option value="Cancelado" <?php if ($filtro_estado == 'Cancelado') echo 'selected'; ?>>Cancelado</option>
-        </select>
+        <div class="filter-item">
+            <label for="estado">Estado:</label>
+            <select id="estado" name="estado">
+                <option value="">Todos</option>
+                <option value="Procesando" <?php if ($filtro_estado == 'Procesando') echo 'selected'; ?>>Procesando</option>
+                <option value="Cancelado" <?php if ($filtro_estado == 'Cancelado') echo 'selected'; ?>>Cancelado</option>
+            </select>
+        </div>
         
-        <label for="hijo">Hijo:</label>
-        <select id="hijo" name="hijo">
-            <option value="">Todos</option>
-            <?php foreach ($hijos as $hijo) : ?>
-                <option value="<?php echo $hijo['Id']; ?>" <?php if ($filtro_hijo == $hijo['Id']) echo 'selected'; ?>><?php echo htmlspecialchars($hijo['Nombre']); ?></option>
-            <?php endforeach; ?>
-        </select>
+        <div class="filter-item">
+            <label for="hijo">Hijo:</label>
+            <select id="hijo" name="hijo">
+                <option value="">Todos</option>
+                <?php foreach ($hijos as $hijo) : ?>
+                    <option value="<?php echo $hijo['Id']; ?>" <?php if ($filtro_hijo == $hijo['Id']) echo 'selected'; ?>><?php echo htmlspecialchars($hijo['Nombre']); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
         
-        <label for="menu">Menú:</label>
-        <select id="menu" name="menu">
-            <option value="">Todos</option>
-            <?php foreach ($menus as $menu) : ?>
-                <option value="<?php echo $menu['Id']; ?>" <?php if ($filtro_menu == $menu['Id']) echo 'selected'; ?>><?php echo htmlspecialchars($menu['Nombre']); ?></option>
-            <?php endforeach; ?>
-        </select>
-        
-        <button type="submit">Filtrar</button>
+        <div class="filter-item">
+            <label for="menu">Menú:</label>
+            <select id="menu" name="menu">
+                <option value="">Todos</option>
+                <?php foreach ($menus as $menu) : ?>
+                    <option value="<?php echo $menu['Id']; ?>" <?php if ($filtro_menu == $menu['Id']) echo 'selected'; ?>><?php echo htmlspecialchars($menu['Nombre']); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+
+        <div class="filter-item">
+            <button type="submit">Filtrar</button>
+        </div>
     </form>
 
     <table>
