@@ -42,7 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Login</title>
+<title>¡Que gusto verde de nuevo!</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
