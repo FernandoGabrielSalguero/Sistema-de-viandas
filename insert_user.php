@@ -2,11 +2,11 @@
 include 'includes/db.php';
 
 $nombre = 'Juan Perez';
-$usuario = 'juan';
-$contrasena = password_hash('mi_password_seguro', PASSWORD_BCRYPT);
+$usuario = 'flor';
+$contrasena = password_hash('flor', PASSWORD_BCRYPT);
 $telefono = '123456789';
 $correo = 'juan@example.com';
-$rol = 'administrador';
+$rol = 'papas';
 
 $stmt = $pdo->prepare("INSERT INTO Usuarios (Nombre, Usuario, Contrasena, Telefono, Correo, Rol) VALUES (?, ?, ?, ?, ?, ?)");
 $stmt->execute([$nombre, $usuario, $contrasena, $telefono, $correo, $rol]);
