@@ -26,7 +26,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         switch ($user['Rol']) {
             case 'administrador':
                 error_log("Redirigiendo a admin/dashboard.php");
-                header("Location: admin/dashboard.php");
+                header("Location: cocina/dashboard.php");
                 break;
             case 'cocina':
                 error_log("Redirigiendo a cocina/dashboard.php");
