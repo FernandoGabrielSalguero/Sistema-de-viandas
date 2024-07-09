@@ -69,6 +69,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['actualizar_hijo'])) {
     }
 }
 
+// Procesar la eliminación de una asignación
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['eliminar_asignacion'])) {
+    $usuario_id = $_POST['usuario_id'];
+    $hijo_id = $_POST['hijo_id'];
+
+    // Eliminar la relación entre usuario y hijo en la base de datos
+    $stmt = $pdo->prepare("DELETE FROM Usuarios_Hijos WHERE Usuario_Id = ? AND Hijo_Id = ?");
+    if ($stmt->execute([$usuario_id, $hijo_id])) {
+        $success = "Asignación eliminada con éxito.";
+    } else {
+        $error = "Hubo un error al eliminar la asignación.";
+    }
+
+    // Recargar la página después de eliminar la asignación
+    header("Location: asignar_hijos.php");
+    exit();
+}
+
 // Obtener todos los usuarios con rol "Papás"
 $stmt = $pdo->prepare("SELECT Id, Nombre FROM Usuarios WHERE Rol = 'papas'");
 $stmt->execute();
@@ -95,6 +113,17 @@ $cursos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $stmt = $pdo->prepare("SELECT Id, Nombre FROM Preferencias_Alimenticias");
 $stmt->execute();
 $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Obtener la lista de hijos asignados a cada usuario
+$stmt = $pdo->prepare("SELECT uh.Usuario_Id, uh.Hijo_Id, u.Nombre AS NombrePapa, h.Nombre AS NombreHijo, h.Colegio_Id, h.Curso_Id, h.Preferencias_Alimenticias, c.Nombre AS Colegio, cu.Nombre AS Curso, p.Nombre AS Preferencia
+                       FROM Usuarios_Hijos uh
+                       JOIN Usuarios u ON uh.Usuario_Id = u.Id
+                       JOIN Hijos h ON uh.Hijo_Id = h.Id
+                       JOIN Colegios c ON h.Colegio_Id = c.Id
+                       JOIN Cursos cu ON h.Curso_Id = cu.Id
+                       JOIN Preferencias_Alimenticias p ON h.Preferencias_Alimenticias = p.Id");
+$stmt->execute();
+$asignaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -179,19 +208,7 @@ $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <th>Preferencias Alimenticias</th>
             <th>Acción</th>
         </tr>
-        <?php
-        // Obtener la lista de hijos asignados a cada usuario
-        $stmt = $pdo->prepare("SELECT uh.Usuario_Id, uh.Hijo_Id, u.Nombre AS NombrePapa, h.Nombre AS NombreHijo, h.Colegio_Id, h.Curso_Id, h.Preferencias_Alimenticias, c.Nombre AS Colegio, cu.Nombre AS Curso, p.Nombre AS Preferencia
-                               FROM Usuarios_Hijos uh
-                               JOIN Usuarios u ON uh.Usuario_Id = u.Id
-                               JOIN Hijos h ON uh.Hijo_Id = h.Id
-                               JOIN Colegios c ON h.Colegio_Id = c.Id
-                               JOIN Cursos cu ON h.Curso_Id = cu.Id
-                               JOIN Preferencias_Alimenticias p ON h.Preferencias_Alimenticias = p.Id");
-        $stmt->execute();
-        $asignaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        foreach ($asignaciones as $asignacion) : ?>
+        <?php foreach ($asignaciones as $asignacion) : ?>
             <tr>
                 <form method="post" action="asignar_hijos.php">
                     <td><?php echo htmlspecialchars($asignacion['NombrePapa']); ?></td>
@@ -225,6 +242,7 @@ $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </td>
                     <td>
                         <input type="hidden" name="hijo_id" value="<?php echo htmlspecialchars($asignacion['Hijo_Id']); ?>">
+                        <input type="hidden" name="usuario_id" value="<?php echo htmlspecialchars($asignacion['Usuario_Id']); ?>">
                         <button type="submit" name="actualizar_hijo">Actualizar</button>
                         <button type="submit" name="eliminar_asignacion" onclick="return confirm('¿Está seguro de que desea eliminar esta asignación?');">Eliminar</button>
                     </td>
@@ -232,25 +250,5 @@ $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </tr>
         <?php endforeach; ?>
     </table>
-
-    <?php
-    // Procesar la eliminación de una asignación
-    if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['eliminar_asignacion'])) {
-        $usuario_id = $_POST['usuario_id'];
-        $hijo_id = $_POST['hijo_id'];
-
-        // Eliminar la relación entre usuario y hijo en la base de datos
-        $stmt = $pdo->prepare("DELETE FROM Usuarios_Hijos WHERE Usuario_Id = ? AND Hijo_Id = ?");
-        if ($stmt->execute([$usuario_id, $hijo_id])) {
-            echo "<p class='success'>Asignación eliminada con éxito.</p>";
-        } else {
-            echo "<p class='error'>Hubo un error al eliminar la asignación.</p>";
-        }
-
-        // Recargar la página después de eliminar la asignación
-        header("Location: asignar_hijos.php");
-        exit();
-    }
-    ?>
 </body>
 </html>
