@@ -20,6 +20,7 @@ if (!isset($_SESSION['user_id']) || getUserRole($_SESSION['user_id']) !== 'admin
         <li><a href="gestion_saldo.php">Gestión Saldo</a></li>
         <li><a href="alta_usuarios.php">Alta Usuarios</a></li>
         <li><a href="asignar_hijos.php">Gestión Usuarios</a></li>
+        <li><a href="gestion_representantes.php">Gestión Representantes</a></li>
         <li><a href="alta_colegios.php">Alta Colegios</a></li>
         <li><a href="gestion_colegios.php">Gestión Colegios</a></li>
         <li><a href="alta_menu.php">Alta Menú</a></li>
