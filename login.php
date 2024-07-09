@@ -7,6 +7,8 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+$rol = '';
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $usuario = $_POST['usuario'];
     $contrasena = $_POST['contrasena'];
@@ -19,8 +21,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION['usuario_id'] = $user['Id'];
         $_SESSION['rol'] = $user['Rol'];
         
-        // Imprimir el rol del usuario
-        echo "Rol del usuario: " . $user['Rol'];
+        // Almacenar el rol del usuario en una variable
+        $rol = $user['Rol'];
         
         // Mensajes de depuración
         error_log("Usuario ID: " . $user['Id']);
@@ -75,5 +77,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <input type="password" id="contrasena" name="contrasena" required>
         <button type="submit">Ingresar</button>
     </form>
+    <?php if ($rol): ?>
+    <script>
+        console.log("Rol del usuario: <?php echo $rol; ?>");
+    </script>
+    <?php endif; ?>
 </body>
 </html>
