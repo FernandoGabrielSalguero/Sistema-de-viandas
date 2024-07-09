@@ -4,14 +4,17 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 include 'db.php';
 include 'functions.php';
 
-// if (!isset($_SESSION['user_id']) || getUserRole($_SESSION['user_id']) !== 'administrador') {
-//     header("Location: ../login.php");
-//     exit();
-// }
+if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
+    header("Location: ../login.php");
+    exit();
+}
 ?>
 <nav>
     <ul>
