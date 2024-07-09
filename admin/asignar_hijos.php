@@ -16,12 +16,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['asignar_hijo'])) {
     if (empty($usuario_id) || empty($hijo_id)) {
         $error = "Todos los campos son obligatorios.";
     } else {
-        // Insertar la relación entre usuario y hijo en la base de datos
-        $stmt = $pdo->prepare("INSERT INTO Usuarios_Hijos (Usuario_Id, Hijo_Id) VALUES (?, ?)");
-        if ($stmt->execute([$usuario_id, $hijo_id])) {
-            $success = "Hijo asignado con éxito.";
+        // Verificar si la relación ya existe
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM Usuarios_Hijos WHERE Usuario_Id = ? AND Hijo_Id = ?");
+        $stmt->execute([$usuario_id, $hijo_id]);
+        $exists = $stmt->fetchColumn();
+
+        if ($exists) {
+            $error = "El hijo ya está asignado a este usuario.";
         } else {
-            $error = "Hubo un error al asignar el hijo.";
+            // Insertar la relación entre usuario y hijo en la base de datos
+            $stmt = $pdo->prepare("INSERT INTO Usuarios_Hijos (Usuario_Id, Hijo_Id) VALUES (?, ?)");
+            if ($stmt->execute([$usuario_id, $hijo_id])) {
+                $success = "Hijo asignado con éxito.";
+            } else {
+                $error = "Hubo un error al asignar el hijo.";
+            }
         }
     }
 }
