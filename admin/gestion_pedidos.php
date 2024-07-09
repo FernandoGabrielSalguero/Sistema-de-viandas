@@ -13,8 +13,8 @@ $sql = "SELECT pc.Id, m.Nombre as Nombre_menú, c.Nombre AS ColegioNombre, cu.No
                COALESCE(pc.Preferencias_alimenticias, 'Sin preferencias alimenticias') AS Preferencias_alimenticias 
         FROM Pedidos_Comida pc 
         JOIN Hijos h ON pc.Hijo_Id = h.Id
-        JOIN Colegios c ON h.Colegio = c.Id 
-        JOIN Cursos cu ON h.Curso = cu.Id 
+        JOIN Colegios c ON h.Colegio_Id = c.Id 
+        JOIN Cursos cu ON h.Curso_Id = cu.Id 
         JOIN Menú m ON pc.Menú_Id = m.Id";
 $whereClauses = [];
 $params = [];
@@ -46,6 +46,13 @@ if ($whereClauses) {
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Depuración: Imprimir la consulta SQL y los parámetros
+echo "<pre>";
+echo "SQL Query: " . $sql . "\n";
+echo "Parameters: " . print_r($params, true) . "\n";
+echo "Results: " . print_r($pedidos, true) . "\n";
+echo "</pre>";
 
 // Cambiar el estado del pedido
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
