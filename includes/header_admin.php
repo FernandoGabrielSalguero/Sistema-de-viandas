@@ -23,9 +23,14 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
     <title>Panel de Administrador</title>
     <link rel="stylesheet" href="../css/styles.css">
     <style>
+        /* Material Design Buttons */
         nav ul {
             list-style: none;
             padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: space-around;
+            background-color: #6200ea;
         }
 
         nav ul li {
@@ -35,8 +40,17 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
         nav ul li a {
             text-decoration: none;
             display: block;
-            padding: 10px;
-            color: #000;
+            padding: 15px 20px;
+            color: #fff;
+            background-color: #6200ea;
+            transition: background-color 0.3s, color 0.3s;
+            border-radius: 4px;
+            margin: 5px;
+        }
+
+        nav ul li a:hover {
+            background-color: #3700b3;
+            color: #fff;
         }
 
         nav ul li ul {
@@ -44,11 +58,14 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
             position: absolute;
             top: 100%;
             left: 0;
-            background-color: #fff;
+            background-color: #6200ea;
             border: 1px solid #ccc;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
             list-style: none;
             padding: 0;
+            margin: 0;
+            min-width: 200px;
         }
 
         nav ul li:hover > ul {
@@ -56,11 +73,14 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
         }
 
         nav ul li ul li a {
-            padding: 10px;
+            padding: 10px 15px;
+            background-color: #6200ea;
+            color: #fff;
+            border-radius: 0;
         }
 
         nav ul li ul li a:hover {
-            background-color: #f2f2f2;
+            background-color: #3700b3;
         }
     </style>
 </head>
