@@ -123,7 +123,7 @@ $pedidos_viandas = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <tr>
             <td><?php echo htmlspecialchars($pedido['Hijo']); ?></td>
             <td><?php echo htmlspecialchars($pedido['Menu']); ?></td>
-            <td><?php echo htmlspecialchars($pedido['Fecha_entrega']); ?></td>
+            <td><?php echo htmlspecialchars($pedido['Fecha_entrega'] ?? ''); ?></td>
             <td><?php echo htmlspecialchars($pedido['Estado']); ?></td>
         </tr>
         <?php endforeach; ?>
