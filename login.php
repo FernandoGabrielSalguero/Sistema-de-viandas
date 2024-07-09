@@ -19,6 +19,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION['usuario_id'] = $user['Id'];
         $_SESSION['rol'] = $user['Rol'];
         
+        // Imprimir el rol del usuario
+        echo "Rol del usuario: " . $user['Rol'];
+        
         // Mensajes de depuración
         error_log("Usuario ID: " . $user['Id']);
         error_log("Rol: " . $user['Rol']);
@@ -26,26 +29,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         switch ($user['Rol']) {
             case 'administrador':
                 error_log("Redirigiendo a admin/dashboard.php");
+                if (file_exists('admin/dashboard.php')) {
+                    error_log("Archivo admin/dashboard.php existe");
+                } else {
+                    error_log("Archivo admin/dashboard.php no existe");
+                }
                 header("Location: admin/dashboard.php");
-                break;
+                exit();
             case 'cocina':
                 error_log("Redirigiendo a cocina/dashboard.php");
-                header("Location: admin/dashboard.php");
-                break;
+                header("Location: cocina/dashboard.php");
+                exit();
             case 'papas':
                 error_log("Redirigiendo a papas/dashboard.php");
                 header("Location: papas/dashboard.php");
-                break;
+                exit();
             case 'representante':
                 error_log("Redirigiendo a representante/dashboard.php");
                 header("Location: representante/dashboard.php");
-                break;
+                exit();
             default:
                 error_log("Rol no válido: " . $user['Rol']);
                 header("Location: login.php?error=Rol no válido");
-                break;
+                exit();
         }
-        exit();
     } else {
         $error = "Usuario o contraseña incorrectos";
     }
