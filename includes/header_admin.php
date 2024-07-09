@@ -23,14 +23,14 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
     <title>Panel de Administrador</title>
     <link rel="stylesheet" href="../css/styles.css">
     <style>
-        /* Material Design Buttons */
+        /* Background fondo header */
         nav ul {
             list-style: none;
             padding: 0;
             margin: 0;
             display: flex;
             justify-content: space-around;
-            background-color: #fff;
+            background-color: #6200ea; 
         }
 
         nav ul li {
@@ -74,7 +74,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
 
         nav ul li ul li a {
             padding: 10px 15px;
-            background-color: #6200ea;
+            background-color: #fff;
             color: #fff;
             border-radius: 0;
         }
