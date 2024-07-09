@@ -8,10 +8,10 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'representante') {
-    header("Location: ../index.php");
-    exit();
-}
+// if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'representante') {
+//     header("Location: ../index.php");
+//     exit();
+// }
 ?>
 <!DOCTYPE html>
 <html lang="es">
