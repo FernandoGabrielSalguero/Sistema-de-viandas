@@ -48,7 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </head>
 <body>
     <form method="post">
-        <h2>Login</h2>
+        <h2>Ingresa tu usuario y contraseña</h2>
         <?php if (isset($error)) { echo "<p class='error'>$error</p>"; } ?>
         <label for="usuario">Usuario</label>
         <input type="text" id="usuario" name="usuario" required>
