@@ -30,7 +30,8 @@ $filtro_curso = isset($_GET['curso_id']) ? $_GET['curso_id'] : '';
 $filtro_fecha = isset($_GET['fecha_entrega']) ? $_GET['fecha_entrega'] : '';
 
 // Obtener pedidos de viandas con filtros
-$query = "SELECT h.Nombre as Hijo, m.Nombre as Menu, pc.Fecha_entrega, pc.Estado 
+$query = "SELECT h.Nombre as Hijo, m.Nombre as Menu, pc.Fecha_entrega, pc.Estado, 
+                 COALESCE(pc.Preferencias_alimenticias, 'Sin preferencias alimenticias') as Preferencias_alimenticias
           FROM Pedidos_Comida pc
           JOIN Hijos h ON pc.Hijo_Id = h.Id
           JOIN `Menú` m ON pc.Menú_Id = m.Id
@@ -118,6 +119,7 @@ $pedidos_viandas = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <th>Menú</th>
             <th>Fecha de Entrega</th>
             <th>Estado</th>
+            <th>Preferencias Alimenticias</th>
         </tr>
         <?php foreach ($pedidos_viandas as $pedido) : ?>
         <tr>
@@ -125,6 +127,7 @@ $pedidos_viandas = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <td><?php echo htmlspecialchars($pedido['Menu']); ?></td>
             <td><?php echo htmlspecialchars($pedido['Fecha_entrega'] ?? ''); ?></td>
             <td><?php echo htmlspecialchars($pedido['Estado']); ?></td>
+            <td><?php echo htmlspecialchars($pedido['Preferencias_alimenticias']); ?></td>
         </tr>
         <?php endforeach; ?>
     </table>
