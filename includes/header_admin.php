@@ -91,8 +91,8 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
             <li>
                 <a href="#">Gestión de Pedidos</a>
                 <ul>
-                    <li><a href="gestion_pedidos.php">Gestión Pedidos</a></li>
-                    <li><a href="gestion_saldo.php">Gestión Saldo</a></li>
+                    <li><a href="gestion_pedidos.php">Viandas</a></li>
+                    <li><a href="gestion_saldo.php">Saldo</a></li>
                 </ul>
             </li>
             <li>
