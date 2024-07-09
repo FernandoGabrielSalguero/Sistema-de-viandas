@@ -30,7 +30,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
             margin: 0;
             display: flex;
             justify-content: space-around;
-            background-color: #6200ea;
+            background-color: #fff;
         }
 
         nav ul li {
