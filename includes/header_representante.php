@@ -4,14 +4,17 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// if (session_status() === PHP_SESSION_NONE) {
-//     session_start();
-// }
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-// if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'representante') {
-//     header("Location: ../index.php");
-//     exit();
-// }
+include 'db.php';
+include 'functions.php';
+
+if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'representante') {
+    header("Location: ../index.php");
+    exit();
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
