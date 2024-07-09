@@ -27,7 +27,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'representante') {
     <nav>
         <ul>
             <li><a href="dashboard.php">Inicio</a></li>
-            <li><a href="../logout.php">Salir</a></li>
+            <li><a href="logout.php">Salir</a></li>
         </ul>
     </nav>
 </body>
