@@ -74,13 +74,13 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
 
         nav ul li ul li a {
             padding: 10px 15px;
-            background-color: #6200ea;
+            background-color: #fff;
             color: #fff;
             border-radius: 0;
         }
 
         nav ul li ul li a:hover {
-            background-color: #3700b3;
+            background-color: #007bff;
         }
     </style>
 </head>
