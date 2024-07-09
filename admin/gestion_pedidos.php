@@ -25,12 +25,12 @@ $cursos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 // Obtener la cantidad de saldo aprobado
 $stmt = $pdo->prepare("SELECT SUM(Saldo) as SaldoAprobado FROM Pedidos_Saldo WHERE Estado = 'Aprobado'");
 $stmt->execute();
-$saldoAprobado = $stmt->fetch(PDO::FETCH_ASSOC)['SaldoAprobado'] ?? 0.0;
+$saldoAprobado = (float)($stmt->fetch(PDO::FETCH_ASSOC)['SaldoAprobado'] ?? 0);
 
 // Obtener la cantidad de saldo en estado pendiente de aprobación
 $stmt = $pdo->prepare("SELECT SUM(Saldo) as SaldoPendiente FROM Pedidos_Saldo WHERE Estado = 'Pendiente de aprobación'");
 $stmt->execute();
-$saldoPendiente = $stmt->fetch(PDO::FETCH_ASSOC)['SaldoPendiente'] ?? 0.0;
+$saldoPendiente = (float)($stmt->fetch(PDO::FETCH_ASSOC)['SaldoPendiente'] ?? 0);
 
 // Obtener la cantidad de pedidos por escuela y por curso con filtros
 $query = "SELECT c.Nombre as Colegio, cu.Nombre as Curso, COUNT(pc.Id) as CantidadPedidos
@@ -129,11 +129,11 @@ $cantidadUsuarios = $stmt->fetch(PDO::FETCH_ASSOC)['CantidadUsuarios'];
     <div class="kpi-container">
         <div class="kpi-card">
             <h2>Saldo Aprobado</h2>
-            <p><?php echo number_format((float)$saldoAprobado, 2); ?> ARS</p>
+            <p><?php echo number_format($saldoAprobado, 2); ?> ARS</p>
         </div>
         <div class="kpi-card">
             <h2>Saldo Pendiente</h2>
-            <p><?php echo number_format((float)$saldoPendiente, 2); ?> ARS</p>
+            <p><?php echo number_format($saldoPendiente, 2); ?> ARS</p>
         </div>
         <div class="kpi-card">
             <h2>Usuarios Registrados</h2>
