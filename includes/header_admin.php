@@ -8,10 +8,10 @@ session_start();
 include 'db.php';
 include 'functions.php';
 
-if (!isset($_SESSION['user_id']) || getUserRole($_SESSION['user_id']) !== 'administrador') {
-    header("Location: ../login.php");
-    exit();
-}
+// if (!isset($_SESSION['user_id']) || getUserRole($_SESSION['user_id']) !== 'administrador') {
+//     header("Location: ../login.php");
+//     exit();
+// }
 ?>
 <nav>
     <ul>
