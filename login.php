@@ -21,37 +21,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION['usuario_id'] = $user['Id'];
         $_SESSION['rol'] = $user['Rol'];
         
-        // Almacenar el rol del usuario en una variable
-        $rol = $user['Rol'];
-        
-        // Mensajes de depuración
-        error_log("Usuario ID: " . $user['Id']);
-        error_log("Rol: " . $user['Rol']);
+        // Imprimir el rol del usuario y verificar que se establece correctamente
+        echo "<script>console.log('Rol del usuario: " . $user['Rol'] . "');</script>";
         
         switch ($user['Rol']) {
             case 'administrador':
-                error_log("Redirigiendo a admin/dashboard.php");
-                if (file_exists('admin/dashboard.php')) {
-                    error_log("Archivo admin/dashboard.php existe");
-                } else {
-                    error_log("Archivo admin/dashboard.php no existe");
-                }
+                echo "<script>console.log('Redirigiendo a admin/dashboard.php');</script>";
                 header("Location: admin/dashboard.php");
                 exit();
             case 'cocina':
-                error_log("Redirigiendo a cocina/dashboard.php");
+                echo "<script>console.log('Redirigiendo a cocina/dashboard.php');</script>";
                 header("Location: cocina/dashboard.php");
                 exit();
             case 'papas':
-                error_log("Redirigiendo a papas/dashboard.php");
+                echo "<script>console.log('Redirigiendo a papas/dashboard.php');</script>";
                 header("Location: papas/dashboard.php");
                 exit();
             case 'representante':
-                error_log("Redirigiendo a representante/dashboard.php");
+                echo "<script>console.log('Redirigiendo a representante/dashboard.php');</script>";
                 header("Location: representante/dashboard.php");
                 exit();
             default:
-                error_log("Rol no válido: " . $user['Rol']);
+                echo "<script>console.log('Rol no válido: " . $user['Rol'] . "');</script>";
                 header("Location: login.php?error=Rol no válido");
                 exit();
         }
@@ -77,10 +68,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <input type="password" id="contrasena" name="contrasena" required>
         <button type="submit">Ingresar</button>
     </form>
-    <?php if ($rol): ?>
-    <script>
-        console.log("Rol del usuario: <?php echo $rol; ?>");
-    </script>
-    <?php endif; ?>
 </body>
 </html>
