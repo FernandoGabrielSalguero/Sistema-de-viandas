@@ -30,7 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 break;
             case 'cocina':
                 error_log("Redirigiendo a cocina/dashboard.php");
-                header("Location: cocina/dashboard.php");
+                header("Location: admin/dashboard.php");
                 break;
             case 'papas':
                 error_log("Redirigiendo a papas/dashboard.php");
