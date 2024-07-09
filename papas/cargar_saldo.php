@@ -26,7 +26,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Insertar el pedido de saldo
             $stmt = $pdo->prepare("INSERT INTO Pedidos_Saldo (Usuario_Id, Saldo, Estado, Comprobante, Fecha_pedido) VALUES (?, ?, 'Pendiente de aprobación', ?, NOW())");
             if ($stmt->execute([$usuario_id, $monto, $comprobante_nombre])) {
-                $success = "Pedido de saldo realizado con éxito.";
+                $success = "Pedido de saldo realizado con éxito. La acreditación puede demorar hasta 72hs";
             } else {
                 $error = "Error al realizar el pedido de saldo.";
             }

@@ -7,45 +7,42 @@ error_reporting(E_ALL);
 include '../includes/header_admin.php';
 include '../includes/db.php';
 
-// Obtener los saldos pendientes de aprobación
-$stmt = $pdo->prepare("SELECT ps.Id, ps.Saldo, ps.Usuario_Id, u.Usuario, ps.Estado FROM Pedidos_Saldo ps JOIN Usuarios u ON ps.Usuario_Id = u.Id WHERE ps.Estado = 'Pendiente de aprobación'");
+// Parámetros de paginación
+$itemsPerPage = 15;
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$offset = ($page - 1) * $itemsPerPage;
+
+// Obtener la cantidad total de registros
+$totalItemsQuery = $pdo->query("SELECT COUNT(*) FROM Pedidos_Saldo");
+$totalItems = $totalItemsQuery->fetchColumn();
+
+// Calcular el número total de páginas
+$totalPages = ceil($totalItems / $itemsPerPage);
+
+// Obtener los registros de la página actual
+$stmt = $pdo->prepare("SELECT Id, Usuario_Id, Saldo, Estado, Comprobante, Fecha_pedido FROM Pedidos_Saldo LIMIT :offset, :itemsPerPage");
+$stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+$stmt->bindParam(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
 $stmt->execute();
-$pendientes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$pedidosSaldo = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Aprobar saldo
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['aprobar'])) {
+// Cambiar el estado del saldo
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
     $id = $_POST['id'];
-    $stmt = $pdo->prepare("UPDATE Pedidos_Saldo SET Estado = 'Aprobado' WHERE Id = ?");
-    if ($stmt->execute([$id])) {
-        // Obtener el saldo y el Usuario_Id del pedido aprobado
-        $stmt = $pdo->prepare("SELECT Saldo, Usuario_Id FROM Pedidos_Saldo WHERE Id = ?");
-        $stmt->execute([$id]);
-        $pedido = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        $saldo = $pedido['Saldo'];
-        $usuario_id = $pedido['Usuario_Id'];
-
-        // Actualizar el saldo del usuario
-        $stmt = $pdo->prepare("UPDATE Usuarios SET Saldo = Saldo + ? WHERE Id = ?");
-        $stmt->execute([$saldo, $usuario_id]);
-
-        $success = "Saldo aprobado con éxito.";
-        
-        // Obtener el correo del usuario
-        $stmt = $pdo->prepare("SELECT Correo FROM Usuarios WHERE Id = ?");
-        $stmt->execute([$usuario_id]);
-        $correo = $stmt->fetchColumn();
-
-        // Enviar correo al usuario (simplificado para este ejemplo)
-        mail($correo, "Saldo aprobado", "Su saldo ha sido aprobado y ya está disponible para la compra de viandas.");
+    $nuevo_estado = $_POST['estado'];
+    $stmt = $pdo->prepare("UPDATE Pedidos_Saldo SET Estado = ? WHERE Id = ?");
+    if ($stmt->execute([$nuevo_estado, $id])) {
+        $success = "Estado del saldo actualizado con éxito.";
     } else {
-        $error = "Hubo un error al aprobar el saldo.";
+        $error = "Hubo un error al actualizar el estado del saldo.";
     }
 
-    // Obtener los saldos pendientes de nuevo después de la aprobación
-    $stmt = $pdo->prepare("SELECT ps.Id, ps.Saldo, ps.Usuario_Id, u.Usuario, ps.Estado FROM Pedidos_Saldo ps JOIN Usuarios u ON ps.Usuario_Id = u.Id WHERE ps.Estado = 'Pendiente de aprobación'");
+    // Volver a cargar los registros después de la actualización
+    $stmt = $pdo->prepare("SELECT Id, Usuario_Id, Saldo, Estado, Comprobante, Fecha_pedido FROM Pedidos_Saldo LIMIT :offset, :itemsPerPage");
+    $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+    $stmt->bindParam(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
     $stmt->execute();
-    $pendientes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $pedidosSaldo = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 ?>
 
@@ -53,11 +50,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['aprobar'])) {
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Gestión de Saldos</title>
+    <title>Gestión de Saldo</title>
     <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
-    <h1>Gestión de Saldos</h1>
+    <h1>Gestión de Saldo</h1>
     <?php
     if (isset($error)) {
         echo "<p class='error'>$error</p>";
@@ -69,25 +66,52 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['aprobar'])) {
     <table>
         <tr>
             <th>ID</th>
-            <th>Usuario</th>
+            <th>Usuario ID</th>
             <th>Saldo</th>
             <th>Estado</th>
+            <th>Comprobante</th>
+            <th>Fecha y Hora</th>
             <th>Acción</th>
         </tr>
-        <?php foreach ($pendientes as $pendiente) : ?>
+        <?php foreach ($pedidosSaldo as $pedido) : ?>
         <tr>
-            <td><?php echo htmlspecialchars($pendiente['Id'] ?? ''); ?></td>
-            <td><?php echo htmlspecialchars($pendiente['Usuario'] ?? ''); ?></td>
-            <td><?php echo htmlspecialchars($pendiente['Saldo'] ?? ''); ?></td>
-            <td><?php echo htmlspecialchars($pendiente['Estado'] ?? ''); ?></td>
+            <td><?php echo htmlspecialchars($pedido['Id']); ?></td>
+            <td><?php echo htmlspecialchars($pedido['Usuario_Id']); ?></td>
+            <td><?php echo htmlspecialchars($pedido['Saldo']); ?></td>
+            <td><?php echo htmlspecialchars($pedido['Estado']); ?></td>
+            <td><a href="../uploads/<?php echo htmlspecialchars($pedido['Comprobante']); ?>" target="_blank">Ver Comprobante</a></td>
+            <td><?php echo htmlspecialchars($pedido['Fecha_pedido']); ?></td>
             <td>
                 <form method="post" action="gestion_saldo.php">
-                    <input type="hidden" name="id" value="<?php echo htmlspecialchars($pendiente['Id'] ?? ''); ?>">
-                    <button type="submit" name="aprobar">Aprobar</button>
+                    <input type="hidden" name="id" value="<?php echo htmlspecialchars($pedido['Id']); ?>">
+                    <select name="estado">
+                        <option value="Pendiente de aprobación" <?php echo ($pedido['Estado'] == 'Pendiente de aprobación') ? 'selected' : ''; ?>>Pendiente de aprobación</option>
+                        <option value="Aprobado" <?php echo ($pedido['Estado'] == 'Aprobado') ? 'selected' : ''; ?>>Aprobado</option>
+                        <option value="Rechazado" <?php echo ($pedido['Estado'] == 'Rechazado') ? 'selected' : ''; ?>>Rechazado</option>
+                    </select>
+                    <button type="submit" name="cambiar_estado">Cambiar Estado</button>
                 </form>
             </td>
         </tr>
         <?php endforeach; ?>
     </table>
+
+    <div class="pagination">
+        <?php if ($page > 1): ?>
+            <a href="?page=<?php echo $page - 1; ?>">&laquo; Anterior</a>
+        <?php endif; ?>
+
+        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+            <?php if ($i == $page): ?>
+                <strong><?php echo $i; ?></strong>
+            <?php else: ?>
+                <a href="?page=<?php echo $i; ?>"><?php echo $i; ?></a>
+            <?php endif; ?>
+        <?php endfor; ?>
+
+        <?php if ($page < $totalPages): ?>
+            <a href="?page=<?php echo $page + 1; ?>">Siguiente &raquo;</a>
+        <?php endif; ?>
+    </div>
 </body>
 </html>
