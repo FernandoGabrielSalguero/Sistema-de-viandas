@@ -8,25 +8,29 @@ include '../includes/header_admin.php';
 include '../includes/db.php';
 
 // Obtener los pedidos
-$sql = "SELECT pc.Id, pc.Nombre_menu, pc.Colegio, pc.Curso, pc.Nombre_alumno, pc.Fecha_entrega, pc.Estado_pedido, pc.Preferencias_alimenticias, c.Nombre AS ColegioNombre, cu.Nombre AS CursoNombre 
+$sql = "SELECT pc.Id, m.Nombre as Nombre_menú, c.Nombre AS ColegioNombre, cu.Nombre AS CursoNombre, 
+               h.Nombre AS Nombre_alumno, pc.Fecha_entrega, pc.Estado, 
+               COALESCE(pc.Preferencias_alimenticias, 'Sin preferencias alimenticias') AS Preferencias_alimenticias 
         FROM Pedidos_Comida pc 
-        JOIN Colegios c ON pc.Colegio = c.Id 
-        JOIN Cursos cu ON pc.Curso = cu.Id";
+        JOIN Colegios c ON h.Colegio_Id = c.Id 
+        JOIN Cursos cu ON h.Curso_Id = cu.Id 
+        JOIN Hijos h ON pc.Hijo_Id = h.Id 
+        JOIN Menú m ON pc.Menú_Id = m.Id";
 $whereClauses = [];
 $params = [];
 
 if (!empty($_GET['colegio'])) {
-    $whereClauses[] = "pc.Colegio = ?";
+    $whereClauses[] = "c.Id = ?";
     $params[] = $_GET['colegio'];
 }
 
 if (!empty($_GET['curso'])) {
-    $whereClauses[] = "pc.Curso = ?";
+    $whereClauses[] = "cu.Id = ?";
     $params[] = $_GET['curso'];
 }
 
 if (!empty($_GET['alumno'])) {
-    $whereClauses[] = "pc.Nombre_alumno LIKE ?";
+    $whereClauses[] = "h.Nombre LIKE ?";
     $params[] = "%" . $_GET['alumno'] . "%";
 }
 
@@ -46,8 +50,8 @@ $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 // Cambiar el estado del pedido
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
     $id = $_POST['id'];
-    $nuevo_estado = $_POST['estado_pedido'];
-    $stmt = $pdo->prepare("UPDATE Pedidos_Comida SET Estado_pedido = ? WHERE Id = ?");
+    $nuevo_estado = $_POST['estado'];
+    $stmt = $pdo->prepare("UPDATE Pedidos_Comida SET Estado = ? WHERE Id = ?");
     if ($stmt->execute([$nuevo_estado, $id])) {
         $success = "Estado del pedido actualizado con éxito.";
     } else {
@@ -125,20 +129,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
         <?php foreach ($pedidos as $pedido) : ?>
         <tr>
             <td><?php echo htmlspecialchars($pedido['Id'] ?? ''); ?></td>
-            <td><?php echo htmlspecialchars($pedido['Nombre_menu'] ?? ''); ?></td>
+            <td><?php echo htmlspecialchars($pedido['Nombre_menú'] ?? ''); ?></td>
             <td><?php echo htmlspecialchars($pedido['ColegioNombre'] ?? ''); ?></td>
             <td><?php echo htmlspecialchars($pedido['CursoNombre'] ?? ''); ?></td>
             <td><?php echo htmlspecialchars($pedido['Nombre_alumno'] ?? ''); ?></td>
             <td><?php echo htmlspecialchars($pedido['Fecha_entrega'] ?? ''); ?></td>
-            <td><?php echo htmlspecialchars($pedido['Estado_pedido'] ?? ''); ?></td>
+            <td><?php echo htmlspecialchars($pedido['Estado'] ?? ''); ?></td>
             <td><?php echo htmlspecialchars($pedido['Preferencias_alimenticias'] ?? ''); ?></td>
             <td>
                 <form method="post" action="gestion_pedidos.php">
                     <input type="hidden" name="id" value="<?php echo htmlspecialchars($pedido['Id'] ?? ''); ?>">
-                    <select name="estado_pedido">
-                        <option value="Procesando" <?php echo ($pedido['Estado_pedido'] == 'Procesando') ? 'selected' : ''; ?>>Procesando</option>
-                        <option value="Cancelado" <?php echo ($pedido['Estado_pedido'] == 'Cancelado') ? 'selected' : ''; ?>>Cancelado</option>
-                        <option value="Entregado" <?php echo ($pedido['Estado_pedido'] == 'Entregado') ? 'selected' : ''; ?>>Entregado</option>
+                    <select name="estado">
+                        <option value="Procesando" <?php echo ($pedido['Estado'] == 'Procesando') ? 'selected' : ''; ?>>Procesando</option>
+                        <option value="Cancelado" <?php echo ($pedido['Estado'] == 'Cancelado') ? 'selected' : ''; ?>>Cancelado</option>
+                        <option value="Entregado" <?php echo ($pedido['Estado'] == 'Entregado') ? 'selected' : ''; ?>>Entregado</option>
                     </select>
                     <button type="submit" name="cambiar_estado">Cambiar Estado</button>
                 </form>
