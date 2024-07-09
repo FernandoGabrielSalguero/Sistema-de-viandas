@@ -45,7 +45,7 @@ form label {
     margin-bottom: 5px;
 }
 
-form input[type="text"], form input[type="date"], form input[type="password"], form select {
+form input[type="text"], form input[type="date"], form input[type="password"], form input[type="email"], form select {
     width: 100%;
     padding: 8px;
     margin-bottom: 10px;
