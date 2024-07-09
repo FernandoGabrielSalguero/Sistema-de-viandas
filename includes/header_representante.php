@@ -8,17 +8,24 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-include 'db.php';
-include 'functions.php';
-
-if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'representante') {
-    header("Location: ../login.php");
+if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'representante') {
+    header("Location: ../index.php");
     exit();
 }
 ?>
-<nav>
-    <ul>
-        <li><a href="pedidos.php">Pedidos</a></li>
-        <li><a href="logout.php">Salir</a></li>
-    </ul>
-</nav>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel de Representante</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="dashboard.php">Inicio</a></li>
+            <li><a href="../logout.php">Salir</a></li>
+        </ul>
+    </nav>
+</body>
+</html>
