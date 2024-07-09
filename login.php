@@ -19,18 +19,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION['usuario_id'] = $user['Id'];
         $_SESSION['rol'] = $user['Rol'];
         
+        // Mensajes de depuración
+        error_log("Usuario ID: " . $user['Id']);
+        error_log("Rol: " . $user['Rol']);
+        
         switch ($user['Rol']) {
             case 'administrador':
+                error_log("Redirigiendo a admin/dashboard.php");
                 header("Location: admin/dashboard.php");
                 break;
             case 'cocina':
+                error_log("Redirigiendo a cocina/dashboard.php");
                 header("Location: cocina/dashboard.php");
                 break;
             case 'papas':
+                error_log("Redirigiendo a papas/dashboard.php");
                 header("Location: papas/dashboard.php");
                 break;
             case 'representante':
+                error_log("Redirigiendo a representante/dashboard.php");
                 header("Location: representante/dashboard.php");
+                break;
+            default:
+                error_log("Rol no válido: " . $user['Rol']);
+                header("Location: login.php?error=Rol no válido");
                 break;
         }
         exit();
