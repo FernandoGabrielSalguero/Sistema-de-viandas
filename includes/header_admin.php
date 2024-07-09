@@ -58,7 +58,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
             position: absolute;
             top: 100%;
             left: 0;
-            background-color: #6200ea;
+            background-color: #fff;
             border: 1px solid #ccc;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             border-radius: 4px;
@@ -74,7 +74,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
 
         nav ul li ul li a {
             padding: 10px 15px;
-            background-color: #fff;
+            background-color: #6200ea;
             color: #fff;
             border-radius: 0;
         }
