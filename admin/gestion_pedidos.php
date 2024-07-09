@@ -12,9 +12,9 @@ $sql = "SELECT pc.Id, m.Nombre as Nombre_menú, c.Nombre AS ColegioNombre, cu.No
                h.Nombre AS Nombre_alumno, pc.Fecha_entrega, pc.Estado, 
                COALESCE(pc.Preferencias_alimenticias, 'Sin preferencias alimenticias') AS Preferencias_alimenticias 
         FROM Pedidos_Comida pc 
-        JOIN Colegios c ON h.Colegio_Id = c.Id 
-        JOIN Cursos cu ON h.Curso_Id = cu.Id 
-        JOIN Hijos h ON pc.Hijo_Id = h.Id 
+        JOIN Hijos h ON pc.Hijo_Id = h.Id
+        JOIN Colegios c ON h.Colegio = c.Id 
+        JOIN Cursos cu ON h.Curso = cu.Id 
         JOIN Menú m ON pc.Menú_Id = m.Id";
 $whereClauses = [];
 $params = [];
