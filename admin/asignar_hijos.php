@@ -84,12 +84,7 @@ $stmt = $pdo->prepare($query);
 $stmt->execute();
 $asignaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-echo "<pre>";
-echo "Paso 5 - Query: $query\n";
-echo "Asignaciones:\n";
-var_dump($asignaciones);
-echo "</pre>";
-exit();
+
 ?>
 
 <!DOCTYPE html>
