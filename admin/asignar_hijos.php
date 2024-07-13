@@ -68,24 +68,6 @@ $hijos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Verificar y depurar cada paso de la consulta
 
-// Paso 1: Join entre Usuarios_Hijos y Usuarios
-$query = "
-    SELECT uh.Usuario_Id, uh.Hijo_Id, u.Nombre AS NombrePapa
-    FROM Usuarios_Hijos uh
-    JOIN Usuarios u ON uh.Usuario_Id = u.Id
-";
-
-$stmt = $pdo->prepare($query);
-$stmt->execute();
-$asignaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-echo "<pre>";
-echo "Paso 1 - Query: $query\n";
-echo "Asignaciones:\n";
-var_dump($asignaciones);
-echo "</pre>";
-exit();
-
 // Paso 2: Añadir Join con Hijos
 $query = "
     SELECT uh.Usuario_Id, uh.Hijo_Id, u.Nombre AS NombrePapa, h.Nombre AS NombreHijo
@@ -100,70 +82,6 @@ $asignaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 echo "<pre>";
 echo "Paso 2 - Query: $query\n";
-echo "Asignaciones:\n";
-var_dump($asignaciones);
-echo "</pre>";
-exit();
-
-// Paso 3: Añadir Join con Colegios
-$query = "
-    SELECT uh.Usuario_Id, uh.Hijo_Id, u.Nombre AS NombrePapa, h.Nombre AS NombreHijo, c.Nombre AS Colegio
-    FROM Usuarios_Hijos uh
-    JOIN Usuarios u ON uh.Usuario_Id = u.Id
-    JOIN Hijos h ON uh.Hijo_Id = h.Id
-    JOIN Colegios c ON h.Colegio_Id = c.Id
-";
-
-$stmt = $pdo->prepare($query);
-$stmt->execute();
-$asignaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-echo "<pre>";
-echo "Paso 3 - Query: $query\n";
-echo "Asignaciones:\n";
-var_dump($asignaciones);
-echo "</pre>";
-exit();
-
-// Paso 4: Añadir Join con Cursos
-$query = "
-    SELECT uh.Usuario_Id, uh.Hijo_Id, u.Nombre AS NombrePapa, h.Nombre AS NombreHijo, c.Nombre AS Colegio, cu.Nombre AS Curso
-    FROM Usuarios_Hijos uh
-    JOIN Usuarios u ON uh.Usuario_Id = u.Id
-    JOIN Hijos h ON uh.Hijo_Id = h.Id
-    JOIN Colegios c ON h.Colegio_Id = c.Id
-    JOIN Cursos cu ON h.Curso_Id = cu.Id
-";
-
-$stmt = $pdo->prepare($query);
-$stmt->execute();
-$asignaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// echo "<pre>";
-// echo "Paso 4 - Query: $query\n";
-// echo "Asignaciones:\n";
-// var_dump($asignaciones);
-// echo "</pre>";
-// exit();
-
-// Paso 5: Añadir Join con Preferencias_Alimenticias
-$query = "
-    SELECT uh.Usuario_Id, uh.Hijo_Id, u.Nombre AS NombrePapa, h.Nombre AS NombreHijo, 
-           c.Nombre AS Colegio, cu.Nombre AS Curso, p.Nombre AS Preferencia
-    FROM Usuarios_Hijos uh
-    JOIN Usuarios u ON uh.Usuario_Id = u.Id
-    JOIN Hijos h ON uh.Hijo_Id = h.Id
-    JOIN Colegios c ON h.Colegio_Id = c.Id
-    JOIN Cursos cu ON h.Curso_Id = cu.Id
-    JOIN Preferencias_Alimenticias p ON h.Preferencias_Alimenticias = p.Id
-";
-
-$stmt = $pdo->prepare($query);
-$stmt->execute();
-$asignaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-echo "<pre>";
-echo "Paso 5 - Query: $query\n";
 echo "Asignaciones:\n";
 var_dump($asignaciones);
 echo "</pre>";
@@ -202,7 +120,7 @@ exit();
             <option value="">Seleccione un hijo</option>
             <?php foreach ($hijos as $hijo) : ?>
                 <option value="<?php echo htmlspecialchars($hijo['Id']); ?>">
-                    <?php echo htmlspecialchars($hijo['Nombre'] . ' - ' . $hijo['Colegio'] . ' - ' . $hijo['Curso']); ?>
+                    <?php echo htmlspecialchars($hijo['Nombre']); ?>
                 </option>
             <?php endforeach; ?>
         </select>
