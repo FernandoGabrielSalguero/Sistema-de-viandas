@@ -28,8 +28,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['asignar_hijo'])) {
             $stmt = $pdo->prepare("INSERT INTO Usuarios_Hijos (Usuario_Id, Hijo_Id) VALUES (?, ?)");
             if ($stmt->execute([$usuario_id, $hijo_id])) {
                 $success = "Hijo asignado con éxito.";
+                var_dump("Inserción exitosa en Usuarios_Hijos");
             } else {
                 $error = "Hubo un error al asignar el hijo.";
+                var_dump("Error al insertar en Usuarios_Hijos");
             }
         }
     }
