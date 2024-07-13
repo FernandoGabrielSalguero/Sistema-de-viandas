@@ -68,12 +68,13 @@ $hijos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Verificar y depurar cada paso de la consulta
 
-// Paso 2: Añadir Join con Hijos
+// Paso 3: Añadir Join con Colegios
 $query = "
-    SELECT uh.Usuario_Id, uh.Hijo_Id, u.Nombre AS NombrePapa, h.Nombre AS NombreHijo
+    SELECT uh.Usuario_Id, uh.Hijo_Id, u.Nombre AS NombrePapa, h.Nombre AS NombreHijo, c.Nombre AS Colegio
     FROM Usuarios_Hijos uh
     JOIN Usuarios u ON uh.Usuario_Id = u.Id
     JOIN Hijos h ON uh.Hijo_Id = h.Id
+    JOIN Colegios c ON h.Colegio_Id = c.Id
 ";
 
 $stmt = $pdo->prepare($query);
@@ -81,7 +82,7 @@ $stmt->execute();
 $asignaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 echo "<pre>";
-echo "Paso 2 - Query: $query\n";
+echo "Paso 3 - Query: $query\n";
 echo "Asignaciones:\n";
 var_dump($asignaciones);
 echo "</pre>";
