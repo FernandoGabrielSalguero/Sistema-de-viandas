@@ -121,16 +121,28 @@ $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <button type="submit" name="crear_usuario">Crear Usuario</button>
     </form>
 
+    <h2>Filtros</h2>
+    <div>
+        <label for="filtro_nombre">Nombre</label>
+        <input type="text" id="filtro_nombre" placeholder="Filtrar por Nombre">
+        
+        <label for="filtro_usuario">Usuario</label>
+        <input type="text" id="filtro_usuario" placeholder="Filtrar por Usuario">
+        
+        <label for="filtro_correo">Correo</label>
+        <input type="text" id="filtro_correo" placeholder="Filtrar por Correo">
+    </div>
+
     <h2>Usuarios Registrados</h2>
     <table>
         <tr>
-            <th><input type="text" id="filtro_id" placeholder="ID"></th>
-            <th><input type="text" id="filtro_nombre" placeholder="Nombre"></th>
-            <th><input type="text" id="filtro_usuario" placeholder="Usuario"></th>
-            <th><input type="text" id="filtro_telefono" placeholder="Teléfono"></th>
-            <th><input type="text" id="filtro_correo" placeholder="Correo"></th>
-            <th><input type="text" id="filtro_rol" placeholder="Rol"></th>
-            <th><input type="text" id="filtro_saldo" placeholder="Saldo"></th>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Usuario</th>
+            <th>Teléfono</th>
+            <th>Correo</th>
+            <th>Rol</th>
+            <th>Saldo</th>
             <th>Acciones</th>
         </tr>
         <?php foreach ($usuarios as $usuario) : ?>
@@ -162,36 +174,35 @@ $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const filtros = {
-            id: document.getElementById('filtro_id'),
-            nombre: document.getElementById('filtro_nombre'),
-            usuario: document.getElementById('filtro_usuario'),
-            telefono: document.getElementById('filtro_telefono'),
-            correo: document.getElementById('filtro_correo'),
-            rol: document.getElementById('filtro_rol'),
-            saldo: document.getElementById('filtro_saldo')
-        };
+        const filtroNombre = document.getElementById('filtro_nombre');
+        const filtroUsuario = document.getElementById('filtro_usuario');
+        const filtroCorreo = document.getElementById('filtro_correo');
 
         function filtrarTabla() {
             const rows = document.querySelectorAll('table tr');
             rows.forEach((row, index) => {
                 if (index === 0) return; // Saltar el encabezado
 
-                let mostrar = true;
-                Object.keys(filtros).forEach((key, idx) => {
-                    const filtro = filtros[key].value.toLowerCase();
-                    const valorCelda = row.querySelectorAll('td')[idx].innerText.toLowerCase();
-                    if (filtro && !valorCelda.includes(filtro)) {
-                        mostrar = false;
-                    }
-                });
+                const nombre = row.querySelector('td:nth-child(2) input').value.toLowerCase();
+                const usuario = row.querySelector('td:nth-child(3) input').value.toLowerCase();
+                const correo = row.querySelector('td:nth-child(5) input').value.toLowerCase();
+
+                const filtroNombreVal = filtroNombre.value.toLowerCase();
+                const filtroUsuarioVal = filtroUsuario.value.toLowerCase();
+                const filtroCorreoVal = filtroCorreo.value.toLowerCase();
+
+                const mostrar =
+                    (filtroNombreVal === '' || nombre.includes(filtroNombreVal)) &&
+                    (filtroUsuarioVal === '' || usuario.includes(filtroUsuarioVal)) &&
+                    (filtroCorreoVal === '' || correo.includes(filtroCorreoVal));
+
                 row.style.display = mostrar ? '' : 'none';
             });
         }
 
-        Object.values(filtros).forEach((filtro) => {
-            filtro.addEventListener('input', filtrarTabla);
-        });
+        filtroNombre.addEventListener('input', filtrarTabla);
+        filtroUsuario.addEventListener('input', filtrarTabla);
+        filtroCorreo.addEventListener('input', filtrarTabla);
     });
     </script>
 </body>
