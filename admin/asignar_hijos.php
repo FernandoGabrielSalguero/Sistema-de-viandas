@@ -67,7 +67,7 @@ $stmt->execute();
 $hijos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Obtener la lista de hijos asignados a cada usuario
-$stmt = $pdo->prepare("SELECT uh.Usuario_Id, uh.Hijo_Id, u.Nombre AS NombrePapa, h.Nombre AS NombreHijo, h.Colegio_Id, h.Curso_Id, h.Preferencias_Alimenticias, c.Nombre AS Colegio, cu.Nombre AS Curso, p.Nombre AS Preferencia
+$stmt = $pdo->prepare("SELECT uh.Usuario_Id, uh.Hijo_Id, u.Nombre AS NombrePapa, h.Nombre AS NombreHijo, c.Nombre AS Colegio, cu.Nombre AS Curso, p.Nombre AS Preferencia
                        FROM Usuarios_Hijos uh
                        JOIN Usuarios u ON uh.Usuario_Id = u.Id
                        JOIN Hijos h ON uh.Hijo_Id = h.Id
