@@ -139,12 +139,12 @@ $stmt = $pdo->prepare($query);
 $stmt->execute();
 $asignaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-echo "<pre>";
-echo "Paso 4 - Query: $query\n";
-echo "Asignaciones:\n";
-var_dump($asignaciones);
-echo "</pre>";
-exit();
+// echo "<pre>";
+// echo "Paso 4 - Query: $query\n";
+// echo "Asignaciones:\n";
+// var_dump($asignaciones);
+// echo "</pre>";
+// exit();
 
 // Paso 5: Añadir Join con Preferencias_Alimenticias
 $query = "
