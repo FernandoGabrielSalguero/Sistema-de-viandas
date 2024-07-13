@@ -121,17 +121,6 @@ $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <button type="submit" name="crear_usuario">Crear Usuario</button>
     </form>
 
-    <h2>Filtros</h2>
-    <div>
-        <label for="filtro_nombre">Nombre</label>
-        <input type="text" id="filtro_nombre" placeholder="Filtrar por Nombre">
-        
-        <label for="filtro_usuario">Usuario</label>
-        <input type="text" id="filtro_usuario" placeholder="Filtrar por Usuario">
-        
-        <label for="filtro_correo">Correo</label>
-        <input type="text" id="filtro_correo" placeholder="Filtrar por Correo">
-    </div>
 
     <h2>Usuarios Registrados</h2>
     <table>
