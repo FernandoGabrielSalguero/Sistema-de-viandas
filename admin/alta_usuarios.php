@@ -35,8 +35,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['crear_usuario'])) {
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['eliminar_usuario'])) {
     $usuario_id = $_POST['usuario_id'];
     try {
+        // Eliminar las referencias en la tabla Usuarios_Hijos
+        $stmt = $pdo->prepare("DELETE FROM Usuarios_Hijos WHERE Usuario_Id = ?");
+        $stmt->execute([$usuario_id]);
+        
+        // Ahora eliminar el usuario de la tabla Usuarios
         $stmt = $pdo->prepare("DELETE FROM Usuarios WHERE Id = ?");
         $stmt->execute([$usuario_id]);
+        
         $success = "Usuario eliminado con éxito.";
     } catch (PDOException $e) {
         $error = "Hubo un error al eliminar el usuario: " . $e->getMessage();
@@ -172,9 +178,9 @@ $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 if (index === 0) return; // Saltar el encabezado
 
                 let mostrar = true;
-                Object.keys(filtros).forEach((key) => {
+                Object.keys(filtros).forEach((key, idx) => {
                     const filtro = filtros[key].value.toLowerCase();
-                    const valorCelda = row.querySelectorAll('td')[index].innerText.toLowerCase();
+                    const valorCelda = row.querySelectorAll('td')[idx].innerText.toLowerCase();
                     if (filtro && !valorCelda.includes(filtro)) {
                         mostrar = false;
                     }
