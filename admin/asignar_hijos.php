@@ -53,36 +53,47 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['eliminar_asignacion'])
     exit();
 }
 
+// Procesar la actualización de una asignación
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['actualizar_asignacion'])) {
+    $usuario_id = $_POST['usuario_id'];
+    $hijo_id = $_POST['hijo_id'];
+    $nuevo_hijo_id = $_POST['nuevo_hijo_id'];
+
+    // Validar que todos los campos estén llenos
+    if (empty($usuario_id) || empty($hijo_id) || empty($nuevo_hijo_id)) {
+        $error = "Todos los campos son obligatorios.";
+    } else {
+        // Actualizar la relación en la base de datos
+        $stmt = $pdo->prepare("UPDATE Usuarios_Hijos SET Hijo_Id = ? WHERE Usuario_Id = ? AND Hijo_Id = ?");
+        if ($stmt->execute([$nuevo_hijo_id, $usuario_id, $hijo_id])) {
+            $success = "Asignación actualizada con éxito.";
+        } else {
+            $error = "Hubo un error al actualizar la asignación.";
+        }
+    }
+}
+
 // Obtener todos los usuarios con rol "Papás"
 $stmt = $pdo->prepare("SELECT Id, Nombre FROM Usuarios WHERE Rol = 'papas'");
 $stmt->execute();
 $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Obtener todos los hijos
-$stmt = $pdo->prepare("SELECT h.Id, h.Nombre, h.Colegio_Id, h.Curso_Id, h.Preferencias_Alimenticias, c.Nombre AS Colegio, cu.Nombre AS Curso
-                       FROM Hijos h
-                       JOIN Colegios c ON h.Colegio_Id = c.Id
-                       JOIN Cursos cu ON h.Curso_Id = cu.Id");
+$stmt = $pdo->prepare("SELECT h.Id, h.Nombre FROM Hijos h");
 $stmt->execute();
 $hijos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Obtener la lista de hijos asignados a cada usuario
 $query = "
-    SELECT uh.Usuario_Id, uh.Hijo_Id, u.Nombre AS NombrePapa, h.Nombre AS NombreHijo, 
-           c.Nombre AS Colegio, cu.Nombre AS Curso, p.Nombre AS Preferencia
+    SELECT uh.Usuario_Id, uh.Hijo_Id, u.Nombre AS NombrePapa, h.Nombre AS NombreHijo
     FROM Usuarios_Hijos uh
     JOIN Usuarios u ON uh.Usuario_Id = u.Id
     JOIN Hijos h ON uh.Hijo_Id = h.Id
-    JOIN Colegios c ON h.Colegio_Id = c.Id
-    JOIN Cursos cu ON h.Curso_Id = cu.Id
-    JOIN Preferencias_Alimenticias p ON h.Preferencias_Alimenticias = p.Id
 ";
 
 $stmt = $pdo->prepare($query);
 $stmt->execute();
 $asignaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Mostrar los datos directamente en pantalla
 ?>
 
 <!DOCTYPE html>
@@ -131,22 +142,25 @@ $asignaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <tr>
                 <th>Nombre del Papá</th>
                 <th>Nombre del Hijo</th>
-                <th>Colegio</th>
-                <th>Curso</th>
-                <th>Preferencias Alimenticias</th>
                 <th>Acción</th>
             </tr>
             <?php foreach ($asignaciones as $asignacion) : ?>
                 <tr>
                     <form method="post" action="asignar_hijos.php">
                         <td><?php echo htmlspecialchars($asignacion['NombrePapa']); ?></td>
-                        <td><?php echo htmlspecialchars($asignacion['NombreHijo']); ?></td>
-                        <td><?php echo htmlspecialchars($asignacion['Colegio']); ?></td>
-                        <td><?php echo htmlspecialchars($asignacion['Curso']); ?></td>
-                        <td><?php echo htmlspecialchars($asignacion['Preferencia']); ?></td>
+                        <td>
+                            <select name="nuevo_hijo_id" required>
+                                <?php foreach ($hijos as $hijo) : ?>
+                                    <option value="<?php echo htmlspecialchars($hijo['Id']); ?>" <?php echo ($hijo['Id'] == $asignacion['Hijo_Id']) ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($hijo['Nombre']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </td>
                         <td>
                             <input type="hidden" name="hijo_id" value="<?php echo htmlspecialchars($asignacion['Hijo_Id']); ?>">
                             <input type="hidden" name="usuario_id" value="<?php echo htmlspecialchars($asignacion['Usuario_Id']); ?>">
+                            <button type="submit" name="actualizar_asignacion">Actualizar</button>
                             <button type="submit" name="eliminar_asignacion" onclick="return confirm('¿Está seguro de que desea eliminar esta asignación?');">Eliminar</button>
                         </td>
                     </form>
@@ -156,19 +170,5 @@ $asignaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <?php else : ?>
         <p>No hay asignaciones disponibles.</p>
     <?php endif; ?>
-
-    <h2>Datos Obtenidos de la Base de Datos</h2>
-    <pre>
-        <?php
-        echo "Usuarios con rol 'papas':\n";
-        print_r($usuarios);
-        
-        echo "\nHijos:\n";
-        print_r($hijos);
-        
-        echo "\nAsignaciones:\n";
-        print_r($asignaciones);
-        ?>
-    </pre>
 </body>
 </html>
