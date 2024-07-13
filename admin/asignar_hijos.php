@@ -66,9 +66,7 @@ $stmt = $pdo->prepare("SELECT h.Id, h.Nombre, h.Colegio_Id, h.Curso_Id, h.Prefer
 $stmt->execute();
 $hijos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Verificar y depurar cada paso de la consulta
-
-// Paso 5: Añadir Join con Preferencias_Alimenticias
+// Obtener la lista de hijos asignados a cada usuario
 $query = "
     SELECT uh.Usuario_Id, uh.Hijo_Id, u.Nombre AS NombrePapa, h.Nombre AS NombreHijo, 
            c.Nombre AS Colegio, cu.Nombre AS Curso, p.Nombre AS Preferencia
@@ -83,8 +81,6 @@ $query = "
 $stmt = $pdo->prepare($query);
 $stmt->execute();
 $asignaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-
 ?>
 
 <!DOCTYPE html>
