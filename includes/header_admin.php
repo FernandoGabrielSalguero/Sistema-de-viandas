@@ -100,12 +100,17 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
                 <ul>
                     <li><a href="alta_usuarios.php">Alta Usuarios</a></li>
                     <li><a href="asignar_hijos.php">Gestión Usuarios</a></li>
-                    <li><a href="gestion_representantes.php">Gestión Representantes</a></li>
                     <li><a href="alta_preferencias.php">Alta Preferencias Alimenticias</a></li>
                 </ul>
             </li>
-            <li><a href="alta_colegios.php">Alta Colegios</a></li>
-            <li><a href="gestion_colegios.php">Gestión Colegios</a></li>
+            <li>
+                <a href="#">Colegios</a>
+                <ul>
+                    <li><a href="alta_colegios.php">Alta Colegios</a></li>
+                    <li><a href="gestion_colegios.php">Gestión Colegios</a></li>
+                    <li><a href="gestion_representantes.php">Gestión Representantes</a></li>
+                </ul>
+            </li>
             <li><a href="alta_menu.php">Alta Menú</a></li>
             <li><a href="logout.php">Salir</a></li>
         </ul>
