@@ -133,6 +133,11 @@ $stmt = $pdo->prepare("SELECT uh.Usuario_Id, uh.Hijo_Id, u.Nombre AS NombrePapa,
                        JOIN Preferencias_Alimenticias p ON h.Preferencias_Alimenticias = p.Id");
 $stmt->execute();
 $asignaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Depuración de datos
+var_dump($usuarios);
+var_dump($hijos);
+var_dump($asignaciones);
 ?>
 
 <!DOCTYPE html>
