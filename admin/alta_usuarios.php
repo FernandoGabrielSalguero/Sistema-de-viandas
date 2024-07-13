@@ -68,9 +68,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['actualizar_usuario']))
     }
 }
 
-// Obtener todos los usuarios
-$stmt = $pdo->prepare("SELECT * FROM Usuarios");
-$stmt->execute();
+// Obtener todos los usuarios con filtros
+$nombre_filtro = isset($_GET['nombre_filtro']) ? $_GET['nombre_filtro'] : '';
+$usuario_filtro = isset($_GET['usuario_filtro']) ? $_GET['usuario_filtro'] : '';
+$correo_filtro = isset($_GET['correo_filtro']) ? $_GET['correo_filtro'] : '';
+
+$query = "SELECT * FROM Usuarios WHERE 1=1";
+$params = [];
+
+if (!empty($nombre_filtro)) {
+    $query .= " AND Nombre LIKE ?";
+    $params[] = '%' . $nombre_filtro . '%';
+}
+if (!empty($usuario_filtro)) {
+    $query .= " AND Usuario LIKE ?";
+    $params[] = '%' . $usuario_filtro . '%';
+}
+if (!empty($correo_filtro)) {
+    $query .= " AND Correo LIKE ?";
+    $params[] = '%' . $correo_filtro . '%';
+}
+
+$stmt = $pdo->prepare($query);
+$stmt->execute($params);
 $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
@@ -121,6 +141,19 @@ $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <button type="submit" name="crear_usuario">Crear Usuario</button>
     </form>
 
+    <h2>Filtros</h2>
+    <form method="get" action="alta_usuarios.php">
+        <label for="nombre_filtro">Nombre</label>
+        <input type="text" id="nombre_filtro" name="nombre_filtro" value="<?php echo htmlspecialchars($nombre_filtro); ?>">
+        
+        <label for="usuario_filtro">Usuario</label>
+        <input type="text" id="usuario_filtro" name="usuario_filtro" value="<?php echo htmlspecialchars($usuario_filtro); ?>">
+        
+        <label for="correo_filtro">Correo</label>
+        <input type="text" id="correo_filtro" name="correo_filtro" value="<?php echo htmlspecialchars($correo_filtro); ?>">
+
+        <button type="submit">Buscar</button>
+    </form>
 
     <h2>Usuarios Registrados</h2>
     <table>
@@ -160,39 +193,5 @@ $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </tr>
         <?php endforeach; ?>
     </table>
-
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const filtroNombre = document.getElementById('filtro_nombre');
-        const filtroUsuario = document.getElementById('filtro_usuario');
-        const filtroCorreo = document.getElementById('filtro_correo');
-
-        function filtrarTabla() {
-            const rows = document.querySelectorAll('table tr');
-            rows.forEach((row, index) => {
-                if (index === 0) return; // Saltar el encabezado
-
-                const nombre = row.querySelector('td:nth-child(2) input').value.toLowerCase();
-                const usuario = row.querySelector('td:nth-child(3) input').value.toLowerCase();
-                const correo = row.querySelector('td:nth-child(5) input').value.toLowerCase();
-
-                const filtroNombreVal = filtroNombre.value.toLowerCase();
-                const filtroUsuarioVal = filtroUsuario.value.toLowerCase();
-                const filtroCorreoVal = filtroCorreo.value.toLowerCase();
-
-                const mostrar =
-                    (filtroNombreVal === '' || nombre.includes(filtroNombreVal)) &&
-                    (filtroUsuarioVal === '' || usuario.includes(filtroUsuarioVal)) &&
-                    (filtroCorreoVal === '' || correo.includes(filtroCorreoVal));
-
-                row.style.display = mostrar ? '' : 'none';
-            });
-        }
-
-        filtroNombre.addEventListener('input', filtrarTabla);
-        filtroUsuario.addEventListener('input', filtrarTabla);
-        filtroCorreo.addEventListener('input', filtrarTabla);
-    });
-    </script>
 </body>
 </html>
