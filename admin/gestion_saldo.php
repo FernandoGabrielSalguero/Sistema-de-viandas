@@ -30,6 +30,23 @@ $pedidosSaldo = $stmt->fetchAll(PDO::FETCH_ASSOC);
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
     $id = $_POST['id'];
     $nuevo_estado = $_POST['estado'];
+
+    // Obtener el pedido de saldo específico
+    $stmt = $pdo->prepare("SELECT Usuario_Id, Saldo FROM Pedidos_Saldo WHERE Id = ?");
+    $stmt->execute([$id]);
+    $pedido = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Si el nuevo estado es "Aprobado", sumar el saldo al usuario
+    if ($nuevo_estado == 'Aprobado' && $pedido['Estado'] != 'Aprobado') {
+        $usuario_id = $pedido['Usuario_Id'];
+        $saldo = $pedido['Saldo'];
+
+        // Sumar el saldo al saldo del usuario
+        $stmt = $pdo->prepare("UPDATE Usuarios SET Saldo = Saldo + ? WHERE Id = ?");
+        $stmt->execute([$saldo, $usuario_id]);
+    }
+
+    // Actualizar el estado del pedido de saldo
     $stmt = $pdo->prepare("UPDATE Pedidos_Saldo SET Estado = ? WHERE Id = ?");
     if ($stmt->execute([$nuevo_estado, $id])) {
         $success = "Estado del saldo actualizado con éxito.";
