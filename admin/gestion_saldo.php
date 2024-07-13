@@ -32,11 +32,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
     $nuevo_estado = $_POST['estado'];
 
     // Obtener el pedido de saldo específico
-    $stmt = $pdo->prepare("SELECT Usuario_Id, Saldo FROM Pedidos_Saldo WHERE Id = ?");
+    $stmt = $pdo->prepare("SELECT Usuario_Id, Saldo, Estado FROM Pedidos_Saldo WHERE Id = ?");
     $stmt->execute([$id]);
     $pedido = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Si el nuevo estado es "Aprobado", sumar el saldo al usuario
+    // Si el nuevo estado es "Aprobado" y el estado anterior no era "Aprobado", sumar el saldo al usuario
     if ($nuevo_estado == 'Aprobado' && $pedido['Estado'] != 'Aprobado') {
         $usuario_id = $pedido['Usuario_Id'];
         $saldo = $pedido['Saldo'];
@@ -95,7 +95,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
             <td><?php echo htmlspecialchars($pedido['Id']); ?></td>
             <td><?php echo htmlspecialchars($pedido['Usuario_Id']); ?></td>
             <td><?php echo htmlspecialchars($pedido['Saldo']); ?></td>
-            <td><?php echo htmlspecialchars($pedido['Estado']); ?></td>
+            <td><?php echo htmlspecialchars($pedido['Estado'] ?? 'Desconocido'); ?></td>
             <td><a href="../uploads/<?php echo htmlspecialchars($pedido['Comprobante']); ?>" target="_blank">Ver Comprobante</a></td>
             <td><?php echo htmlspecialchars($pedido['Fecha_pedido']); ?></td>
             <td>
