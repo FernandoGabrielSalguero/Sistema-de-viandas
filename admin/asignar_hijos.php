@@ -53,6 +53,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['eliminar_asignacion'])
     exit();
 }
 
+// Obtener la lista de hijos asignados a cada usuario
+$stmt = $pdo->prepare("SELECT uh.Usuario_Id, uh.Hijo_Id, u.Nombre AS NombrePapa, h.Nombre AS NombreHijo, c.Nombre AS Colegio, cu.Nombre AS Curso, p.Nombre AS Preferencia
+                       FROM Usuarios_Hijos uh
+                       JOIN Usuarios u ON uh.Usuario_Id = u.Id
+                       JOIN Hijos h ON uh.Hijo_Id = h.Id
+                       JOIN Colegios c ON h.Colegio_Id = c.Id
+                       JOIN Cursos cu ON h.Curso_Id = cu.Id
+                       JOIN Preferencias_Alimenticias p ON h.Preferencias_Alimenticias = p.Id");
+$stmt->execute();
+$asignaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Depuración de datos
+var_dump($asignaciones);
+exit();
+
+
+
 // Obtener todos los usuarios con rol "Papás"
 $stmt = $pdo->prepare("SELECT Id, Nombre FROM Usuarios WHERE Rol = 'papas'");
 $stmt->execute();
