@@ -81,8 +81,6 @@ $query = "
 $stmt = $pdo->prepare($query);
 $stmt->execute();
 $asignaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Mostrar los datos directamente en pantalla
 ?>
 
 <!DOCTYPE html>
@@ -125,18 +123,32 @@ $asignaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <button type="submit" name="asignar_hijo">Asignar Hijo</button>
     </form>
 
-    <h2>Datos Obtenidos de la Base de Datos</h2>
-    <pre>
-        <?php
-        echo "Usuarios con rol 'papas':\n";
-        print_r($usuarios);
-        
-        echo "\nHijos:\n";
-        print_r($hijos);
-        
-        echo "\nAsignaciones:\n";
-        print_r($asignaciones);
-        ?>
-    </pre>
+    <h2>Lista de Hijos Asignados</h2>
+    <table>
+        <tr>
+            <th>Nombre del Papá</th>
+            <th>Nombre del Hijo</th>
+            <th>Colegio</th>
+            <th>Curso</th>
+            <th>Preferencias Alimenticias</th>
+            <th>Acción</th>
+        </tr>
+        <?php foreach ($asignaciones as $asignacion) : ?>
+            <tr>
+                <form method="post" action="asignar_hijos.php">
+                    <td><?php echo htmlspecialchars($asignacion['NombrePapa']); ?></td>
+                    <td><?php echo htmlspecialchars($asignacion['NombreHijo']); ?></td>
+                    <td><?php echo htmlspecialchars($asignacion['Colegio']); ?></td>
+                    <td><?php echo htmlspecialchars($asignacion['Curso']); ?></td>
+                    <td><?php echo htmlspecialchars($asignacion['Preferencia']); ?></td>
+                    <td>
+                        <input type="hidden" name="hijo_id" value="<?php echo htmlspecialchars($asignacion['Hijo_Id']); ?>">
+                        <input type="hidden" name="usuario_id" value="<?php echo htmlspecialchars($asignacion['Usuario_Id']); ?>">
+                        <button type="submit" name="eliminar_asignacion" onclick="return confirm('¿Está seguro de que desea eliminar esta asignación?');">Eliminar</button>
+                    </td>
+                </form>
+            </tr>
+        <?php endforeach; ?>
+    </table>
 </body>
 </html>
