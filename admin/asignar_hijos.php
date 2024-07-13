@@ -81,6 +81,12 @@ $query = "
 $stmt = $pdo->prepare($query);
 $stmt->execute();
 $asignaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Depuración de datos
+echo "<pre>";
+echo "Asignaciones:\n";
+var_dump($asignaciones);
+echo "</pre>";
 ?>
 
 <!DOCTYPE html>
