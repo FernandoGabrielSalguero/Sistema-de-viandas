@@ -67,7 +67,7 @@ $stmt->execute();
 $hijos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Obtener la lista de hijos asignados a cada usuario
-$stmt = $pdo->prepare("
+$query = "
     SELECT uh.Usuario_Id, uh.Hijo_Id, u.Nombre AS NombrePapa, h.Nombre AS NombreHijo, 
            c.Nombre AS Colegio, cu.Nombre AS Curso, p.Nombre AS Preferencia
     FROM Usuarios_Hijos uh
@@ -76,12 +76,18 @@ $stmt = $pdo->prepare("
     JOIN Colegios c ON h.Colegio_Id = c.Id
     JOIN Cursos cu ON h.Curso_Id = cu.Id
     JOIN Preferencias_Alimenticias p ON h.Preferencias_Alimenticias = p.Id
-");
+";
+
+$stmt = $pdo->prepare($query);
 $stmt->execute();
 $asignaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Depuración de datos
+echo "<pre>";
+echo "Query: $query\n";
+echo "Asignaciones:\n";
 var_dump($asignaciones);
+echo "</pre>";
 exit();
 ?>
 
