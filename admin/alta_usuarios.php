@@ -15,14 +15,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['crear_usuario'])) {
     $telefono = $_POST['telefono'];
     $correo = $_POST['correo'];
     $rol = $_POST['rol'];
+    $saldo = $_POST['saldo'];
 
     // Validar que todos los campos estén llenos
-    if (empty($nombre) || empty($usuario) || empty($contrasena) || empty($telefono) || empty($correo) || empty($rol)) {
+    if (empty($nombre) || empty($usuario) || empty($contrasena) || empty($telefono) || empty($correo) || empty($rol) || empty($saldo)) {
         $error = "Todos los campos son obligatorios.";
     } else {
         // Insertar el nuevo usuario en la base de datos
-        $stmt = $pdo->prepare("INSERT INTO Usuarios (Nombre, Usuario, Contrasena, Telefono, Correo, Rol) VALUES (?, ?, ?, ?, ?, ?)");
-        if ($stmt->execute([$nombre, $usuario, $contrasena, $telefono, $correo, $rol])) {
+        $stmt = $pdo->prepare("INSERT INTO Usuarios (Nombre, Usuario, Contrasena, Telefono, Correo, Rol, Saldo) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        if ($stmt->execute([$nombre, $usuario, $contrasena, $telefono, $correo, $rol, $saldo])) {
             $success = "Usuario creado con éxito.";
         } else {
             $error = "Hubo un error al crear el usuario.";
@@ -33,11 +34,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['crear_usuario'])) {
 // Procesar la eliminación de un usuario
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['eliminar_usuario'])) {
     $usuario_id = $_POST['usuario_id'];
-    $stmt = $pdo->prepare("DELETE FROM Usuarios WHERE Id = ?");
-    if ($stmt->execute([$usuario_id])) {
+    try {
+        $stmt = $pdo->prepare("DELETE FROM Usuarios WHERE Id = ?");
+        $stmt->execute([$usuario_id]);
         $success = "Usuario eliminado con éxito.";
-    } else {
-        $error = "Hubo un error al eliminar el usuario.";
+    } catch (PDOException $e) {
+        $error = "Hubo un error al eliminar el usuario: " . $e->getMessage();
     }
 }
 
@@ -49,10 +51,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['actualizar_usuario']))
     $telefono = $_POST['telefono'];
     $correo = $_POST['correo'];
     $rol = $_POST['rol'];
+    $saldo = $_POST['saldo'];
 
     // Actualizar el usuario en la base de datos
-    $stmt = $pdo->prepare("UPDATE Usuarios SET Nombre = ?, Usuario = ?, Telefono = ?, Correo = ?, Rol = ? WHERE Id = ?");
-    if ($stmt->execute([$nombre, $usuario, $telefono, $correo, $rol, $usuario_id])) {
+    $stmt = $pdo->prepare("UPDATE Usuarios SET Nombre = ?, Usuario = ?, Telefono = ?, Correo = ?, Rol = ?, Saldo = ? WHERE Id = ?");
+    if ($stmt->execute([$nombre, $usuario, $telefono, $correo, $rol, $saldo, $usuario_id])) {
         $success = "Usuario actualizado con éxito.";
     } else {
         $error = "Hubo un error al actualizar el usuario.";
@@ -105,6 +108,9 @@ $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <option value="representante">Representante</option>
             <option value="administrador">Administrador</option>
         </select>
+
+        <label for="saldo">Saldo</label>
+        <input type="number" step="0.01" id="saldo" name="saldo" required>
         
         <button type="submit" name="crear_usuario">Crear Usuario</button>
     </form>
@@ -112,12 +118,13 @@ $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <h2>Usuarios Registrados</h2>
     <table>
         <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Usuario</th>
-            <th>Teléfono</th>
-            <th>Correo</th>
-            <th>Rol</th>
+            <th><input type="text" id="filtro_id" placeholder="ID"></th>
+            <th><input type="text" id="filtro_nombre" placeholder="Nombre"></th>
+            <th><input type="text" id="filtro_usuario" placeholder="Usuario"></th>
+            <th><input type="text" id="filtro_telefono" placeholder="Teléfono"></th>
+            <th><input type="text" id="filtro_correo" placeholder="Correo"></th>
+            <th><input type="text" id="filtro_rol" placeholder="Rol"></th>
+            <th><input type="text" id="filtro_saldo" placeholder="Saldo"></th>
             <th>Acciones</th>
         </tr>
         <?php foreach ($usuarios as $usuario) : ?>
@@ -136,6 +143,7 @@ $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <option value="administrador" <?php echo ($usuario['Rol'] == 'administrador') ? 'selected' : ''; ?>>Administrador</option>
                     </select>
                 </td>
+                <td><input type="number" step="0.01" name="saldo" value="<?php echo htmlspecialchars($usuario['Saldo']); ?>" required></td>
                 <td>
                     <input type="hidden" name="usuario_id" value="<?php echo htmlspecialchars($usuario['Id']); ?>">
                     <button type="submit" name="actualizar_usuario">Actualizar</button>
@@ -145,5 +153,40 @@ $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </tr>
         <?php endforeach; ?>
     </table>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const filtros = {
+            id: document.getElementById('filtro_id'),
+            nombre: document.getElementById('filtro_nombre'),
+            usuario: document.getElementById('filtro_usuario'),
+            telefono: document.getElementById('filtro_telefono'),
+            correo: document.getElementById('filtro_correo'),
+            rol: document.getElementById('filtro_rol'),
+            saldo: document.getElementById('filtro_saldo')
+        };
+
+        function filtrarTabla() {
+            const rows = document.querySelectorAll('table tr');
+            rows.forEach((row, index) => {
+                if (index === 0) return; // Saltar el encabezado
+
+                let mostrar = true;
+                Object.keys(filtros).forEach((key) => {
+                    const filtro = filtros[key].value.toLowerCase();
+                    const valorCelda = row.querySelectorAll('td')[index].innerText.toLowerCase();
+                    if (filtro && !valorCelda.includes(filtro)) {
+                        mostrar = false;
+                    }
+                });
+                row.style.display = mostrar ? '' : 'none';
+            });
+        }
+
+        Object.values(filtros).forEach((filtro) => {
+            filtro.addEventListener('input', filtrarTabla);
+        });
+    });
+    </script>
 </body>
 </html>
