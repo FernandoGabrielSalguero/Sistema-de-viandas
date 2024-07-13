@@ -99,6 +99,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
                 <a href="#">Usuarios</a>
                 <ul>
                     <li><a href="alta_usuarios.php">Gestión Usuarios</a></li>
+                    <li><a href="agregar_hijo.php">Crear Hijos</a></li>
                     <li><a href="asignar_hijos.php">Asignación Hijos</a></li>
                     <li><a href="alta_preferencias.php">Alta Preferencias Alimenticias</a></li>
                 </ul>
