@@ -5,10 +5,10 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 // Configuración de la base de datos
-$host = 'localhost';
-$db   = 'nombre_de_tu_base_de_datos';
-$user = 'tu_usuario';
-$pass = 'tu_contraseña';
+$host = '127.0.0.1';
+$db = 'u437094107_viandas_sch00l';
+$user = 'u437094107_adm111n';
+$pass = '9t:RuQ7^nr+/';
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
