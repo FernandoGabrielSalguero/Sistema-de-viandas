@@ -18,7 +18,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'cocina') {
 ?>
 <nav>
     <ul>
-        <li><a href="pedidos.php">Pedidos</a></li>
+        <!-- <li><a href="pedidos.php">Pedidos</a></li> -->
         <li><a href="logout.php">Salir</a></li>
     </ul>
 </nav>
