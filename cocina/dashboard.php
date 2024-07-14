@@ -11,6 +11,8 @@ include '../includes/db.php';
 $fecha_filtro = '';
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['filtrar_fecha'])) {
     $fecha_filtro = $_POST['fecha_entrega'];
+} elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['eliminar_filtro'])) {
+    $fecha_filtro = '';
 }
 
 // Obtener la cantidad total de viandas compradas, agrupadas por nombre de menú y día de entrega
@@ -104,6 +106,7 @@ $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <label for="fecha_entrega">Filtrar por Fecha de Entrega:</label>
         <input type="date" id="fecha_entrega" name="fecha_entrega" value="<?php echo htmlspecialchars($fecha_filtro); ?>">
         <button type="submit" name="filtrar_fecha">Filtrar</button>
+        <button type="submit" name="eliminar_filtro">Eliminar Filtro</button>
     </form>
     
     <h2>Total de Menús</h2>
