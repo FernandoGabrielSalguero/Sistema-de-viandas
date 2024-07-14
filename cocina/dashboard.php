@@ -7,34 +7,54 @@ error_reporting(E_ALL);
 include '../includes/header_cocina.php';
 include '../includes/db.php';
 
+// Procesar el formulario de filtro por fecha de entrega
+$fecha_filtro = '';
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['filtrar_fecha'])) {
+    $fecha_filtro = $_POST['fecha_entrega'];
+}
+
 // Obtener la cantidad total de viandas compradas, agrupadas por nombre de menú y día de entrega
 $query_menus = "
-    SELECT m.Nombre AS MenuNombre, pc.Fecha_entrega, COUNT(*) AS Cantidad
+    SELECT m.Nombre AS MenuNombre, DATE_FORMAT(pc.Fecha_entrega, '%d/%b/%y') AS FechaEntrega, COUNT(*) AS Cantidad
     FROM Pedidos_Comida pc
     JOIN Menú m ON pc.Menú_Id = m.Id
-    GROUP BY m.Nombre, pc.Fecha_entrega
 ";
+if (!empty($fecha_filtro)) {
+    $query_menus .= " WHERE pc.Fecha_entrega = ?";
+}
+$query_menus .= " GROUP BY m.Nombre, pc.Fecha_entrega";
 $stmt = $pdo->prepare($query_menus);
-$stmt->execute();
+if (!empty($fecha_filtro)) {
+    $stmt->execute([$fecha_filtro]);
+} else {
+    $stmt->execute();
+}
 $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Obtener la cantidad total de viandas compradas, divididas por colegio y cursos
 $query_colegios = "
-    SELECT c.Nombre AS ColegioNombre, cu.Nombre AS CursoNombre, m.Nombre AS MenuNombre, COUNT(*) AS Cantidad, pc.Fecha_entrega
+    SELECT c.Nombre AS ColegioNombre, cu.Nombre AS CursoNombre, m.Nombre AS MenuNombre, COUNT(*) AS Cantidad, DATE_FORMAT(pc.Fecha_entrega, '%d/%b/%y') AS FechaEntrega
     FROM Pedidos_Comida pc
     JOIN Hijos h ON pc.Hijo_Id = h.Id
     JOIN Colegios c ON h.Colegio_Id = c.Id
     JOIN Cursos cu ON h.Curso_Id = cu.Id
     JOIN Menú m ON pc.Menú_Id = m.Id
-    GROUP BY c.Nombre, cu.Nombre, m.Nombre, pc.Fecha_entrega
 ";
+if (!empty($fecha_filtro)) {
+    $query_colegios .= " WHERE pc.Fecha_entrega = ?";
+}
+$query_colegios .= " GROUP BY c.Nombre, cu.Nombre, m.Nombre, pc.Fecha_entrega";
 $stmt = $pdo->prepare($query_colegios);
-$stmt->execute();
+if (!empty($fecha_filtro)) {
+    $stmt->execute([$fecha_filtro]);
+} else {
+    $stmt->execute();
+}
 $colegios = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Obtener los alumnos con preferencias alimenticias
 $query_preferencias = "
-    SELECT pc.Fecha_entrega, c.Nombre AS ColegioNombre, cu.Nombre AS CursoNombre, h.Nombre AS AlumnoNombre, m.Nombre AS MenuNombre, p.Nombre AS PreferenciaNombre
+    SELECT DATE_FORMAT(pc.Fecha_entrega, '%d/%b/%y') AS FechaEntrega, c.Nombre AS ColegioNombre, cu.Nombre AS CursoNombre, h.Nombre AS AlumnoNombre, m.Nombre AS MenuNombre, p.Nombre AS PreferenciaNombre
     FROM Pedidos_Comida pc
     JOIN Hijos h ON pc.Hijo_Id = h.Id
     JOIN Colegios c ON h.Colegio_Id = c.Id
@@ -43,8 +63,15 @@ $query_preferencias = "
     JOIN Preferencias_Alimenticias p ON h.Preferencias_Alimenticias = p.Id
     WHERE h.Preferencias_Alimenticias IS NOT NULL
 ";
+if (!empty($fecha_filtro)) {
+    $query_preferencias .= " AND pc.Fecha_entrega = ?";
+}
 $stmt = $pdo->prepare($query_preferencias);
-$stmt->execute();
+if (!empty($fecha_filtro)) {
+    $stmt->execute([$fecha_filtro]);
+} else {
+    $stmt->execute();
+}
 $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
@@ -73,13 +100,19 @@ $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <body>
     <h1>Dashboard Cocina</h1>
     
+    <form method="post" action="dashboard.php">
+        <label for="fecha_entrega">Filtrar por Fecha de Entrega:</label>
+        <input type="date" id="fecha_entrega" name="fecha_entrega" value="<?php echo htmlspecialchars($fecha_filtro); ?>">
+        <button type="submit" name="filtrar_fecha">Filtrar</button>
+    </form>
+    
     <h2>Total de Menús</h2>
     <div class="kpi-container">
         <?php foreach ($menus as $menu) : ?>
             <div class="kpi">
                 <h3><?php echo htmlspecialchars($menu['MenuNombre']); ?></h3>
                 <p>Cantidad: <?php echo htmlspecialchars($menu['Cantidad']); ?></p>
-                <p>Fecha de entrega: <?php echo htmlspecialchars($menu['Fecha_entrega']); ?></p>
+                <p>Fecha de entrega: <?php echo htmlspecialchars($menu['FechaEntrega']); ?></p>
             </div>
         <?php endforeach; ?>
     </div>
@@ -92,7 +125,7 @@ $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <h4><?php echo htmlspecialchars($colegio['CursoNombre']); ?></h4>
                 <p>Menú: <?php echo htmlspecialchars($colegio['MenuNombre']); ?></p>
                 <p>Cantidad: <?php echo htmlspecialchars($colegio['Cantidad']); ?></p>
-                <p>Fecha de entrega: <?php echo htmlspecialchars($colegio['Fecha_entrega']); ?></p>
+                <p>Fecha de entrega: <?php echo htmlspecialchars($colegio['FechaEntrega']); ?></p>
             </div>
         <?php endforeach; ?>
     </div>
@@ -109,7 +142,7 @@ $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </tr>
         <?php foreach ($preferencias as $preferencia) : ?>
             <tr>
-                <td><?php echo htmlspecialchars($preferencia['Fecha_entrega']); ?></td>
+                <td><?php echo htmlspecialchars($preferencia['FechaEntrega']); ?></td>
                 <td><?php echo htmlspecialchars($preferencia['ColegioNombre']); ?></td>
                 <td><?php echo htmlspecialchars($preferencia['CursoNombre']); ?></td>
                 <td><?php echo htmlspecialchars($preferencia['AlumnoNombre']); ?></td>
