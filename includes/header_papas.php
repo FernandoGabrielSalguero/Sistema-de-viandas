@@ -5,7 +5,7 @@
     <title>Panel de Papás</title>
     <link rel="stylesheet" href="../css/styles.css">
     <style>
-        nav {
+        /* nav {
             background-color: red;
             padding: 10px;
         }
@@ -29,7 +29,7 @@
         }
         nav ul li a:hover {
             background-color: darkgreen;
-        }
+        } */
     </style>
 </head>
 <body>
