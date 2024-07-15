@@ -6,6 +6,33 @@ error_reporting(E_ALL);
 
 include '../includes/header_admin.php';
 include '../includes/db.php';
+include '../includes/load_env.php';
+
+// Cargar variables del archivo .env
+loadEnv(__DIR__ . '/../.env');
+
+// Función para enviar correo electrónico usando SMTP
+function enviarCorreo($to, $subject, $message) {
+    $headers = "From: " . getenv('SMTP_USERNAME') . "\r\n" .
+               "Reply-To: " . getenv('SMTP_USERNAME') . "\r\n" .
+               "X-Mailer: PHP/" . phpversion();
+
+    // Configuración del transporte SMTP
+    $params = [
+        'host' => getenv('SMTP_HOST'),
+        'port' => getenv('SMTP_PORT'),
+        'auth' => true,
+        'username' => getenv('SMTP_USERNAME'),
+        'password' => getenv('SMTP_PASSWORD'),
+    ];
+
+    // Usar la función mail() de PHP
+    ini_set('SMTP', $params['host']);
+    ini_set('smtp_port', $params['port']);
+    ini_set('sendmail_from', $params['username']);
+
+    return mail($to, $subject, $message, $headers);
+}
 
 // Parámetros de paginación
 $itemsPerPage = 15;
@@ -44,6 +71,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
         // Sumar el saldo al saldo del usuario
         $stmt = $pdo->prepare("UPDATE Usuarios SET Saldo = Saldo + ? WHERE Id = ?");
         $stmt->execute([$saldo, $usuario_id]);
+
+        // Obtener el correo del usuario
+        $stmt = $pdo->prepare("SELECT Correo FROM Usuarios WHERE Id = ?");
+        $stmt->execute([$usuario_id]);
+        $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+        $correo = $usuario['Correo'];
+
+        // Enviar correo electrónico
+        $subject = "Saldo Aprobado";
+        $message = "Estimado usuario,\n\nSu saldo de $saldo ARS ha sido aprobado y acreditado en su cuenta.\n\nSaludos,\nEquipo de Ilmana Gastronomía";
+
+        if (!enviarCorreo($correo, $subject, $message)) {
+            $error = "No se pudo enviar el correo electrónico al usuario.";
+        }
     }
 
     // Actualizar el estado del pedido de saldo
