@@ -56,14 +56,16 @@ $colegios = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Obtener los alumnos con preferencias alimenticias
 $query_preferencias = "
-    SELECT m.Nombre AS MenuNombre, DATE_FORMAT(pc.Fecha_entrega, '%d/%m/%y') AS FechaEntrega, c.Nombre AS ColegioNombre, cu.Nombre AS CursoNombre, h.Nombre AS AlumnoNombre, p.Nombre AS PreferenciaNombre
+    SELECT m.Nombre AS MenuNombre, DATE_FORMAT(pc.Fecha_entrega, '%d/%m/%y') AS FechaEntrega, 
+           c.Nombre AS ColegioNombre, cu.Nombre AS CursoNombre, 
+           h.Nombre AS AlumnoNombre, p.Nombre AS PreferenciaNombre
     FROM Pedidos_Comida pc
     JOIN Hijos h ON pc.Hijo_Id = h.Id
     JOIN Colegios c ON h.Colegio_Id = c.Id
     JOIN Cursos cu ON h.Curso_Id = cu.Id
     JOIN Menú m ON pc.Menú_Id = m.Id
-    JOIN Preferencias_Alimenticias p ON h.Preferencias_Alimenticias = p.Id
-    WHERE h.Preferencias_Alimenticias IS NOT NULL
+    JOIN Preferencias_Alimenticias p ON pc.Preferencias_alimenticias = p.Id
+    WHERE pc.Preferencias_alimenticias IS NOT NULL
 ";
 if (!empty($fecha_filtro)) {
     $query_preferencias .= " AND pc.Fecha_entrega = ?";
