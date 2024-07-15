@@ -6,12 +6,40 @@ error_reporting(E_ALL);
 
 include '../includes/header_admin.php';
 include '../includes/db.php';
+include '../includes/load_env.php';
+
+// Cargar variables del archivo .env
+loadEnv(__DIR__ . '/../.env');
+
+// Función para enviar correo electrónico usando SMTP
+function enviarCorreo($to, $subject, $message) {
+    $headers = "From: " . getenv('SMTP_USERNAME') . "\r\n" .
+               "Reply-To: " . getenv('SMTP_USERNAME') . "\r\n" .
+               "X-Mailer: PHP/" . phpversion();
+
+    // Configuración del transporte SMTP
+    $params = [
+        'host' => getenv('SMTP_HOST'),
+        'port' => getenv('SMTP_PORT'),
+        'auth' => true,
+        'username' => getenv('SMTP_USERNAME'),
+        'password' => getenv('SMTP_PASSWORD'),
+    ];
+
+    // Usar la función mail() de PHP
+    ini_set('SMTP', $params['host']);
+    ini_set('smtp_port', $params['port']);
+    ini_set('sendmail_from', $params['username']);
+
+    return mail($to, $subject, $message, $headers);
+}
 
 // Procesar el formulario cuando se envíe
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['crear_usuario'])) {
     $nombre = $_POST['nombre'];
     $usuario = $_POST['usuario'];
-    $contrasena = password_hash($_POST['contrasena'], PASSWORD_BCRYPT);
+    $contrasena = $_POST['contrasena']; // Guardar la contraseña sin cifrar para el correo
+    $contrasena_cifrada = password_hash($contrasena, PASSWORD_BCRYPT);
     $telefono = $_POST['telefono'];
     $correo = $_POST['correo'];
     $rol = $_POST['rol'];
@@ -23,13 +51,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['crear_usuario'])) {
     } else {
         // Insertar el nuevo usuario en la base de datos
         $stmt = $pdo->prepare("INSERT INTO Usuarios (Nombre, Usuario, Contrasena, Telefono, Correo, Rol, Saldo) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        if ($stmt->execute([$nombre, $usuario, $contrasena, $telefono, $correo, $rol, $saldo])) {
+        if ($stmt->execute([$nombre, $usuario, $contrasena_cifrada, $telefono, $correo, $rol, $saldo])) {
             $success = "Usuario creado con éxito.";
+
+            // Enviar correo electrónico
+            $subject = "Bienvenido a Ilmana Gastronomía";
+            $message = "Estimado $nombre,\n\nSu cuenta ha sido creada exitosamente.\n\nUsuario: $usuario\nContraseña: $contrasena\n\nSaludos,\nEquipo de Ilmana Gastronomía";
+
+            if (enviarCorreo($correo, $subject, $message)) {
+                $success .= " Se ha enviado un correo electrónico al usuario.";
+            } else {
+                $error = "No se pudo enviar el correo electrónico.";
+            }
         } else {
             $error = "Hubo un error al crear el usuario.";
         }
     }
 }
+
+// Resto del código para manejar la actualización, eliminación y visualización de usuarios...
 
 // Procesar la eliminación de un usuario
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['eliminar_usuario'])) {

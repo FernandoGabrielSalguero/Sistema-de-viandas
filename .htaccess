@@ -1,0 +1,4 @@
+# Archivo .htaccess
+php_value SMTP smtp.hostinger.com
+php_value smtp_port 465
+php_value sendmail_from contacto@ilmanagastronomia.com
