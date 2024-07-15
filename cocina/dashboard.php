@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['filtrar_fecha'])) {
 
 // Obtener la cantidad total de viandas compradas, agrupadas por nombre de menú y día de entrega
 $query_menus = "
-    SELECT m.Nombre AS MenuNombre, DATE_FORMAT(pc.Fecha_entrega, '%d/%b/%y') AS FechaEntrega, COUNT(*) AS Cantidad
+    SELECT m.Nombre AS MenuNombre, DATE_FORMAT(pc.Fecha_entrega, '%d/%m/%y') AS FechaEntrega, COUNT(*) AS Cantidad
     FROM Pedidos_Comida pc
     JOIN Menú m ON pc.Menú_Id = m.Id
 ";
@@ -35,7 +35,7 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Obtener la cantidad total de viandas compradas, divididas por colegio y cursos
 $query_colegios = "
-    SELECT c.Nombre AS ColegioNombre, cu.Nombre AS CursoNombre, m.Nombre AS MenuNombre, COUNT(*) AS Cantidad, DATE_FORMAT(pc.Fecha_entrega, '%d/%b/%y') AS FechaEntrega
+    SELECT c.Nombre AS ColegioNombre, cu.Nombre AS CursoNombre, m.Nombre AS MenuNombre, COUNT(*) AS Cantidad, DATE_FORMAT(pc.Fecha_entrega, '%d/%m/%y') AS FechaEntrega
     FROM Pedidos_Comida pc
     JOIN Hijos h ON pc.Hijo_Id = h.Id
     JOIN Colegios c ON h.Colegio_Id = c.Id
@@ -56,7 +56,7 @@ $colegios = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Obtener los alumnos con preferencias alimenticias
 $query_preferencias = "
-    SELECT DATE_FORMAT(pc.Fecha_entrega, '%d/%b/%y') AS FechaEntrega, c.Nombre AS ColegioNombre, cu.Nombre AS CursoNombre, h.Nombre AS AlumnoNombre, m.Nombre AS MenuNombre, p.Nombre AS PreferenciaNombre
+    SELECT m.Nombre AS MenuNombre, DATE_FORMAT(pc.Fecha_entrega, '%d/%m/%y') AS FechaEntrega, c.Nombre AS ColegioNombre, cu.Nombre AS CursoNombre, h.Nombre AS AlumnoNombre, p.Nombre AS PreferenciaNombre
     FROM Pedidos_Comida pc
     JOIN Hijos h ON pc.Hijo_Id = h.Id
     JOIN Colegios c ON h.Colegio_Id = c.Id
@@ -97,16 +97,31 @@ $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
             text-align: center;
             width: 200px;
         }
+        .filter-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .filter-item {
+            flex: 1 1 200px;
+        }
     </style>
 </head>
 <body>
     <h1>Dashboard Cocina</h1>
     
-    <form method="post" action="dashboard.php">
-        <label for="fecha_entrega">Filtrar por Fecha de Entrega:</label>
-        <input type="date" id="fecha_entrega" name="fecha_entrega" value="<?php echo htmlspecialchars($fecha_filtro); ?>">
-        <button type="submit" name="filtrar_fecha">Filtrar</button>
-        <button type="submit" name="eliminar_filtro">Eliminar Filtro</button>
+    <form method="post" action="dashboard.php" class="filter-container">
+        <div class="filter-item">
+            <label for="fecha_entrega">Filtrar por Fecha de Entrega:</label>
+            <input type="date" id="fecha_entrega" name="fecha_entrega" value="<?php echo htmlspecialchars($fecha_filtro); ?>">
+        </div>
+        <div class="filter-item">
+            <button type="submit" name="filtrar_fecha">Filtrar</button>
+        </div>
+        <div class="filter-item">
+            <button type="submit" name="eliminar_filtro">Eliminar Filtro</button>
+        </div>
     </form>
     
     <h2>Total de Menús</h2>
@@ -136,20 +151,20 @@ $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <h2>Preferencias Alimenticias</h2>
     <table border="1">
         <tr>
+            <th>Nombre menú</th>
             <th>Fecha de entrega</th>
             <th>Colegio</th>
             <th>Curso</th>
             <th>Alumno</th>
-            <th>Menú elegido</th>
             <th>Preferencia</th>
         </tr>
         <?php foreach ($preferencias as $preferencia) : ?>
             <tr>
+                <td><?php echo htmlspecialchars($preferencia['MenuNombre']); ?></td>
                 <td><?php echo htmlspecialchars($preferencia['FechaEntrega']); ?></td>
                 <td><?php echo htmlspecialchars($preferencia['ColegioNombre']); ?></td>
                 <td><?php echo htmlspecialchars($preferencia['CursoNombre']); ?></td>
                 <td><?php echo htmlspecialchars($preferencia['AlumnoNombre']); ?></td>
-                <td><?php echo htmlspecialchars($preferencia['MenuNombre']); ?></td>
                 <td><?php echo htmlspecialchars($preferencia['PreferenciaNombre']); ?></td>
             </tr>
         <?php endforeach; ?>
