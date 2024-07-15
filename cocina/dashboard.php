@@ -75,6 +75,16 @@ if (!empty($fecha_filtro)) {
     $stmt->execute();
 }
 $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Debugging output
+echo "<pre>";
+echo "Menus:\n";
+var_dump($menus);
+echo "Colegios:\n";
+var_dump($colegios);
+echo "Preferencias:\n";
+var_dump($preferencias);
+echo "</pre>";
 ?>
 
 <!DOCTYPE html>
