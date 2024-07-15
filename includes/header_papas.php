@@ -25,7 +25,7 @@
 
         nav ul li a {
             text-decoration: none;
-            color: white;
+            color: white; /* Letra blanca */
             background-color: #4caf50; /* Verde */
             padding: 10px 20px;
             border-radius: 5px;
