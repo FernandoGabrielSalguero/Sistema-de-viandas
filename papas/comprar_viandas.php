@@ -44,6 +44,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $total_precio = 0;
     $fecha_entrega = '';
 
+    // Calcular el precio total de los menús seleccionados
     foreach ($menu_ids as $menu_id) {
         $stmt = $pdo->prepare("SELECT Precio, Fecha_entrega FROM `Menú` WHERE Id = ?");
         $stmt->execute([$menu_id]);
@@ -54,17 +55,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Verificar si el usuario tiene saldo suficiente
     if ($saldo_disponible >= $total_precio) {
-        foreach ($menu_ids as $menu_id) {
-            // Realizar el pedido
-            $stmt = $pdo->prepare("INSERT INTO Pedidos_Comida (Hijo_Id, Menú_Id, Fecha_pedido, Estado, Fecha_entrega) VALUES (?, ?, NOW(), 'Procesando', ?)");
-            if ($stmt->execute([$hijo_id, $menu_id, $fecha_entrega])) {
-                // Actualizar el saldo del usuario
-                $stmt = $pdo->prepare("UPDATE Usuarios SET Saldo = Saldo - ? WHERE Id = ?");
-                $stmt->execute([$total_precio, $usuario_id]);
-                $success = "Pedido realizado con éxito.";
-            } else {
-                $error = "Error al realizar el pedido.";
+        // Iniciar una transacción
+        $pdo->beginTransaction();
+
+        try {
+            foreach ($menu_ids as $menu_id) {
+                // Realizar el pedido
+                $stmt = $pdo->prepare("INSERT INTO Pedidos_Comida (Hijo_Id, Menú_Id, Fecha_pedido, Estado, Fecha_entrega) VALUES (?, ?, NOW(), 'Procesando', ?)");
+                $stmt->execute([$hijo_id, $menu_id, $fecha_entrega]);
             }
+
+            // Actualizar el saldo del usuario una sola vez
+            $stmt = $pdo->prepare("UPDATE Usuarios SET Saldo = Saldo - ? WHERE Id = ?");
+            $stmt->execute([$total_precio, $usuario_id]);
+
+            // Confirmar la transacción
+            $pdo->commit();
+            $success = "Pedido realizado con éxito.";
+        } catch (Exception $e) {
+            // Revertir la transacción en caso de error
+            $pdo->rollBack();
+            $error = "Error al realizar el pedido: " . $e->getMessage();
         }
     } else {
         $error = "Saldo insuficiente.";
