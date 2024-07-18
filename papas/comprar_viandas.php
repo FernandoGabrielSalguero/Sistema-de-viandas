@@ -42,15 +42,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $hijo_id = $_POST['hijo_id'];
     $menu_ids = $_POST['menu_ids'];
     $total_precio = 0;
-    $fecha_entrega = '';
 
     // Calcular el precio total de los menús seleccionados
+    $menus_seleccionados = [];
     foreach ($menu_ids as $menu_id) {
         $stmt = $pdo->prepare("SELECT Precio, Fecha_entrega FROM `Menú` WHERE Id = ?");
         $stmt->execute([$menu_id]);
         $menu = $stmt->fetch(PDO::FETCH_ASSOC);
         $total_precio += $menu['Precio'];
-        $fecha_entrega = $menu['Fecha_entrega'];
+        $menus_seleccionados[] = $menu;
     }
 
     // Verificar si el usuario tiene saldo suficiente
@@ -59,10 +59,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $pdo->beginTransaction();
 
         try {
-            foreach ($menu_ids as $menu_id) {
+            foreach ($menus_seleccionados as $menu) {
                 // Realizar el pedido
                 $stmt = $pdo->prepare("INSERT INTO Pedidos_Comida (Hijo_Id, Menú_Id, Fecha_pedido, Estado, Fecha_entrega) VALUES (?, ?, NOW(), 'Procesando', ?)");
-                $stmt->execute([$hijo_id, $menu_id, $fecha_entrega]);
+                $stmt->execute([$hijo_id, $menu_id, $menu['Fecha_entrega']]);
             }
 
             // Actualizar el saldo del usuario una sola vez
