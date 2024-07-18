@@ -56,7 +56,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['crear_usuario'])) {
 
             // Enviar correo electrónico
             $subject = "Bienvenido a Ilmana Gastronomía";
-            $message = "Estimado $nombre,\n\nSu cuenta ha sido creada exitosamente.\n\nUsuario: $usuario\nContraseña: $contrasena\n\nSaludos,\nEquipo de Ilmana Gastronomía";
+            $message = "Estimado $nombre,\n\nSu cuenta ha sido creada exitosamente. Link nueva plataforma: https://viandas.ilmanagastronomia.com/ \n\nUsuario: $usuario\nContraseña: $contrasena\n\nSaludos,\nEquipo de Ilmana Gastronomía";
 
             if (enviarCorreo($correo, $subject, $message)) {
                 $success .= " Se ha enviado un correo electrónico al usuario.";
