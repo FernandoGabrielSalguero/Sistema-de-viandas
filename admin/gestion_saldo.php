@@ -95,7 +95,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
     if ($stmt->execute([$nuevo_estado, $id])) {
         $success = "Estado del saldo actualizado con éxito.";
     } else {
-        $error = "Hubo un error al actualizar el estado del saldo.";
+        $error = "Hubo un error al actualizar el estado del saldo: " . implode(", ", $stmt->errorInfo());
     }
 
     // Volver a cargar los registros después de la actualización
