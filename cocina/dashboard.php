@@ -68,31 +68,7 @@ if (!empty($fecha_filtro) && !empty($colegio_filtro)) {
 }
 $colegios = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Obtener los alumnos con preferencias alimenticias
-$query_preferencias = "
-    SELECT m.Nombre AS MenuNombre, DATE_FORMAT(pc.Fecha_entrega, '%d/%m/%y') AS FechaEntrega, 
-           c.Nombre AS ColegioNombre, cu.Nombre AS CursoNombre, 
-           h.Nombre AS AlumnoNombre, p.Nombre AS PreferenciaNombre
-    FROM Pedidos_Comida pc
-    JOIN Hijos h ON pc.Hijo_Id = h.Id
-    JOIN Colegios c ON h.Colegio_Id = c.Id
-    JOIN Cursos cu ON h.Curso_Id = cu.Id
-    JOIN Menú m ON pc.Menú_Id = m.Id
-    JOIN Preferencias_Alimenticias p ON pc.Preferencias_alimenticias = p.Id
-    WHERE pc.Preferencias_alimenticias IS NOT NULL
-";
-if (!empty($fecha_filtro)) {
-    $query_preferencias .= " AND pc.Fecha_entrega = ?";
-}
-$stmt = $pdo->prepare($query_preferencias);
-if (!empty($fecha_filtro)) {
-    $stmt->execute([$fecha_filtro]);
-} else {
-    $stmt->execute();
-}
-$preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Agrupar los resultados por nivel y curso
+// Agrupar los resultados por nivel y colegio
 $niveles = [
     'Nivel Inicial' => ['Nivel Inicial Sala 3A', 'Nivel Inicial Sala 3B', 'Nivel Inicial Sala 4A', 'Nivel Inicial Sala 4B', 'Nivel Inicial Sala 5A', 'Nivel Inicial Sala 5B'],
     'Primaria' => ['Primaria Primer Grado A', 'Primaria Primer Grado B', 'Primaria Segundo Grado', 'Primaria Tercer Grado', 'Primaria cuarto Grado', 'Primaria Quinto Grado', 'Primaria Sexto Grado', 'Primaria Septimo Grado'],
@@ -100,12 +76,10 @@ $niveles = [
 ];
 
 $niveles_data = [];
-foreach ($niveles as $nivel => $cursos) {
-    foreach ($cursos as $curso) {
-        foreach ($colegios as $colegio) {
-            if ($colegio['CursoNombre'] == $curso) {
-                $niveles_data[$nivel][$curso][] = $colegio;
-            }
+foreach ($colegios as $colegio) {
+    foreach ($niveles as $nivel => $cursos) {
+        if (in_array($colegio['CursoNombre'], $cursos)) {
+            $niveles_data[$nivel][$colegio['ColegioNombre']][] = $colegio;
         }
     }
 }
@@ -197,32 +171,31 @@ foreach ($niveles as $nivel => $cursos) {
         </div>
     </div>
 
-    <h2>Totalidad de Viandas por Colegio y Curso</h2>
-    <?php foreach ($niveles_data as $nivel => $cursos) : ?>
+    <h2>Totalidad de Viandas por Colegio y Nivel</h2>
+    <?php foreach ($niveles_data as $nivel => $colegios) : ?>
         <h2><?php echo htmlspecialchars($nivel); ?></h2>
-        <?php foreach ($cursos as $curso_nombre => $datos) : ?>
-            <h3><?php echo htmlspecialchars($curso_nombre); ?></h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Colegio</th>
-                        <th>Menú</th>
-                        <th>Cantidad</th>
-                        <th>Fecha de entrega</th>
-                    </tr>
-                </thead>
-                <tbody>
+        <table>
+            <thead>
+                <tr>
+                    <th>Colegio</th>
+                    <th>Menú</th>
+                    <th>Cantidad</th>
+                    <th>Fecha de entrega</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($colegios as $colegio_nombre => $datos) : ?>
                     <?php foreach ($datos as $dato) : ?>
                         <tr>
-                            <td><?php echo htmlspecialchars($dato['ColegioNombre']); ?></td>
+                            <td><?php echo htmlspecialchars($colegio_nombre); ?></td>
                             <td><?php echo htmlspecialchars($dato['MenuNombre']); ?></td>
                             <td><?php echo htmlspecialchars($dato['Cantidad']); ?></td>
                             <td><?php echo htmlspecialchars($dato['FechaEntrega']); ?></td>
                         </tr>
                     <?php endforeach; ?>
-                </tbody>
-            </table>
-        <?php endforeach; ?>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
     <?php endforeach; ?>
 
     <h2>Preferencias Alimenticias</h2>
