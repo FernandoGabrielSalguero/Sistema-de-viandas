@@ -22,8 +22,8 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
     <meta charset="UTF-8">
     <title>Panel de Administrador</title>
     <style>
-        /* Background fondo header */
-        nav ul {
+       /* Background fondo header */
+       nav ul {
             list-style: none;
             padding: 0;
             margin: 0;
@@ -55,7 +55,15 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
         }
 
         .tagus {
-            background-color: #28a745;
+            background-color: #9575cd;
+        }
+
+        .primary {
+            background-color: #1e88e5;
+        }
+
+        .accent {
+            background-color: #2962ff;
         }
 
         .warn {
@@ -93,10 +101,15 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
             padding: 0;
             margin: 0;
             min-width: 200px;
+            z-index: 1000; /* Asegura que el submenú esté por encima de otros elementos */
         }
 
         nav ul li:hover > ul {
             display: block;
+        }
+
+        nav ul li ul li {
+            position: relative;
         }
 
         nav ul li ul li a {
@@ -108,6 +121,11 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
 
         nav ul li ul li a:hover {
             background-color: #007bff;
+        }
+
+        nav ul li ul li ul {
+            top: 0;
+            left: 100%;
         }
     </style>
 </head>
