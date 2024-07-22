@@ -61,6 +61,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
 
         .warn {
             background-color: #d32f2f;
+            color: white;
         }
 
         .link {
