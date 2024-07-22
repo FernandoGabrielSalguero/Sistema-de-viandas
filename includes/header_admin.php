@@ -55,7 +55,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
         }
 
         .tagus {
-            background-color: #9575cd;
+            background-color: #28a745;
         }
 
         .warn {
