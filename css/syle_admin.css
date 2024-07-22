@@ -1,51 +1,32 @@
 /* style_admin.css */
+
+/* Estilo general del cuerpo */
 body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f4f5f7;
+    font-family: Arial, sans-serif;
     margin: 0;
-    padding: 20px;
+    padding: 0;
+    background-color: #f4f5f7;
 }
 
-h1 {
-    text-align: center;
-    color: #333;
-    margin-bottom: 30px;
-}
-
-.filter-form {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.filter-form select,
-.filter-form input {
-    width: 30%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
+/* Contenedor de las KPI */
 .kpi-container {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-around;
     margin-bottom: 20px;
+    padding: 20px;
 }
 
+/* Tarjetas de KPI */
 .kpi-card {
     background-color: #ffffff;
     border: 1px solid #ddd;
     border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     padding: 20px;
     text-align: center;
     margin: 10px;
     width: 200px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .kpi-card h2 {
@@ -60,13 +41,31 @@ h1 {
     color: #555;
 }
 
+/* Contenedor del formulario de filtro */
+.filter-form {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding: 20px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.filter-form select,
+.filter-form input {
+    width: 30%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Estilo de la tabla */
 table {
     width: 100%;
     border-collapse: collapse;
-    background-color: #fff;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin: 20px 0;
 }
 
 table, th, td {
@@ -80,9 +79,21 @@ th, td {
 
 th {
     background-color: #f4f5f7;
-    color: #333;
 }
 
-tr:nth-child(even) {
-    background-color: #f9f9f9;
+@media (max-width: 768px) {
+    .filter-form select,
+    .filter-form input {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .kpi-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .kpi-card {
+        width: 90%;
+    }
 }
