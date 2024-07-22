@@ -46,8 +46,11 @@ $totalItems = $totalItemsQuery->fetchColumn();
 // Calcular el número total de páginas
 $totalPages = ceil($totalItems / $itemsPerPage);
 
-// Obtener los registros de la página actual
-$stmt = $pdo->prepare("SELECT Id, Usuario_Id, Saldo, Estado, Comprobante, Fecha_pedido FROM Pedidos_Saldo LIMIT :offset, :itemsPerPage");
+// Obtener los registros de la página actual, incluyendo el nombre del usuario
+$stmt = $pdo->prepare("SELECT ps.Id, ps.Usuario_Id, u.Nombre AS Usuario_Nombre, ps.Saldo, ps.Estado, ps.Comprobante, ps.Fecha_pedido 
+                       FROM Pedidos_Saldo ps
+                       JOIN Usuarios u ON ps.Usuario_Id = u.Id
+                       LIMIT :offset, :itemsPerPage");
 $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
 $stmt->bindParam(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
 $stmt->execute();
@@ -92,11 +95,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
     if ($stmt->execute([$nuevo_estado, $id])) {
         $success = "Estado del saldo actualizado con éxito.";
     } else {
-        $error = "Hubo un error al actualizar el estado del saldo.";
+        $error = "Hubo un error al actualizar el estado del saldo: " . implode(", ", $stmt->errorInfo());
     }
 
     // Volver a cargar los registros después de la actualización
-    $stmt = $pdo->prepare("SELECT Id, Usuario_Id, Saldo, Estado, Comprobante, Fecha_pedido FROM Pedidos_Saldo LIMIT :offset, :itemsPerPage");
+    $stmt = $pdo->prepare("SELECT ps.Id, ps.Usuario_Id, u.Nombre AS Usuario_Nombre, ps.Saldo, ps.Estado, ps.Comprobante, ps.Fecha_pedido 
+                           FROM Pedidos_Saldo ps
+                           JOIN Usuarios u ON ps.Usuario_Id = u.Id
+                           LIMIT :offset, :itemsPerPage");
     $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
     $stmt->bindParam(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
     $stmt->execute();
@@ -124,7 +130,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
     <table>
         <tr>
             <th>ID</th>
-            <th>Usuario ID</th>
+            <th>Usuario</th>
             <th>Saldo</th>
             <th>Estado</th>
             <th>Comprobante</th>
@@ -134,7 +140,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
         <?php foreach ($pedidosSaldo as $pedido) : ?>
         <tr>
             <td><?php echo htmlspecialchars($pedido['Id']); ?></td>
-            <td><?php echo htmlspecialchars($pedido['Usuario_Id']); ?></td>
+            <td><?php echo htmlspecialchars($pedido['Usuario_Nombre']); ?></td>
             <td><?php echo htmlspecialchars($pedido['Saldo']); ?></td>
             <td><?php echo htmlspecialchars($pedido['Estado'] ?? 'Desconocido'); ?></td>
             <td><a href="../uploads/<?php echo htmlspecialchars($pedido['Comprobante']); ?>" target="_blank">Ver Comprobante</a></td>
