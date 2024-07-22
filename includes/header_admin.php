@@ -28,8 +28,11 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
             padding: 0;
             margin: 0;
             display: flex;
-            justify-content: space-around;
-            background-color: #6200ea; 
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            background-color: #f5f5f5;
+            padding: 20px;
         }
 
         nav ul li {
@@ -39,17 +42,50 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
         nav ul li a {
             text-decoration: none;
             display: block;
-            padding: 15px 20px;
+            padding: 10px 20px;
             color: #fff;
-            background-color: #6200ea;
-            transition: background-color 0.3s, color 0.3s;
-            border-radius: 4px;
+            border-radius: 5px;
             margin: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .basic {
+            background-color: #1976d2;
+        }
+
+        .tagus {
+            background-color: #9575cd;
+        }
+
+        .primary {
+            background-color: #1e88e5;
+        }
+
+        .accent {
+            background-color: #2962ff;
+        }
+
+        .warn {
+            background-color: #d32f2f;
+        }
+
+        .link {
+            background-color: #0d47a1;
+        }
+
+        .gray {
+            background-color: #cfd8dc;
+            color: #000;
+        }
+
+        .disabled {
+            background-color: #bdbdbd;
+            color: #9e9e9e;
         }
 
         nav ul li a:hover {
-            background-color: #3700b3;
-            color: #fff;
+            opacity: 0.9;
         }
 
         nav ul li ul {
@@ -73,7 +109,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
 
         nav ul li ul li a {
             padding: 10px 15px;
-            background-color: #6200ea;
+            background-color: #1976d2;
             color: #fff;
             border-radius: 0;
         }
@@ -86,33 +122,33 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
 <body>
     <nav>
         <ul>
-            <li><a href="dashboard.php">Dashboard</a></li>
+            <li><a href="dashboard.php" class="basic">Dashboard</a></li>
             <li>
-                <a href="#">Gestión de Pedidos</a>
+                <a href="#" class="tagus">Gestión de Pedidos</a>
                 <ul>
-                    <li><a href="gestion_pedidos.php">Viandas</a></li>
-                    <li><a href="gestion_saldo.php">Saldo</a></li>
+                    <li><a href="gestion_pedidos.php" class="basic">Viandas</a></li>
+                    <li><a href="gestion_saldo.php" class="basic">Saldo</a></li>
                 </ul>
             </li>
             <li>
-                <a href="#">Usuarios</a>
+                <a href="#" class="primary">Usuarios</a>
                 <ul>
-                    <li><a href="alta_usuarios.php">Gestión Usuarios</a></li>
-                    <li><a href="agregar_hijo.php">Crear Hijos</a></li>
-                    <li><a href="asignar_hijos.php">Asignación Hijos</a></li>
-                    <li><a href="alta_preferencias.php">Alta Preferencias Alimenticias</a></li>
+                    <li><a href="alta_usuarios.php" class="basic">Gestión Usuarios</a></li>
+                    <li><a href="agregar_hijo.php" class="basic">Crear Hijos</a></li>
+                    <li><a href="asignar_hijos.php" class="basic">Asignación Hijos</a></li>
+                    <li><a href="alta_preferencias.php" class="basic">Alta Preferencias Alimenticias</a></li>
                 </ul>
             </li>
             <li>
-                <a href="#">Colegios</a>
+                <a href="#" class="accent">Colegios</a>
                 <ul>
-                    <li><a href="alta_colegios.php">Alta Colegios</a></li>
-                    <li><a href="gestion_colegios.php">Gestión Colegios</a></li>
-                    <li><a href="gestion_representantes.php">Gestión Representantes</a></li>
+                    <li><a href="alta_colegios.php" class="basic">Alta Colegios</a></li>
+                    <li><a href="gestion_colegios.php" class="basic">Gestión Colegios</a></li>
+                    <li><a href="gestion_representantes.php" class="basic">Gestión Representantes</a></li>
                 </ul>
             </li>
-            <li><a href="alta_menu.php">Alta Menú</a></li>
-            <li><a href="logout.php">Salir</a></li>
+            <li><a href="alta_menu.php" class="warn">Alta Menú</a></li>
+            <li><a href="logout.php" class="link">Salir</a></li>
         </ul>
     </nav>
 </body>
