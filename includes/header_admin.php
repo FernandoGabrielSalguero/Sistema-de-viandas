@@ -58,14 +58,6 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
             background-color: #9575cd;
         }
 
-        .primary {
-            background-color: #1e88e5;
-        }
-
-        .accent {
-            background-color: #2962ff;
-        }
-
         .warn {
             background-color: #d32f2f;
         }
@@ -131,7 +123,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
                 </ul>
             </li>
             <li>
-                <a href="#" class="primary">Usuarios</a>
+                <a href="#" class="tagus">Usuarios</a>
                 <ul>
                     <li><a href="alta_usuarios.php" class="basic">Gestión Usuarios</a></li>
                     <li><a href="agregar_hijo.php" class="basic">Crear Hijos</a></li>
@@ -140,15 +132,15 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
                 </ul>
             </li>
             <li>
-                <a href="#" class="accent">Colegios</a>
+                <a href="#" class="tagus">Colegios</a>
                 <ul>
                     <li><a href="alta_colegios.php" class="basic">Alta Colegios</a></li>
                     <li><a href="gestion_colegios.php" class="basic">Gestión Colegios</a></li>
                     <li><a href="gestion_representantes.php" class="basic">Gestión Representantes</a></li>
                 </ul>
             </li>
-            <li><a href="alta_menu.php" class="warn">Alta Menú</a></li>
-            <li><a href="logout.php" class="link">Salir</a></li>
+            <li><a href="alta_menu.php" class="tagus">Alta Menú</a></li>
+            <li><a href="logout.php" class="warn">Salir</a></li>
         </ul>
     </nav>
 </body>
