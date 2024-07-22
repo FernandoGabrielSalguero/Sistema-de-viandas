@@ -114,29 +114,29 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
 <body>
     <nav>
         <ul>
-            <li><a href="dashboard.php" class="basic">Dashboard</a></li>
+            <li><a href="dashboard.php" class="tagus">Dashboard</a></li>
             <li>
                 <a href="#" class="tagus">Gestión de Pedidos</a>
                 <ul>
-                    <li><a href="gestion_pedidos.php" class="basic">Viandas</a></li>
-                    <li><a href="gestion_saldo.php" class="basic">Saldo</a></li>
+                    <li><a href="gestion_pedidos.php" class="tagus">Viandas</a></li>
+                    <li><a href="gestion_saldo.php" class="tagus">Saldo</a></li>
                 </ul>
             </li>
             <li>
                 <a href="#" class="tagus">Usuarios</a>
                 <ul>
-                    <li><a href="alta_usuarios.php" class="basic">Gestión Usuarios</a></li>
-                    <li><a href="agregar_hijo.php" class="basic">Crear Hijos</a></li>
-                    <li><a href="asignar_hijos.php" class="basic">Asignación Hijos</a></li>
-                    <li><a href="alta_preferencias.php" class="basic">Alta Preferencias Alimenticias</a></li>
+                    <li><a href="alta_usuarios.php" class="tagus">Gestión Usuarios</a></li>
+                    <li><a href="agregar_hijo.php" class="tagus">Crear Hijos</a></li>
+                    <li><a href="asignar_hijos.php" class="tagus">Asignación Hijos</a></li>
+                    <li><a href="alta_preferencias.php" class="tagus">Alta Preferencias Alimenticias</a></li>
                 </ul>
             </li>
             <li>
                 <a href="#" class="tagus">Colegios</a>
                 <ul>
-                    <li><a href="alta_colegios.php" class="basic">Alta Colegios</a></li>
-                    <li><a href="gestion_colegios.php" class="basic">Gestión Colegios</a></li>
-                    <li><a href="gestion_representantes.php" class="basic">Gestión Representantes</a></li>
+                    <li><a href="alta_colegios.php" class="tagus">Alta Colegios</a></li>
+                    <li><a href="gestion_colegios.php" class="tagus">Gestión Colegios</a></li>
+                    <li><a href="gestion_representantes.php" class="tagus">Gestión Representantes</a></li>
                 </ul>
             </li>
             <li><a href="alta_menu.php" class="tagus">Alta Menú</a></li>
