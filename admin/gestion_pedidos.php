@@ -82,60 +82,14 @@ $kpi_data = $kpi_stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <title>Gestión de Pedidos</title>
     <link rel="stylesheet" href="../css/styles.css">
-    <style>
-        .filter-form {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-        .filter-form select,
-        .filter-form input {
-            width: 30%;
-        }
-        .kpi-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-around;
-            margin-bottom: 20px;
-        }
-        .kpi-card {
-            background-color: #ffffff;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            margin: 10px;
-            width: 200px;
-        }
-        .kpi-card h2 {
-            margin: 0;
-            font-size: 20px;
-            color: #333;
-        }
-        .kpi-card p {
-            margin: 5px 0 0;
-            font-size: 16px;
-            color: #555;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        table, th, td {
-            border: 1px solid black;
-        }
-        th, td {
-            padding: 10px;
-            text-align: left;
-        }
-    </style>
+    <link rel="stylesheet" href="../css/style_admin.css"> <!-- Nueva hoja de estilos -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
     <h1>Gestión de Pedidos</h1>
 
-    <div class="filter-form">
-        <select id="colegio_id" name="colegio_id" onchange="applyFilter()">
+    <form class="filter-form" method="get" action="gestion_pedidos.php">
+        <select id="colegio_id" name="colegio_id">
             <option value="">Todos los colegios</option>
             <?php foreach ($colegios as $colegio) : ?>
                 <option value="<?php echo htmlspecialchars($colegio['Id']); ?>" <?php echo ($colegio_id == $colegio['Id']) ? 'selected' : ''; ?>>
@@ -144,7 +98,7 @@ $kpi_data = $kpi_stmt->fetchAll(PDO::FETCH_ASSOC);
             <?php endforeach; ?>
         </select>
 
-        <select id="curso_id" name="curso_id" onchange="applyFilter()">
+        <select id="curso_id" name="curso_id">
             <option value="">Todos los cursos</option>
             <?php foreach ($cursos as $curso) : ?>
                 <option value="<?php echo htmlspecialchars($curso['Id']); ?>" <?php echo ($curso_id == $curso['Id']) ? 'selected' : ''; ?>>
@@ -153,8 +107,9 @@ $kpi_data = $kpi_stmt->fetchAll(PDO::FETCH_ASSOC);
             <?php endforeach; ?>
         </select>
 
-        <input type="date" id="fecha_entrega" name="fecha_entrega" value="<?php echo htmlspecialchars($fecha_entrega); ?>" onchange="applyFilter()">
-    </div>
+        <input type="date" id="fecha_entrega" name="fecha_entrega" value="<?php echo htmlspecialchars($fecha_entrega); ?>">
+        <button type="submit">Aplicar Filtros</button>
+    </form>
 
     <div class="kpi-container">
         <?php foreach ($kpi_data as $kpi) : ?>
