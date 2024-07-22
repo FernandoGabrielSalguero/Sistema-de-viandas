@@ -23,7 +23,7 @@ $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 $saldo_disponible = $usuario['Saldo'];
 
 // Obtener hijos del usuario
-$stmt = $pdo->prepare("SELECT h.Id, h.Nombre FROM Hijos h JOIN Usuarios_Hijos uh ON h.Id = uh.Hijo_Id WHERE uh.Usuario_Id = ?");
+$stmt = $pdo->prepare("SELECT h.Id, h.Nombre, h.Preferencias_Alimenticias FROM Hijos h JOIN Usuarios_Hijos uh ON h.Id = uh.Hijo_Id WHERE uh.Usuario_Id = ?");
 $stmt->execute([$usuario_id]);
 $hijos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -60,9 +60,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         try {
             foreach ($menus_seleccionados as $menu) {
+                // Obtener las preferencias alimenticias del hijo
+                $stmt = $pdo->prepare("SELECT Preferencias_Alimenticias FROM Hijos WHERE Id = ?");
+                $stmt->execute([$hijo_id]);
+                $preferencias_alimenticias = $stmt->fetchColumn();
+
                 // Realizar el pedido
-                $stmt = $pdo->prepare("INSERT INTO Pedidos_Comida (Hijo_Id, Menú_Id, Fecha_pedido, Estado, Fecha_entrega) VALUES (?, ?, NOW(), 'Procesando', ?)");
-                $stmt->execute([$hijo_id, $menu['Id'], $menu['Fecha_entrega']]);
+                $stmt = $pdo->prepare("INSERT INTO Pedidos_Comida (Hijo_Id, Menú_Id, Fecha_pedido, Estado, Fecha_entrega, Preferencias_Alimenticias) VALUES (?, ?, NOW(), 'Procesando', ?, ?)");
+                $stmt->execute([$hijo_id, $menu['Id'], $menu['Fecha_entrega'], $preferencias_alimenticias]);
             }
 
             // Actualizar el saldo del usuario una sola vez
