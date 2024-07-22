@@ -21,7 +21,6 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
 <head>
     <meta charset="UTF-8">
     <title>Panel de Administrador</title>
-    <link rel="stylesheet" href="../css/styles.css">
     <style>
         /* Background fondo header */
         nav ul {
