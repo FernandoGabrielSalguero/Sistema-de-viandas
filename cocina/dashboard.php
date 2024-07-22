@@ -24,20 +24,29 @@ $query_menus = "
     FROM Pedidos_Comida pc
     JOIN Menú m ON pc.Menú_Id = m.Id
 ";
-if (!empty($fecha_filtro)) {
-    $query_menus .= " WHERE pc.Fecha_entrega = ?";
+if (!empty($fecha_filtro) || !empty($colegio_filtro)) {
+    $query_menus .= " WHERE ";
+    if (!empty($fecha_filtro)) {
+        $query_menus .= "pc.Fecha_entrega = ? ";
+    }
+    if (!empty($fecha_filtro) && !empty($colegio_filtro)) {
+        $query_menus .= "AND ";
+    }
+    if (!empty($colegio_filtro)) {
+        $query_menus .= "h.Colegio_Id = ? ";
+    }
 }
 $query_menus .= " GROUP BY m.Nombre, pc.Fecha_entrega";
 $stmt = $pdo->prepare($query_menus);
+$params = [];
 if (!empty($fecha_filtro)) {
-    $stmt->execute([$fecha_filtro]);
-} else {
-    $stmt->execute();
+    $params[] = $fecha_filtro;
 }
+if (!empty($colegio_filtro)) {
+    $params[] = $colegio_filtro;
+}
+$stmt->execute($params);
 $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Calcular el total de viandas pedidas
-$total_viandas = array_sum(array_column($menus, 'Cantidad'));
 
 // Obtener la cantidad total de viandas compradas, divididas por colegio y cursos
 $query_colegios = "
@@ -48,27 +57,55 @@ $query_colegios = "
     JOIN Cursos cu ON h.Curso_Id = cu.Id
     JOIN Menú m ON pc.Menú_Id = m.Id
 ";
-if (!empty($fecha_filtro) && !empty($colegio_filtro)) {
-    $query_colegios .= " WHERE pc.Fecha_entrega = ? AND c.Id = ?";
-} elseif (!empty($fecha_filtro)) {
-    $query_colegios .= " WHERE pc.Fecha_entrega = ?";
-} elseif (!empty($colegio_filtro)) {
-    $query_colegios .= " WHERE c.Id = ?";
+if (!empty($fecha_filtro) || !empty($colegio_filtro)) {
+    $query_colegios .= " WHERE ";
+    if (!empty($fecha_filtro)) {
+        $query_colegios .= "pc.Fecha_entrega = ? ";
+    }
+    if (!empty($fecha_filtro) && !empty($colegio_filtro)) {
+        $query_colegios .= "AND ";
+    }
+    if (!empty($colegio_filtro)) {
+        $query_colegios .= "h.Colegio_Id = ? ";
+    }
 }
 $query_colegios .= " GROUP BY c.Nombre, cu.Nombre, m.Nombre, pc.Fecha_entrega";
 $stmt = $pdo->prepare($query_colegios);
-if (!empty($fecha_filtro) && !empty($colegio_filtro)) {
-    $stmt->execute([$fecha_filtro, $colegio_filtro]);
-} elseif (!empty($fecha_filtro)) {
-    $stmt->execute([$fecha_filtro]);
-} elseif (!empty($colegio_filtro)) {
-    $stmt->execute([$colegio_filtro]);
-} else {
-    $stmt->execute();
+$params = [];
+if (!empty($fecha_filtro)) {
+    $params[] = $fecha_filtro;
 }
+if (!empty($colegio_filtro)) {
+    $params[] = $colegio_filtro;
+}
+$stmt->execute($params);
 $colegios = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Agrupar los resultados por nivel y colegio
+// Obtener los alumnos con preferencias alimenticias
+$query_preferencias = "
+    SELECT m.Nombre AS MenuNombre, DATE_FORMAT(pc.Fecha_entrega, '%d/%m/%y') AS FechaEntrega, 
+           c.Nombre AS ColegioNombre, cu.Nombre AS CursoNombre, 
+           h.Nombre AS AlumnoNombre, p.Nombre AS PreferenciaNombre
+    FROM Pedidos_Comida pc
+    JOIN Hijos h ON pc.Hijo_Id = h.Id
+    JOIN Colegios c ON h.Colegio_Id = c.Id
+    JOIN Cursos cu ON h.Curso_Id = cu.Id
+    JOIN Menú m ON pc.Menú_Id = m.Id
+    JOIN Preferencias_Alimenticias p ON pc.Preferencias_alimenticias = p.Id
+    WHERE pc.Preferencias_alimenticias IS NOT NULL
+";
+if (!empty($fecha_filtro)) {
+    $query_preferencias .= " AND pc.Fecha_entrega = ?";
+}
+$stmt = $pdo->prepare($query_preferencias);
+$params = [];
+if (!empty($fecha_filtro)) {
+    $params[] = $fecha_filtro;
+}
+$stmt->execute($params);
+$preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Organizar los datos por nivel y menú
 $niveles = [
     'Nivel Inicial' => ['Nivel Inicial Sala 3A', 'Nivel Inicial Sala 3B', 'Nivel Inicial Sala 4A', 'Nivel Inicial Sala 4B', 'Nivel Inicial Sala 5A', 'Nivel Inicial Sala 5B'],
     'Primaria' => ['Primaria Primer Grado A', 'Primaria Primer Grado B', 'Primaria Segundo Grado', 'Primaria Tercer Grado', 'Primaria cuarto Grado', 'Primaria Quinto Grado', 'Primaria Sexto Grado', 'Primaria Septimo Grado'],
@@ -79,10 +116,23 @@ $niveles_data = [];
 foreach ($colegios as $colegio) {
     foreach ($niveles as $nivel => $cursos) {
         if (in_array($colegio['CursoNombre'], $cursos)) {
-            $niveles_data[$nivel][$colegio['ColegioNombre']][] = $colegio;
+            if (!isset($niveles_data[$nivel])) {
+                $niveles_data[$nivel] = [];
+            }
+            $key = $colegio['MenuNombre'] . '-' . $colegio['FechaEntrega'];
+            if (!isset($niveles_data[$nivel][$key])) {
+                $niveles_data[$nivel][$key] = [
+                    'ColegioNombre' => $colegio['ColegioNombre'],
+                    'MenuNombre' => $colegio['MenuNombre'],
+                    'Cantidad' => 0,
+                    'FechaEntrega' => $colegio['FechaEntrega']
+                ];
+            }
+            $niveles_data[$nivel][$key]['Cantidad'] += $colegio['Cantidad'];
         }
     }
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -114,18 +164,6 @@ foreach ($colegios as $colegio) {
         .filter-item {
             flex: 1 1 200px;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        table, th, td {
-            border: 1px solid black;
-        }
-        th, td {
-            padding: 10px;
-            text-align: left;
-        }
     </style>
 </head>
 <body>
@@ -138,15 +176,7 @@ foreach ($colegios as $colegio) {
         </div>
         <div class="filter-item">
             <label for="colegio">Filtrar por Colegio:</label>
-            <select id="colegio" name="colegio">
-                <option value="">Seleccione un colegio</option>
-                <?php
-                $colegios_query = $pdo->query("SELECT Id, Nombre FROM Colegios");
-                while ($colegio = $colegios_query->fetch(PDO::FETCH_ASSOC)) {
-                    echo '<option value="' . $colegio['Id'] . '"' . ($colegio_filtro == $colegio['Id'] ? ' selected' : '') . '>' . htmlspecialchars($colegio['Nombre']) . '</option>';
-                }
-                ?>
-            </select>
+            <input type="text" id="colegio" name="colegio" value="<?php echo htmlspecialchars($colegio_filtro); ?>">
         </div>
         <div class="filter-item">
             <button type="submit" name="filtrar_fecha">Filtrar</button>
@@ -158,7 +188,11 @@ foreach ($colegios as $colegio) {
     
     <h2>Total de Menús</h2>
     <div class="kpi-container">
-        <?php foreach ($menus as $menu) : ?>
+        <?php
+        $total_viandas = 0;
+        foreach ($menus as $menu) :
+            $total_viandas += $menu['Cantidad'];
+        ?>
             <div class="kpi">
                 <h3><?php echo htmlspecialchars($menu['MenuNombre']); ?></h3>
                 <p>Cantidad: <?php echo htmlspecialchars($menu['Cantidad']); ?></p>
@@ -166,35 +200,38 @@ foreach ($colegios as $colegio) {
             </div>
         <?php endforeach; ?>
         <div class="kpi">
-            <h3>Total Viandas</h3>
+            <h3>Total</h3>
             <p><?php echo $total_viandas; ?></p>
         </div>
     </div>
 
     <h2>Totalidad de Viandas por Colegio y Nivel</h2>
-    <?php foreach ($niveles_data as $nivel => $colegios) : ?>
-        <h2><?php echo htmlspecialchars($nivel); ?></h2>
-        <table>
-            <thead>
+    <?php foreach ($niveles_data as $nivel => $menus) : ?>
+        <h3><?php echo htmlspecialchars($nivel); ?></h3>
+        <table border="1">
+            <tr>
+                <th>Colegio</th>
+                <th>Menú</th>
+                <th>Cantidad</th>
+                <th>Fecha de entrega</th>
+            </tr>
+            <?php
+            $nivel_total = 0;
+            foreach ($menus as $menu) :
+                $nivel_total += $menu['Cantidad'];
+            ?>
                 <tr>
-                    <th>Colegio</th>
-                    <th>Menú</th>
-                    <th>Cantidad</th>
-                    <th>Fecha de entrega</th>
+                    <td><?php echo htmlspecialchars($menu['ColegioNombre']); ?></td>
+                    <td><?php echo htmlspecialchars($menu['MenuNombre']); ?></td>
+                    <td><?php echo htmlspecialchars($menu['Cantidad']); ?></td>
+                    <td><?php echo htmlspecialchars($menu['FechaEntrega']); ?></td>
                 </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($colegios as $colegio_nombre => $datos) : ?>
-                    <?php foreach ($datos as $dato) : ?>
-                        <tr>
-                            <td><?php echo htmlspecialchars($colegio_nombre); ?></td>
-                            <td><?php echo htmlspecialchars($dato['MenuNombre']); ?></td>
-                            <td><?php echo htmlspecialchars($dato['Cantidad']); ?></td>
-                            <td><?php echo htmlspecialchars($dato['FechaEntrega']); ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php endforeach; ?>
-            </tbody>
+            <?php endforeach; ?>
+            <tr>
+                <td colspan="2"><strong>Total</strong></td>
+                <td><strong><?php echo $nivel_total; ?></strong></td>
+                <td></td>
+            </tr>
         </table>
     <?php endforeach; ?>
 
