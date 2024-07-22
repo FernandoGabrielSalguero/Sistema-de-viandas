@@ -102,6 +102,7 @@ $asignaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <title>Asignar Hijos a Papás</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
     <h1>Asignar Hijos a Papás</h1>

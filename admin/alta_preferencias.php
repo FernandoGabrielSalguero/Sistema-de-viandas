@@ -69,6 +69,7 @@ $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <title>Alta de Preferencias Alimenticias</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
     <h1>Alta de Preferencias Alimenticias</h1>
