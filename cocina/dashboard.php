@@ -33,6 +33,23 @@ if (!empty($fecha_filtro)) {
 }
 $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// Obtener el total de viandas pedidas
+$query_total = "
+    SELECT COUNT(*) AS TotalCantidad
+    FROM Pedidos_Comida pc
+";
+if (!empty($fecha_filtro)) {
+    $query_total .= " WHERE pc.Fecha_entrega = ?";
+}
+$stmt_total = $pdo->prepare($query_total);
+if (!empty($fecha_filtro)) {
+    $stmt_total->execute([$fecha_filtro]);
+} else {
+    $stmt_total->execute();
+}
+$total_result = $stmt_total->fetch(PDO::FETCH_ASSOC);
+$total_cantidad = $total_result['TotalCantidad'];
+
 // Obtener la cantidad total de viandas compradas, divididas por colegio y cursos
 $query_colegios = "
     SELECT c.Nombre AS ColegioNombre, cu.Nombre AS CursoNombre, m.Nombre AS MenuNombre, COUNT(*) AS Cantidad, DATE_FORMAT(pc.Fecha_entrega, '%d/%m/%y') AS FechaEntrega
@@ -64,7 +81,7 @@ $query_preferencias = "
     JOIN Colegios c ON h.Colegio_Id = c.Id
     JOIN Cursos cu ON h.Curso_Id = cu.Id
     JOIN Menú m ON pc.Menú_Id = m.Id
-    JOIN Preferencias_Alimenticias p ON pc.Preferencias_alimenticias = p.Id
+    JOIN Preferencias_Alimenticias p ON h.Preferencias_Alimenticias = p.Id
     WHERE pc.Preferencias_alimenticias IS NOT NULL
 ";
 if (!empty($fecha_filtro)) {
@@ -136,6 +153,10 @@ $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <p>Fecha de entrega: <?php echo htmlspecialchars($menu['FechaEntrega']); ?></p>
             </div>
         <?php endforeach; ?>
+        <div class="kpi">
+            <h3>Total</h3>
+            <p>Cantidad: <?php echo htmlspecialchars($total_cantidad); ?></p>
+        </div>
     </div>
 
     <h2>Totalidad de Viandas por Colegio y Curso</h2>
