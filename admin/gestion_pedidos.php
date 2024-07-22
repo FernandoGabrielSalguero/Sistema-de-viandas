@@ -130,10 +130,31 @@ $kpi_data = $kpi_stmt->fetchAll(PDO::FETCH_ASSOC);
         }
     </style>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
 </head>
 <body>
     <h1>Gestión de Pedidos</h1>
+
+    <div class="filter-form">
+        <select id="colegio_id" name="colegio_id" onchange="applyFilter()">
+            <option value="">Todos los colegios</option>
+            <?php foreach ($colegios as $colegio) : ?>
+                <option value="<?php echo htmlspecialchars($colegio['Id']); ?>" <?php echo ($colegio_id == $colegio['Id']) ? 'selected' : ''; ?>>
+                    <?php echo htmlspecialchars($colegio['Nombre']); ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+
+        <select id="curso_id" name="curso_id" onchange="applyFilter()">
+            <option value="">Todos los cursos</option>
+            <?php foreach ($cursos as $curso) : ?>
+                <option value="<?php echo htmlspecialchars($curso['Id']); ?>" <?php echo ($curso_id == $curso['Id']) ? 'selected' : ''; ?>>
+                    <?php echo htmlspecialchars($curso['Nombre']); ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+
+        <input type="date" id="fecha_entrega" name="fecha_entrega" value="<?php echo htmlspecialchars($fecha_entrega); ?>" onchange="applyFilter()">
+    </div>
 
     <div class="kpi-container">
         <?php foreach ($kpi_data as $kpi) : ?>
@@ -148,32 +169,9 @@ $kpi_data = $kpi_stmt->fetchAll(PDO::FETCH_ASSOC);
     <table>
         <thead>
             <tr>
-                <th>
-                    Colegio
-                    <select id="colegio_id" name="colegio_id" onchange="applyFilter()">
-                        <option value="">Todos</option>
-                        <?php foreach ($colegios as $colegio) : ?>
-                            <option value="<?php echo htmlspecialchars($colegio['Id']); ?>" <?php echo ($colegio_id == $colegio['Id']) ? 'selected' : ''; ?>>
-                                <?php echo htmlspecialchars($colegio['Nombre']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </th>
-                <th>
-                    Curso
-                    <select id="curso_id" name="curso_id" onchange="applyFilter()">
-                        <option value="">Todos</option>
-                        <?php foreach ($cursos as $curso) : ?>
-                            <option value="<?php echo htmlspecialchars($curso['Id']); ?>" <?php echo ($curso_id == $curso['Id']) ? 'selected' : ''; ?>>
-                                <?php echo htmlspecialchars($curso['Nombre']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </th>
-                <th>
-                    Fecha de Entrega
-                    <input type="date" id="fecha_entrega" name="fecha_entrega" value="<?php echo htmlspecialchars($fecha_entrega); ?>" onchange="applyFilter()">
-                </th>
+                <th>Colegio</th>
+                <th>Curso</th>
+                <th>Cantidad</th>
             </tr>
         </thead>
         <tbody>
