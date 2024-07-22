@@ -55,15 +55,8 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
         }
 
         .tagus {
-            background-color: #9575cd;
-        }
-
-        .primary {
-            background-color: #1e88e5;
-        }
-
-        .accent {
-            background-color: #2962ff;
+            background-color: #28a745;
+            color: white;
         }
 
         .warn {
@@ -74,15 +67,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
             background-color: #0d47a1;
         }
 
-        .gray {
-            background-color: #cfd8dc;
-            color: #000;
-        }
 
-        .disabled {
-            background-color: #bdbdbd;
-            color: #9e9e9e;
-        }
 
         nav ul li a:hover {
             opacity: 0.9;
