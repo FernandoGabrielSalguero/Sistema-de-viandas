@@ -76,7 +76,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <label for="monto">Monto a recargar:</label>
         <select id="monto" name="monto" required>
             <option value="">Seleccione un monto</option>
-            <?php foreach ([3000, 5000, 10000, 15000, 20000, 50000, 100000, 120000, 150000, 200000] as $monto) : ?>
+            <?php foreach ([3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 12000, 15000, 17000, 20000, 25000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000, 120000, 150000, 200000] as $monto) : ?>
                 <option value="<?php echo $monto; ?>"><?php echo number_format($monto, 2); ?> ARS</option>
             <?php endforeach; ?>
         </select>
