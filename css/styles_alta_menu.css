@@ -108,14 +108,18 @@ td button:hover {
 }
 
 /* Añadir ancho específico a las columnas */
-table th:nth-child(2), table td:nth-child(2) {
-    width: 50px; /* Ajustar ancho de la columna "Nombre" */
+table th:nth-child(1), table td:nth-child(1) {
+    width: 50px; 
 }
 
-table th:nth-child(1), table td:nth-child(1),
+table th:nth-child(2), table td:nth-child(2) {
+    width: 300px; 
+}
+
+
 table th:nth-child(7), table td:nth-child(7),
 table th:nth-child(8), table td:nth-child(8) {
-    width: 300px; /* Ajustar ancho de otras columnas si es necesario */
+    width: 190px; 
 }
 
 /* Colores de estado */
