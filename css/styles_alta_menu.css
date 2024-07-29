@@ -1,62 +1,63 @@
 /* Estilos generales */
 body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f4f7fc;
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
     margin: 0;
     padding: 20px;
 }
 
 h1, h2 {
     text-align: center;
-    color: #4A148C;
+    color: #4a4a4a;
 }
 
-.container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-}
-
-/* Estilo del formulario */
+/* Estilos del formulario */
 form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     margin-bottom: 40px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 form label {
-    color: #4A148C;
+    display: block;
+    margin-bottom: 8px;
     font-weight: bold;
+    color: #333;
 }
 
-form input, form select, form button {
+form input[type="text"],
+form input[type="date"],
+form input[type="datetime-local"],
+form input[type="number"],
+form select {
+    width: 100%;
     padding: 10px;
-    border: 1px solid #ddd;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
     border-radius: 4px;
-    font-size: 16px;
-}
-
-form input:focus, form select:focus, form button:focus {
-    border-color: #6200ea;
-    outline: none;
 }
 
 form button {
-    background-color: #6200ea;
+    width: 100%;
+    padding: 10px;
+    background-color: #218838;
     color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
     cursor: pointer;
-    transition: background-color 0.3s;
 }
 
 form button:hover {
-    background-color: #3700b3;
+    background-color: #218838;
 }
 
-/* Estilo de la tabla */
+/* Estilos de la tabla */
 .table-container {
     overflow-x: auto;
 }
@@ -64,63 +65,53 @@ form button:hover {
 table {
     width: 100%;
     border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
 }
 
-table th, table td {
-    padding: 10px;
+th, td {
+    padding: 15px;
     text-align: left;
-    border: 1px solid #ddd;
 }
 
-table th {
-    background-color: #4A148C;
+th {
+    background-color: #4a4a4a;
     color: #fff;
 }
 
-table td input, table td select, table td button {
+td {
+    border-bottom: 1px solid #ddd;
+}
+
+td select {
     width: 100%;
     padding: 10px;
-    border: 1px solid #ddd;
+    border: 1px solid #ccc;
     border-radius: 4px;
-    font-size: 16px;
 }
 
-table td select[required] {
-    background-color: #f4f7fc;
-    border: 1px solid #ddd;
-}
-
-table td button {
-    background-color: #4A148C;
+td button {
+    padding: 10px;
+    background-color: #218838;
     color: #fff;
     border: none;
+    border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s;
 }
 
-table td button:hover {
+td button:hover {
     background-color: #3700b3;
 }
 
-table tr:nth-child(odd) {
-    background-color: #f9f9f9;
+/* Colores de estado */
+.estado-en-venta {
+    background-color: #d4edda;
+    color: #155724;
 }
 
-table tr:nth-child(even) {
-    background-color: #f4f7fc;
-}
-
-table tr td:nth-child(2) {
-    width: 300px; /* Ampliar la columna "Nombre" */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-table td.estado-en-venta {
-    background-color: #e8f5e9;
-}
-
-table td.estado-sin-stock {
-    background-color: #ffebee;
+.estado-sin-stock {
+    background-color: #f8d7da;
+    color: #721c24;
 }
