@@ -1,47 +1,33 @@
-/* General Styles */
+/* Estilos generales */
 body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f4f7fc;
-    color: #333;
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
     margin: 0;
-    padding: 0;
+    padding: 20px;
 }
 
 h1, h2 {
     text-align: center;
-    color: #6200ea;
+    color: #4a4a4a;
 }
 
-.container {
-    max-width: 800px;
-    margin: 20px auto;
-    padding: 20px;
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.error, .success {
-    color: #fff;
-    background-color: #f44336; /* Red */
-    padding: 10px;
-    margin-bottom: 20px;
-    border-radius: 4px;
-}
-
-.success {
-    background-color: #4caf50; /* Green */
-}
-
-/* Form Styles */
+/* Estilos del formulario */
 form {
-    display: flex;
-    flex-direction: column;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 40px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 form label {
-    margin-bottom: 5px;
-    color: #6200ea;
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #333;
 }
 
 form input[type="text"],
@@ -49,75 +35,83 @@ form input[type="date"],
 form input[type="datetime-local"],
 form input[type="number"],
 form select {
+    width: 100%;
     padding: 10px;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
     border: 1px solid #ccc;
     border-radius: 4px;
 }
 
 form button {
-    padding: 10px 15px;
-    background-color: #6200ea;
+    width: 100%;
+    padding: 10px;
+    background-color: #218838;
     color: #fff;
     border: none;
     border-radius: 4px;
+    font-size: 16px;
     cursor: pointer;
-    transition: background-color 0.3s;
 }
 
 form button:hover {
-    background-color: #3700b3;
+    background-color: #218838;
 }
 
-/* Table Styles */
+/* Estilos de la tabla */
+.table-container {
+    overflow-x: auto;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
 }
 
-table th,
-table td {
-    padding: 12px 15px;
-    border: 1px solid #ddd;
+th, td {
+    padding: 15px;
     text-align: left;
 }
 
-table th {
-    background-color: #6200ea;
+th {
+    background-color: #4a4a4a;
     color: #fff;
 }
 
-table tr:nth-child(even) {
-    background-color: #f9f9f9;
+td {
+    border-bottom: 1px solid #ddd;
 }
 
-table tr:hover {
-    background-color: #f1f1f1;
-}
-
-table input[type="text"],
-table input[type="date"],
-table input[type="datetime-local"],
-table input[type="number"],
-table select {
+td select {
     width: 100%;
-    padding: 8px;
+    padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    box-sizing: border-box;
 }
 
-table button {
-    padding: 5px 10px;
-    background-color: #6200ea;
+td button {
+    padding: 10px;
+    background-color: #218838;
     color: #fff;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s;
 }
 
-table button:hover {
+td button:hover {
     background-color: #3700b3;
+}
+
+/* Colores de estado */
+.estado-en-venta {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.estado-sin-stock {
+    background-color: #f8d7da;
+    color: #721c24;
 }
