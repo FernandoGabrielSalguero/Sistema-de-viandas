@@ -1,4 +1,3 @@
-/* Estilos generales */
 body {
     font-family: Arial, sans-serif;
     background-color: #f8f9fa;
@@ -34,6 +33,8 @@ form input[type="text"],
 form input[type="date"],
 form input[type="datetime-local"],
 form input[type="number"],
+
+
 form select {
     width: 100%;
     padding: 10px;
@@ -73,7 +74,8 @@ table {
 
 th, td {
     padding: 15px;
-    text-align: left;
+    text-align: center;
+    height: auto;
 }
 
 th {
