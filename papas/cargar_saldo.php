@@ -14,7 +14,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $comprobante = $_FILES['comprobante'];
 
     // Validar monto
-    $montos_validos = [3000, 5000, 10000, 15000, 20000, 50000, 100000, 120000, 150000, 200000];
+    $montos_validos = [3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 12000, 15000, 17000, 20000, 25000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000, 120000, 150000, 200000];
     if (!in_array($monto, $montos_validos)) {
         $error = "Monto no válido.";
     } else {
