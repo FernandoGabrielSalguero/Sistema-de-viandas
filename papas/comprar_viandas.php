@@ -34,7 +34,7 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $menus_por_dia = [];
 foreach ($menus as $menu) {
-    $fecha_entrega = DateTime::createFromFormat('Y-m-d', $menu['Fecha_entrega'])->format('d/m/Y');
+    $fecha_entrega = DateTime::createFromFormat('Y-m-d', $menu['Fecha_entrega'])->format('Y-m-d');
     $menus_por_dia[$fecha_entrega][] = $menu;
 }
 
@@ -125,8 +125,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <?php endforeach; ?>
         </select>
         <br><br>
-        <?php foreach ($menus_por_dia as $fecha => $menus) : ?>
-            <h2><?php echo htmlspecialchars($fecha); ?></h2>
+        <?php
+        foreach ($menus_por_dia as $fecha => $menus) :
+            $date = new DateTime($fecha);
+            $formatter = new IntlDateFormatter('es_ES', IntlDateFormatter::FULL, IntlDateFormatter::NONE, 'Europe/Madrid', IntlDateFormatter::GREGORIAN, 'EEEE d/MM/yyyy');
+            $nombre_dia = $formatter->format($date);
+        ?>
+            <h2><?php echo htmlspecialchars(ucfirst($nombre_dia)); ?></h2>
             <?php foreach ($menus as $menu) : ?>
                 <div>
                     <label>
