@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>Panel de Papás</title>
-    <!-- <link rel="stylesheet" href="../css/styles.css"> -->
     <style>
         nav {
-            background-color: #f44336; /* Rojo */
+            background-color: #f44336;
             padding: 10px;
         }
 
@@ -25,8 +24,8 @@
 
         nav ul li a {
             text-decoration: none;
-            color: white; /* Letra blanca */
-            background-color: #4caf50; /* Verde */
+            color: white;
+            background-color: #4caf50;
             padding: 10px 20px;
             border-radius: 5px;
             font-weight: bold;
