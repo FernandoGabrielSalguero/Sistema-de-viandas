@@ -13,7 +13,7 @@
                 <li><a href="dashboard.php">Inicio</a></li>
                 <li><a href="cargar_saldo.php">Cargar Saldo</a></li>
                 <li><a href="comprar_viandas.php">Comprar Viandas</a></li>
-                <li><a href=".. /papas/logout.php" class="logout">Salir</a></li>
+                <li><a href="logout.php" class="logout">Salir</a></li>
             </ul>
         </nav>
     </body>
