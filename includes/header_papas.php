@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Panel de Papás</title>
-    <link rel="stylesheet" href="../css/styles.css">
+    <!-- <link rel="stylesheet" href="../css/styles.css"> -->
     <style>
         nav {
             background-color: #f44336; /* Rojo */
