@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <title>Panel de Papás</title>
-        <link rel="stylesheet" href=".. /css/style_header_papas.css">
+        <link rel="stylesheet" href="../css/style_header_papas.css">
     </head>
 
     <body>
