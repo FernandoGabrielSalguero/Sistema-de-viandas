@@ -1,5 +1,5 @@
 nav {
-    background-color: #808080; /* Gris */
+    background-color: #e6e6e6;
     padding: 10px;
 }
 
@@ -19,7 +19,7 @@ nav ul li {
 nav ul li a {
     text-decoration: none;
     color: white;
-    background-color: #4caf50; /* Verde */
+    background-color: #4caf50;
     padding: 10px 20px;
     border-radius: 5px;
     font-weight: bold;
@@ -30,16 +30,16 @@ nav ul li a {
 }
 
 nav ul li a:hover {
-    background-color: #388e3c; /* Verde oscuro */
+    background-color: #388e3c;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 nav ul li a.logout {
-    background-color: #f44336; /* Rojo */
+    background-color: #f44336; 
 }
 
 nav ul li a.logout:hover {
-    background-color: #d32f2f; /* Rojo oscuro */
+    background-color: #d32f2f;
 }
 
 @media (max-width: 768px) {
