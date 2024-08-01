@@ -4,6 +4,9 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+// Establecer la zona horaria
+date_default_timezone_set('America/Argentina/Buenos_Aires');
+
 session_start();
 include '../includes/db.php';
 
@@ -45,7 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 header("Location: dashboard.php?error=Error al cancelar el pedido.");
             }
         } else {
-            $mensaje_error = "La vianda se podia cancelar hasta el: " . $fecha_hora_cancelacion;
+            $mensaje_error = "La vianda se podia cancelar hasta el: " . $fecha_limite->format('Y-m-d H:i:s');
             header("Location: dashboard.php?error=" . urlencode($mensaje_error));
         }
     } else {
