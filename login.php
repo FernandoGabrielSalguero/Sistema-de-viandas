@@ -41,6 +41,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 echo "<script>console.log('Redirigiendo a representante/dashboard.php');</script>";
                 header("Location: representante/dashboard.php");
                 exit();
+                case 'cuyo_placa':
+                    echo "<script>console.log('Redirigiendo a cuyo/dashboard_cuyo_placa.php');</script>";
+                    header("Location: cuyo/dashboard_cuyo_placa.php");
+                    exit();
             default:
                 echo "<script>console.log('Rol no válido: " . $user['Rol'] . "');</script>";
                 header("Location: login.php?error=Rol no válido");
