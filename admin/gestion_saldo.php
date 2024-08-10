@@ -68,7 +68,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
     $stmt->execute([$id]);
     $pedido = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Manejo de la aprobación del saldo
+    // Si el estado es "Aprobado" y el pedido no estaba previamente aprobado, sumar el saldo
     if ($nuevo_estado == 'Aprobado' && $pedido['Estado'] != 'Aprobado') {
         $usuario_id = $pedido['Usuario_Id'];
         $saldo = $pedido['Saldo'];
@@ -91,15 +91,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
         }
     }
 
-    // Manejo de la cancelación del saldo
-    if ($nuevo_estado == 'Cancelado') {
-        // No se suma el saldo al usuario, solo se actualiza el estado
+    // Manejo de la cancelación/rechazo del saldo
+    if ($nuevo_estado == 'Rechazado' || $nuevo_estado == 'Cancelado') {
+        // Actualizar el estado del pedido de saldo a "Rechazado" o "Cancelado"
         $stmt = $pdo->prepare("UPDATE Pedidos_Saldo SET Estado = ? WHERE Id = ?");
-        $stmt->execute([$nuevo_estado, $id]);
+        if ($stmt->execute([$nuevo_estado, $id])) {
+            $success = "Estado del saldo actualizado a 'Rechazado' con éxito.";
+        } else {
+            $error = "Hubo un error al actualizar el estado a 'Rechazado': " . implode(", ", $stmt->errorInfo());
+        }
     } else {
         // Actualizar el estado del pedido de saldo
         $stmt = $pdo->prepare("UPDATE Pedidos_Saldo SET Estado = ? WHERE Id = ?");
-        $stmt->execute([$nuevo_estado, $id]);
+        if ($stmt->execute([$nuevo_estado, $id])) {
+            $success = "Estado del saldo actualizado con éxito.";
+        } else {
+            $error = "Hubo un error al actualizar el estado del saldo: " . implode(", ", $stmt->errorInfo());
+        }
     }
 
     // Volver a cargar los registros después de la actualización
@@ -113,6 +121,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
     $stmt->execute();
     $pedidosSaldo = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
 
 ?>
 
