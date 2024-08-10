@@ -8,6 +8,8 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'papas') {
     exit();
 }
 
+$mostrarPopup = false;
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $usuario_id = $_SESSION['usuario_id'];
     $monto = $_POST['monto'];
@@ -26,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Insertar el pedido de saldo
             $stmt = $pdo->prepare("INSERT INTO Pedidos_Saldo (Usuario_Id, Saldo, Estado, Comprobante, Fecha_pedido) VALUES (?, ?, 'Pendiente de aprobación', ?, NOW())");
             if ($stmt->execute([$usuario_id, $monto, $comprobante_nombre])) {
-                $success = "Pedido de saldo realizado con éxito. La acreditación puede demorar hasta 72hs";
+                $mostrarPopup = true;  // Esto indica que se debe mostrar el pop-up
             } else {
                 $error = "Error al realizar el pedido de saldo.";
             }
@@ -36,7 +38,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -60,6 +61,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             margin-left: 10px;
             cursor: pointer;
         }
+        /* Estilos del pop-up */
+        .popup {
+            display: none; /* Por defecto está oculto */
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .popup button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -67,9 +91,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <?php
     if (isset($error)) {
         echo "<p class='error'>$error</p>";
-    }
-    if (isset($success)) {
-        echo "<p class='success'>$success</p>";
     }
     ?>
     <form method="post" enctype="multipart/form-data" action="cargar_saldo.php">
@@ -109,6 +130,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <span>ROJO.GENIO.CASINO</span>
         </div>
     </div>
+
+    <!-- Pop-up -->
+    <div id="popup" class="popup">
+        <p>Pedido de saldo realizado con éxito. La acreditación puede demorar hasta 72hs</p>
+        <button onclick="redirigirDashboard()">Aceptar</button>
+    </div>
+
     <script>
         function copiarCBU() {
             const cbu = document.getElementById('cbu').innerText;
@@ -116,6 +144,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 alert("CBU copiado al portapapeles");
             });
         }
+
+        function redirigirDashboard() {
+            window.location.href = 'dashboard.php';
+        }
+
+        <?php if ($mostrarPopup) : ?>
+        document.getElementById('popup').style.display = 'block';
+        <?php endif; ?>
     </script>
 </body>
 </html>
