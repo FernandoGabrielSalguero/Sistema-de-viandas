@@ -50,12 +50,14 @@ $totalPages = ceil($totalItems / $itemsPerPage);
 $stmt = $pdo->prepare("SELECT ps.Id, ps.Usuario_Id, u.Nombre AS Usuario_Nombre, ps.Saldo, ps.Estado, ps.Comprobante, ps.Fecha_pedido 
                        FROM Pedidos_Saldo ps
                        JOIN Usuarios u ON ps.Usuario_Id = u.Id
+                       ORDER BY ps.Id DESC
                        LIMIT :offset, :itemsPerPage");
 $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
 $stmt->bindParam(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
 $stmt->execute();
 $pedidosSaldo = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// Cambiar el estado del saldo
 // Cambiar el estado del saldo
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
     $id = $_POST['id'];
@@ -66,7 +68,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
     $stmt->execute([$id]);
     $pedido = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Si el nuevo estado es "Aprobado" y el estado anterior no era "Aprobado", sumar el saldo al usuario
+    // Manejo de la aprobación del saldo
     if ($nuevo_estado == 'Aprobado' && $pedido['Estado'] != 'Aprobado') {
         $usuario_id = $pedido['Usuario_Id'];
         $saldo = $pedido['Saldo'];
@@ -75,13 +77,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
         $stmt = $pdo->prepare("UPDATE Usuarios SET Saldo = Saldo + ? WHERE Id = ?");
         $stmt->execute([$saldo, $usuario_id]);
 
-        // Obtener el correo del usuario
+        // Enviar correo electrónico
         $stmt = $pdo->prepare("SELECT Correo FROM Usuarios WHERE Id = ?");
         $stmt->execute([$usuario_id]);
         $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
         $correo = $usuario['Correo'];
 
-        // Enviar correo electrónico
         $subject = "Saldo Aprobado";
         $message = "Estimado usuario,\n\nSu saldo de $saldo ARS ha sido aprobado y acreditado en su cuenta.\n\nSaludos,\nEquipo de Ilmana Gastronomía";
 
@@ -90,24 +91,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
         }
     }
 
-    // Actualizar el estado del pedido de saldo
-    $stmt = $pdo->prepare("UPDATE Pedidos_Saldo SET Estado = ? WHERE Id = ?");
-    if ($stmt->execute([$nuevo_estado, $id])) {
-        $success = "Estado del saldo actualizado con éxito.";
+    // Manejo de la cancelación del saldo
+    if ($nuevo_estado == 'Cancelado') {
+        // No se suma el saldo al usuario, solo se actualiza el estado
+        $stmt = $pdo->prepare("UPDATE Pedidos_Saldo SET Estado = ? WHERE Id = ?");
+        $stmt->execute([$nuevo_estado, $id]);
     } else {
-        $error = "Hubo un error al actualizar el estado del saldo: " . implode(", ", $stmt->errorInfo());
+        // Actualizar el estado del pedido de saldo
+        $stmt = $pdo->prepare("UPDATE Pedidos_Saldo SET Estado = ? WHERE Id = ?");
+        $stmt->execute([$nuevo_estado, $id]);
     }
 
     // Volver a cargar los registros después de la actualización
     $stmt = $pdo->prepare("SELECT ps.Id, ps.Usuario_Id, u.Nombre AS Usuario_Nombre, ps.Saldo, ps.Estado, ps.Comprobante, ps.Fecha_pedido 
                            FROM Pedidos_Saldo ps
                            JOIN Usuarios u ON ps.Usuario_Id = u.Id
+                           ORDER BY ps.Id DESC
                            LIMIT :offset, :itemsPerPage");
     $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
     $stmt->bindParam(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
     $stmt->execute();
     $pedidosSaldo = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
 ?>
 
 <!DOCTYPE html>
