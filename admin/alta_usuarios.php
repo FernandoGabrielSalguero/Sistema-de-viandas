@@ -69,8 +69,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['crear_usuario'])) {
     }
 }
 
-// Resto del código para manejar la actualización, eliminación y visualización de usuarios...
-
 // Procesar la eliminación de un usuario
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['eliminar_usuario'])) {
     $usuario_id = $_POST['usuario_id'];
@@ -174,6 +172,8 @@ $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <option value="cocina">Cocina</option>
             <option value="representante">Representante</option>
             <option value="administrador">Administrador</option>
+            <option value="cuyo_placa">Cuyo Placa</option>
+            <option value="transporte_ld">Transporte Larga Distancia</option> <!-- Agregados nuevos roles -->
         </select>
 
         <label for="saldo">Saldo</label>
@@ -222,6 +222,8 @@ $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <option value="cocina" <?php echo ($usuario['Rol'] == 'cocina') ? 'selected' : ''; ?>>Cocina</option>
                         <option value="representante" <?php echo ($usuario['Rol'] == 'representante') ? 'selected' : ''; ?>>Representante</option>
                         <option value="administrador" <?php echo ($usuario['Rol'] == 'administrador') ? 'selected' : ''; ?>>Administrador</option>
+                        <option value="cuyo_placa" <?php echo ($usuario['Rol'] == 'cuyo_placa') ? 'selected' : ''; ?>>Cuyo Placa</option>
+                        <option value="transporte_ld" <?php echo ($usuario['Rol'] == 'transporte_ld') ? 'selected' : ''; ?>>Transporte Larga Distancia</option> <!-- Agregados nuevos roles -->
                     </select>
                 </td>
                 <td><input type="number" step="0.01" name="saldo" value="<?php echo htmlspecialchars($usuario['Saldo']); ?>" required></td>
