@@ -93,6 +93,7 @@ $query_preferencias = "
     JOIN Menú m ON pc.Menú_Id = m.Id
     JOIN Preferencias_Alimenticias p ON pc.Preferencias_alimenticias = p.Id
     WHERE pc.Preferencias_alimenticias IS NOT NULL
+    AND p.Nombre != 'Sin preferencias'
 ";
 if (!empty($fecha_filtro)) {
     $query_preferencias .= " AND pc.Fecha_entrega = ?";
