@@ -48,7 +48,7 @@
             <li><a href="dashboard_cuyo_placa.php">Inicio</a></li>
             <li><a href="reportes.php">Reportes</a></li>
             <li><a href="ajustes.php">Ajustes</a></li>
-            <li><a href="../logout.php">Salir</a></li>
+            <li><a href="../admin/logout.php">Salir</a></li>
         </ul>
     </nav>
 </body>
