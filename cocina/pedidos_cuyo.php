@@ -229,20 +229,40 @@ foreach ($totales_pedidos as $turno => $plantas_totales) {
                             <?php foreach ($menus as $menu) : ?>
                                 <th><?php echo htmlspecialchars($menu); ?></th>
                             <?php endforeach; ?>
+                            <th>Total por Planta</th> <!-- Nueva columna para total de cada fila -->
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($plantas as $planta) : ?>
+                        <?php 
+                        $total_por_turno = array_fill_keys($menus, 0); // Inicializar array para totales por columna
+                        foreach ($plantas as $planta) : 
+                            $total_por_planta = 0; // Inicializar el total por planta
+                        ?>
                             <tr>
                                 <td><?php echo htmlspecialchars(is_array($planta) ? implode(', ', $planta) : $planta); ?></td>
                                 <?php foreach ($menus as $menu) : ?>
                                     <td>
-                                        <?php echo htmlspecialchars($totales_pedidos[$turno][$planta][$menu]); ?>
+                                        <?php 
+                                        $cantidad = $totales_pedidos[$turno][$planta][$menu];
+                                        echo htmlspecialchars($cantidad);
+                                        $total_por_planta += $cantidad; // Sumar al total de la planta
+                                        $total_por_turno[$menu] += $cantidad; // Sumar al total por turno
+                                        ?>
                                     </td>
                                 <?php endforeach; ?>
+                                <td><strong><?php echo htmlspecialchars($total_por_planta); ?></strong></td> <!-- Mostrar total de la planta -->
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
+                    <tfoot>
+                        <tr>
+                            <th>Total por Menú</th>
+                            <?php foreach ($menus as $menu) : ?>
+                                <th><strong><?php echo htmlspecialchars($total_por_turno[$menu]); ?></strong></th>
+                            <?php endforeach; ?>
+                            <th></th> <!-- Columna vacía para el total por fila -->
+                        </tr>
+                    </tfoot>
                 </table>
             <?php endforeach; ?>
         <?php endif; ?>
