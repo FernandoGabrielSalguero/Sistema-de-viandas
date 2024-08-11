@@ -52,69 +52,6 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'cocina') {
             font-weight: bold;
         }
 
-        .basic {
-            background-color: #1976d2;
-        }
-
-        .tagus {
-            background-color: #28a745;
-            color: white;
-        }
-
-        .warn {
-            background-color: #d32f2f;
-            color: white;
-        }
-
-        .link {
-            background-color: #0d47a1;
-        }
-
-
-
-        nav ul li a:hover {
-            opacity: 0.9;
-        }
-
-        nav ul li ul {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background-color: #285504;
-            border: 1px solid #ccc;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border-radius: 4px;
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            min-width: 200px;
-            z-index: 1000;
-        }
-
-        nav ul li:hover>ul {
-            display: block;
-        }
-
-        nav ul li ul li {
-            position: relative;
-        }
-
-        nav ul li ul li a {
-            padding: 10px 15px;
-            background-color: #285504;
-            color: #fff;
-            border-radius: 0;
-        }
-
-        nav ul li ul li a:hover {
-            background-color: #285504;
-        }
-
-        nav ul li ul li ul {
-            top: 0;
-            left: 100%;
-        }
     </style>
 </head>
 
