@@ -78,9 +78,9 @@ foreach ($menus as $menu) {
 }
 
 // Sumar los totales por tipo de comida
-foreach ($totales_pedidos as $turno => $plantas) {
-    foreach ($plantas as $planta => $menus) {
-        foreach ($menus as $menu => $cantidad) {
+foreach ($totales_pedidos as $turno => $plantas_totales) {
+    foreach ($plantas_totales as $planta => $menus_totales) {
+        foreach ($menus_totales as $menu => $cantidad) {
             $totales_comida[$menu] += $cantidad;
         }
     }
@@ -234,7 +234,7 @@ foreach ($totales_pedidos as $turno => $plantas) {
                     <tbody>
                         <?php foreach ($plantas as $planta) : ?>
                             <tr>
-                                <td><?php echo htmlspecialchars($planta); ?></td>
+                                <td><?php echo htmlspecialchars(is_array($planta) ? implode(', ', $planta) : $planta); ?></td>
                                 <?php foreach ($menus as $menu) : ?>
                                     <td>
                                         <?php echo htmlspecialchars($totales_pedidos[$turno][$planta][$menu]); ?>
