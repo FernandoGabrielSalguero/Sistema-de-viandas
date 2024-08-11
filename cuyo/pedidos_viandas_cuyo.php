@@ -53,7 +53,6 @@ $menus = [
 <head>
     <meta charset="UTF-8">
     <title>Pedidos Viandas Cuyo Placa</title>
-    <link rel="stylesheet" href="../css/styles.css">
     <style>
         body {
             margin: 0;
