@@ -123,7 +123,7 @@ $menus = [
         }
 
         input[type="number"] {
-            width: 60px;
+            width: 90px;
         }
 
     </style>
