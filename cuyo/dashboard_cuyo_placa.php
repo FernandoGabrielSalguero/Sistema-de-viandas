@@ -17,6 +17,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'cuyo_placa') {
 $fecha_inicio = '';
 $fecha_fin = '';
 $pedidos_totales = [];
+$totales_comida = []; // Aseguramos que el array está inicializado como un array vacío.
 
 // Procesar el formulario
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -31,6 +32,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                GROUP BY Planta, Turno, Menu");
         $stmt->execute([$fecha_inicio, $fecha_fin]);
         $pedidos_totales = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Inicializar array para los totales de cada tipo de comida
+        foreach ($menus as $menu) {
+            $totales_comida[$menu] = 0; // Aseguramos que cada clave está correctamente inicializada.
+        }
+
+        // Rellenar la tabla con los resultados
+        foreach ($pedidos_totales as $pedido) {
+            $turno = $pedido['Turno'];
+            $planta = $pedido['Planta'];
+            $menu = $pedido['Menu'];
+            $cantidad = $pedido['CantidadTotal'];
+
+            if (isset($resultados[$turno][$planta][$menu])) {
+                $resultados[$turno][$planta][$menu] += $cantidad;
+            }
+
+            // Sumar a los totales por tipo de comida
+            if (isset($totales_comida[$menu])) {
+                $totales_comida[$menu] += $cantidad;
+            }
+        }
     } else {
         $error = "Por favor, seleccione un rango de fechas válido.";
     }
@@ -56,18 +79,6 @@ foreach ($turnos as $turno) {
     $resultados[$turno] = [];
     foreach ($plantas as $planta) {
         $resultados[$turno][$planta] = array_fill_keys($menus, 0);
-    }
-}
-
-// Rellenar la tabla con los resultados
-foreach ($pedidos_totales as $pedido) {
-    $turno = $pedido['Turno'];
-    $planta = $pedido['Planta'];
-    $menu = $pedido['Menu'];
-    $cantidad = $pedido['CantidadTotal'];
-
-    if (isset($resultados[$turno][$planta][$menu])) {
-        $resultados[$turno][$planta][$menu] += $cantidad;
     }
 }
 
@@ -161,6 +172,22 @@ foreach ($pedidos_totales as $pedido) {
             margin-bottom: 20px;
         }
 
+        .kpi-container {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+
+        .kpi {
+            background-color: #007bff;
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+            flex: 1;
+            margin: 0 10px;
+        }
+
     </style>
 </head>
 <body>
@@ -182,6 +209,15 @@ foreach ($pedidos_totales as $pedido) {
         </form>
 
         <?php if (!empty($pedidos_totales)) : ?>
+            <div class="kpi-container">
+                <?php foreach ($totales_comida as $menu => $total) : ?>
+                    <div class="kpi">
+                        <h3><?php echo htmlspecialchars($menu); ?></h3>
+                        <p><?php echo htmlspecialchars($total); ?> viandas</p>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
             <?php foreach ($turnos as $turno) : ?>
                 <div class="turno-header">
                     Turno: <?php echo htmlspecialchars($turno); ?>
