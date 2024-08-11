@@ -71,6 +71,7 @@ $menus = [
         }
 
         form {
+            max-width: 900px;
             width: 100%;
             margin: 0 auto;
         }
