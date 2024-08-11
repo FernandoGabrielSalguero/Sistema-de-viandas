@@ -24,88 +24,98 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'cocina') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <style>
-        body {
-            margin: 0;
+
+       /* Background fondo header */
+       nav ul {
+            list-style: none;
             padding: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
-        }
-
-        .container {
-            width: 100%;
+            margin: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            background-color: #f5f5f5;
             padding: 20px;
-            box-sizing: border-box;
         }
 
-        h1 {
+        nav ul li {
+            position: relative;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            display: block;
+            padding: 10px 20px;
+            color: #fff;
+            border-radius: 5px;
+            margin: 5px;
             text-align: center;
-            margin-bottom: 20px;
-        }
-
-        form {
-            width: 100%;
-            margin: 0 auto 20px auto;
-            text-align: center;
-        }
-
-        label {
             font-weight: bold;
         }
 
-        input[type="date"] {
-            padding: 5px;
-            margin: 0 10px;
+        .basic {
+            background-color: #1976d2;
         }
 
-        button {
-            padding: 10px 20px;
-            font-size: 1em;
-            cursor: pointer;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-            background-color: white;
-        }
-
-        th, td {
-            padding: 10px;
-            text-align: center;
-            border: 1px solid #ddd;
-        }
-
-        th {
-            background-color: #007bff;
+        .tagus {
+            background-color: #28a745;
             color: white;
         }
 
-        .turno-header {
-            background-color: #007bff;
+        .warn {
+            background-color: #d32f2f;
             color: white;
-            padding: 10px;
-            text-align: left;
-            margin-top: 20px;
-            margin-bottom: 10px;
-            font-size: 1.2em;
-            border-radius: 5px;
         }
 
-        .error {
-            color: red;
-            text-align: center;
-            margin-bottom: 20px;
+        .link {
+            background-color: #0d47a1;
         }
 
+
+
+        nav ul li a:hover {
+            opacity: 0.9;
+        }
+
+        nav ul li ul {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            min-width: 200px;
+            z-index: 1000; /* Asegura que el submenú esté por encima de otros elementos */
+        }
+
+        nav ul li:hover > ul {
+            display: block;
+        }
+
+        nav ul li ul li {
+            position: relative;
+        }
+
+        nav ul li ul li a {
+            padding: 10px 15px;
+            background-color: #1976d2;
+            color: #fff;
+            border-radius: 0;
+        }
+
+        nav ul li ul li a:hover {
+            background-color: #007bff;
+        }
+
+        nav ul li ul li ul {
+            top: 0;
+            left: 100%;
+        }
     </style>
 </head>
 <body>
