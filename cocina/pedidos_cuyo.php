@@ -1,11 +1,18 @@
 <?php
+session_start();
+include '../includes/header_cocina.php'; // Asegúrate de que este archivo header sea específico para el rol de cocina
+include '../includes/db.php';
+
 // Habilitar la muestra de errores
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-include '../includes/header_cocina.php';
-include '../includes/db.php';
+// Verificar si el usuario está autenticado y tiene el rol correcto
+if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'cocina') {
+    header("Location: ../index.php");
+    exit();
+}
 
 $fecha_inicio = '';
 $fecha_fin = '';
@@ -70,7 +77,7 @@ foreach ($pedidos_totales as $pedido) {
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Total de viandas compradas</title>
+    <title>Dashboard Cocina</title>
     <style>
         body {
             margin: 0;
@@ -158,13 +165,13 @@ foreach ($pedidos_totales as $pedido) {
 </head>
 <body>
     <div class="container">
-        <h1>Viandas solicitadas</h1>
+        <h1>Dashboard - Cocina</h1>
 
         <?php if (isset($error)) : ?>
             <p class="error"><?php echo $error; ?></p>
         <?php endif; ?>
 
-        <form method="post" action="dashboard_cuyo_placa.php">
+        <form method="post" action="dashboard_cocina.php">
             <label for="fecha_inicio">Desde:</label>
             <input type="date" id="fecha_inicio" name="fecha_inicio" required value="<?php echo htmlspecialchars($fecha_inicio); ?>">
 
@@ -207,4 +214,3 @@ foreach ($pedidos_totales as $pedido) {
     </div>
 </body>
 </html>
-
