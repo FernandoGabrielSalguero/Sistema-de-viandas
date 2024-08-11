@@ -128,6 +128,20 @@ foreach ($pedidos_totales as $pedido) {
             margin-top: 20px;
         }
 
+        .kpi-group {
+            margin-bottom: 30px;
+            width: 100%;
+        }
+
+        .kpi-group h2 {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            margin: 0;
+            text-align: center;
+            border-radius: 5px;
+        }
+
         .kpi {
             background-color: #007bff;
             color: white;
@@ -135,7 +149,8 @@ foreach ($pedidos_totales as $pedido) {
             margin: 10px;
             border-radius: 5px;
             text-align: center;
-            width: 200px;
+            flex: 1;
+            min-width: 200px;
         }
 
     </style>
@@ -159,17 +174,19 @@ foreach ($pedidos_totales as $pedido) {
         </form>
 
         <?php if (!empty($pedidos_totales)) : ?>
-            <div class="kpi-container">
-                <?php foreach ($plantas as $planta) : ?>
-                    <?php foreach ($menus as $menu) : ?>
-                        <div class="kpi">
-                            <h3><?php echo htmlspecialchars($menu); ?></h3>
-                            <p><?php echo htmlspecialchars($planta); ?></p>
-                            <p><?php echo htmlspecialchars($totales_pedidos[$planta][$menu]); ?> viandas</p>
-                        </div>
-                    <?php endforeach; ?>
-                <?php endforeach; ?>
-            </div>
+            <?php foreach ($plantas as $planta) : ?>
+                <div class="kpi-group">
+                    <h2><?php echo htmlspecialchars($planta); ?></h2>
+                    <div class="kpi-container">
+                        <?php foreach ($menus as $menu) : ?>
+                            <div class="kpi">
+                                <h3><?php echo htmlspecialchars($menu); ?></h3>
+                                <p><?php echo htmlspecialchars($totales_pedidos[$planta][$menu]); ?> viandas</p>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endforeach; ?>
         <?php endif; ?>
     </div>
 </body>
