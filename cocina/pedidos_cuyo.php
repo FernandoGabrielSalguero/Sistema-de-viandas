@@ -14,6 +14,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'cocina') {
     exit();
 }
 
+
 $fecha_inicio = '';
 $fecha_fin = '';
 $pedidos_totales = [];
@@ -75,10 +76,9 @@ foreach ($pedidos_totales as $pedido) {
 
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard Cocina</title>
+    <title>Total de viandas compradas</title>
     <style>
         body {
             margin: 0;
@@ -134,8 +134,7 @@ foreach ($pedidos_totales as $pedido) {
             background-color: white;
         }
 
-        th,
-        td {
+        th, td {
             padding: 10px;
             text-align: center;
             border: 1px solid #ddd;
@@ -162,18 +161,18 @@ foreach ($pedidos_totales as $pedido) {
             text-align: center;
             margin-bottom: 20px;
         }
+
     </style>
 </head>
-
 <body>
     <div class="container">
-        <h1>Dashboard - Cocina</h1>
+        <h1>Viandas solicitadas</h1>
 
         <?php if (isset($error)) : ?>
             <p class="error"><?php echo $error; ?></p>
         <?php endif; ?>
 
-        <form method="post" action="dashboard_cocina.php">
+        <form method="post" action="dashboard_cuyo_placa.php">
             <label for="fecha_inicio">Desde:</label>
             <input type="date" id="fecha_inicio" name="fecha_inicio" required value="<?php echo htmlspecialchars($fecha_inicio); ?>">
 
@@ -188,7 +187,7 @@ foreach ($pedidos_totales as $pedido) {
                 <div class="turno-header">
                     Turno: <?php echo htmlspecialchars($turno); ?>
                 </div>
-
+                
                 <table>
                     <thead>
                         <tr>
@@ -215,5 +214,4 @@ foreach ($pedidos_totales as $pedido) {
         <?php endif; ?>
     </div>
 </body>
-
 </html>
