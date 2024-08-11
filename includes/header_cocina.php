@@ -81,7 +81,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'cocina') {
             position: absolute;
             top: 100%;
             left: 0;
-            background-color: #fff;
+            background-color: #285504;
             border: 1px solid #ccc;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             border-radius: 4px;
