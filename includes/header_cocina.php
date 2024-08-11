@@ -110,8 +110,8 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'cocina') {
 </head>
 <body>
 <ul>
-        <li><a href="pedidos.php">Colegios</a></li>
-        <li><a href="pedidos.php">Cuyo Placas</a></li>
+        <li><a href="pedidos_colegios.php">Colegios</a></li>
+        <li><a href="pedidos_cuyo.php">Cuyo Placas</a></li>
         <li><a href="logout.php">Salir</a></li>
     </ul>
 </nav>
