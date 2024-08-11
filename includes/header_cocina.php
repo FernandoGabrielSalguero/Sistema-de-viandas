@@ -33,7 +33,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'cocina') {
             flex-wrap: wrap;
             gap: 10px;
             justify-content: center;
-            background-color: #28a745;
+            background-color: #007bff;
             padding: 20px;
         }
 
