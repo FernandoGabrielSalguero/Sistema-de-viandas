@@ -77,7 +77,7 @@ foreach ($pedidos_totales as $pedido) {
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard Cuyo Placa</title>
+    <title>Total de viandas compradas</title>
     <style>
         body {
             margin: 0;
