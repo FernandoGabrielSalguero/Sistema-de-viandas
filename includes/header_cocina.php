@@ -19,14 +19,13 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'cocina') {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <style>
-
-       /* Background fondo header */
-       nav ul {
+        nav ul {
             list-style: none;
             padding: 0;
             margin: 0;
@@ -90,10 +89,10 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'cocina') {
             padding: 0;
             margin: 0;
             min-width: 200px;
-            z-index: 1000; /* Asegura que el submenú esté por encima de otros elementos */
+            z-index: 1000;
         }
 
-        nav ul li:hover > ul {
+        nav ul li:hover>ul {
             display: block;
         }
 
@@ -118,14 +117,15 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'cocina') {
         }
     </style>
 </head>
-<body>
-<ul>
-        <li><a href="pedidos_colegios.php">Colegios</a></li>
-        <li><a href="pedidos_cuyo.php">Cuyo Placas</a></li>
-        <li><a href="logout.php">Salir</a></li>
-    </ul>
-</nav>
-</body>
-</html>
-<nav>
 
+<body>
+    <nav>
+        <ul>
+            <li><a href="pedidos_colegios.php">Colegios</a></li>
+            <li><a href="pedidos_cuyo.php">Cuyo Placas</a></li>
+            <li><a href="logout.php">Salir</a></li>
+        </ul>
+    </nav>
+</body>
+
+</html>
