@@ -14,10 +14,24 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'cuyo_placa') {
     exit();
 }
 
+// Definir las plantas, turnos y menús
+$plantas = ['Aglomerado', 'Revestimiento', 'Impregnacion', 'Muebles', 'Transporte (Revestimiento)'];
+$turnos = ['Mañana', 'Tarde', 'Noche'];
+$menus = [
+    'Desayuno día siguiente',
+    'Almuerzo Caliente',
+    'Media tarde',
+    'Refrigerio sandwich almuerzo',
+    'Cena caliente',
+    'Refrigerio sandwich cena',
+    'Desayuno noche',
+    'Sandwich noche'
+];
+
 $fecha_inicio = '';
 $fecha_fin = '';
 $pedidos_totales = [];
-$totales_comida = []; // Aseguramos que el array está inicializado como un array vacío.
+$totales_comida = [];
 
 // Procesar el formulario
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -35,7 +49,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // Inicializar array para los totales de cada tipo de comida
         foreach ($menus as $menu) {
-            $totales_comida[$menu] = 0; // Aseguramos que cada clave está correctamente inicializada.
+            $totales_comida[$menu] = 0;
         }
 
         // Rellenar la tabla con los resultados
@@ -58,20 +72,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $error = "Por favor, seleccione un rango de fechas válido.";
     }
 }
-
-// Definir las plantas, turnos y menús
-$plantas = ['Aglomerado', 'Revestimiento', 'Impregnacion', 'Muebles', 'Transporte (Revestimiento)'];
-$turnos = ['Mañana', 'Tarde', 'Noche'];
-$menus = [
-    'Desayuno día siguiente',
-    'Almuerzo Caliente',
-    'Media tarde',
-    'Refrigerio sandwich almuerzo',
-    'Cena caliente',
-    'Refrigerio sandwich cena',
-    'Desayuno noche',
-    'Sandwich noche'
-];
 
 // Inicializar array para mostrar resultados
 $resultados = [];
