@@ -141,7 +141,7 @@ foreach ($colegios as $colegio) {
 <head>
     <meta charset="UTF-8">
     <title>Dashboard Cocina</title>
-    <link rel="stylesheet" href="../css/styles.css">
+    <!-- <link rel="stylesheet" href="../css/styles.css"> -->
     <style>
         .kpi-container {
             display: flex;
