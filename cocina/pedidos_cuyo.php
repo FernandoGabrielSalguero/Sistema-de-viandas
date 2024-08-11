@@ -25,10 +25,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Validar fechas
     if ($fecha_inicio && $fecha_fin && strtotime($fecha_fin) >= strtotime($fecha_inicio)) {
-        $stmt = $pdo->prepare("SELECT Planta, Menu, SUM(Cantidad) as CantidadTotal 
+        $stmt = $pdo->prepare("SELECT Planta, Turno, Menu, SUM(Cantidad) as CantidadTotal 
                                FROM Pedidos_Cuyo_Placa 
                                WHERE Fecha BETWEEN ? AND ? 
-                               GROUP BY Planta, Menu");
+                               GROUP BY Planta, Turno, Menu");
         $stmt->execute([$fecha_inicio, $fecha_fin]);
         $pedidos_totales = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } else {
@@ -36,8 +36,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-// Definir las plantas y menús
+// Definir las plantas, turnos y menús
 $plantas = ['Aglomerado', 'Revestimiento', 'Impregnacion', 'Muebles', 'Transporte (Revestimiento)'];
+$turnos = ['Mañana', 'Tarde', 'Noche'];
 $menus = [
     'Desayuno día siguiente',
     'Almuerzo Caliente',
@@ -51,18 +52,37 @@ $menus = [
 
 // Inicializar array para los totales por planta y menú
 $totales_pedidos = [];
-foreach ($plantas as $planta) {
-    $totales_pedidos[$planta] = array_fill_keys($menus, 0);
+foreach ($turnos as $turno) {
+    $totales_pedidos[$turno] = [];
+    foreach ($plantas as $planta) {
+        $totales_pedidos[$turno][$planta] = array_fill_keys($menus, 0);
+    }
 }
 
 // Rellenar los totales con los resultados obtenidos de la base de datos
 foreach ($pedidos_totales as $pedido) {
+    $turno = $pedido['Turno'];
     $planta = $pedido['Planta'];
     $menu = $pedido['Menu'];
     $cantidad = $pedido['CantidadTotal'];
 
-    if (isset($totales_pedidos[$planta][$menu])) {
-        $totales_pedidos[$planta][$menu] += $cantidad;
+    if (isset($totales_pedidos[$turno][$planta][$menu])) {
+        $totales_pedidos[$turno][$planta][$menu] += $cantidad;
+    }
+}
+
+// Inicializar array para los totales de cada tipo de comida
+$totales_comida = [];
+foreach ($menus as $menu) {
+    $totales_comida[$menu] = 0;
+}
+
+// Sumar los totales por tipo de comida
+foreach ($totales_pedidos as $turno => $plantas) {
+    foreach ($plantas as $planta => $menus) {
+        foreach ($menus as $menu => $cantidad) {
+            $totales_comida[$menu] += $cantidad;
+        }
     }
 }
 ?>
@@ -71,7 +91,6 @@ foreach ($pedidos_totales as $pedido) {
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pedidos Cuyo - Cocina</title>
     <style>
         body {
@@ -128,20 +147,6 @@ foreach ($pedidos_totales as $pedido) {
             margin-top: 20px;
         }
 
-        .kpi-group {
-            margin-bottom: 30px;
-            width: 100%;
-        }
-
-        .kpi-group h2 {
-            background-color: #007bff;
-            color: white;
-            padding: 10px;
-            margin: 0;
-            text-align: center;
-            border-radius: 5px;
-        }
-
         .kpi {
             background-color: #007bff;
             color: white;
@@ -151,6 +156,33 @@ foreach ($pedidos_totales as $pedido) {
             text-align: center;
             flex: 1;
             min-width: 200px;
+        }
+
+        .turno-header {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            text-align: left;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
         }
 
     </style>
@@ -173,19 +205,45 @@ foreach ($pedidos_totales as $pedido) {
             <button type="submit">Filtrar</button>
         </form>
 
-        <?php if (!empty($pedidos_totales)) : ?>
-            <?php foreach ($plantas as $planta) : ?>
-                <div class="kpi-group">
-                    <h2><?php echo htmlspecialchars($planta); ?></h2>
-                    <div class="kpi-container">
-                        <?php foreach ($menus as $menu) : ?>
-                            <div class="kpi">
-                                <h3><?php echo htmlspecialchars($menu); ?></h3>
-                                <p><?php echo htmlspecialchars($totales_pedidos[$planta][$menu]); ?> viandas</p>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
+        <!-- Mostrar KPIs -->
+        <div class="kpi-container">
+            <?php foreach ($totales_comida as $menu => $total) : ?>
+                <div class="kpi">
+                    <h3><?php echo htmlspecialchars($menu); ?></h3>
+                    <p><?php echo htmlspecialchars($total); ?> viandas</p>
                 </div>
+            <?php endforeach; ?>
+        </div>
+
+        <!-- Mostrar tablas de totales por turno -->
+        <?php if (!empty($pedidos_totales)) : ?>
+            <?php foreach ($turnos as $turno) : ?>
+                <div class="turno-header">
+                    Turno: <?php echo htmlspecialchars($turno); ?>
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Planta</th>
+                            <?php foreach ($menus as $menu) : ?>
+                                <th><?php echo htmlspecialchars($menu); ?></th>
+                            <?php endforeach; ?>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($plantas as $planta) : ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($planta); ?></td>
+                                <?php foreach ($menus as $menu) : ?>
+                                    <td>
+                                        <?php echo htmlspecialchars($totales_pedidos[$turno][$planta][$menu]); ?>
+                                    </td>
+                                <?php endforeach; ?>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
             <?php endforeach; ?>
         <?php endif; ?>
     </div>
