@@ -58,19 +58,16 @@ $menus = [
             margin: 0;
             padding: 0;
             font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
         }
 
         .container {
             width: 100%;
             padding: 20px;
             box-sizing: border-box;
-            margin: 0 auto;
         }
 
         h1 {
             text-align: center;
-            margin-bottom: 20px;
         }
 
         form {
@@ -82,7 +79,6 @@ $menus = [
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
-            background-color: white;
         }
 
         th, td {
@@ -92,8 +88,7 @@ $menus = [
         }
 
         th {
-            background-color: #007bff;
-            color: white;
+            background-color: #f4f4f4;
         }
 
         .turno-header {
@@ -104,7 +99,6 @@ $menus = [
             margin-top: 20px;
             margin-bottom: 10px;
             font-size: 1.2em;
-            border-radius: 5px;
         }
 
         .success {
@@ -121,8 +115,6 @@ $menus = [
             color: white;
             border: none;
             border-radius: 5px;
-            display: block;
-            margin: 0 auto;
         }
 
         button:hover {
@@ -130,16 +122,7 @@ $menus = [
         }
 
         input[type="number"] {
-            width: 100%;
-            padding: 5px;
-            box-sizing: border-box;
-        }
-
-        input[type="date"] {
-            padding: 5px;
-            margin-bottom: 20px;
-            display: block;
-            margin: 0 auto;
+            width: 60px;
         }
 
     </style>
