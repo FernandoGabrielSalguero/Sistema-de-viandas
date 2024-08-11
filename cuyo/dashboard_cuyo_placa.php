@@ -165,7 +165,7 @@ foreach ($pedidos_totales as $pedido) {
 </head>
 <body>
     <div class="container">
-        <h1>Dashboard - Pedidos Viandas Cuyo Placa</h1>
+        <h1>Viandas solicitadas</h1>
 
         <?php if (isset($error)) : ?>
             <p class="error"><?php echo $error; ?></p>
