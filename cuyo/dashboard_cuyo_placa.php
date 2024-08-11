@@ -52,6 +52,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $totales_comida[$menu] = 0;
         }
 
+        // Inicializar array para mostrar resultados
+        $resultados = [];
+        foreach ($turnos as $turno) {
+            $resultados[$turno] = [];
+            foreach ($plantas as $planta) {
+                $resultados[$turno][$planta] = array_fill_keys($menus, 0);
+            }
+        }
+
         // Rellenar la tabla con los resultados
         foreach ($pedidos_totales as $pedido) {
             $turno = $pedido['Turno'];
@@ -70,15 +79,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     } else {
         $error = "Por favor, seleccione un rango de fechas válido.";
-    }
-}
-
-// Inicializar array para mostrar resultados
-$resultados = [];
-foreach ($turnos as $turno) {
-    $resultados[$turno] = [];
-    foreach ($plantas as $planta) {
-        $resultados[$turno][$planta] = array_fill_keys($menus, 0);
     }
 }
 
