@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Panel Cuyo Placa</title>
-    <link rel="stylesheet" href="../css/styles.css">
     <style>
         nav {
             background-color: #343a40;
