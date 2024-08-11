@@ -75,6 +75,7 @@ foreach ($pedidos_totales as $pedido) {
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Dashboard Cocina</title>
@@ -133,7 +134,8 @@ foreach ($pedidos_totales as $pedido) {
             background-color: white;
         }
 
-        th, td {
+        th,
+        td {
             padding: 10px;
             text-align: center;
             border: 1px solid #ddd;
@@ -160,9 +162,9 @@ foreach ($pedidos_totales as $pedido) {
             text-align: center;
             margin-bottom: 20px;
         }
-
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>Dashboard - Cocina</h1>
@@ -186,7 +188,7 @@ foreach ($pedidos_totales as $pedido) {
                 <div class="turno-header">
                     Turno: <?php echo htmlspecialchars($turno); ?>
                 </div>
-                
+
                 <table>
                     <thead>
                         <tr>
@@ -213,4 +215,5 @@ foreach ($pedidos_totales as $pedido) {
         <?php endif; ?>
     </div>
 </body>
+
 </html>
