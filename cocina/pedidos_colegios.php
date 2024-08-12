@@ -46,7 +46,7 @@ if (!empty($colegio_filtro)) {
 
 $query_menus .= " GROUP BY m.Nombre, pc.Fecha_entrega";
 
-// Mostrar la consulta y los parámetros
+// Mostrar la consulta y los parámetros para depuración
 var_dump($query_menus);
 var_dump($params);
 
@@ -79,7 +79,7 @@ if (!empty($colegio_filtro)) {
 
 $query_colegios .= " GROUP BY c.Nombre, cu.Nombre, m.Nombre, pc.Fecha_entrega";
 
-// Mostrar la consulta y los parámetros
+// Mostrar la consulta y los parámetros para depuración
 var_dump($query_colegios);
 var_dump($params);
 
@@ -115,7 +115,7 @@ if (!empty($colegio_filtro)) {
     $params[] = $colegio_filtro;
 }
 
-// Mostrar la consulta y los parámetros
+// Mostrar la consulta y los parámetros para depuración
 var_dump($query_preferencias);
 var_dump($params);
 
@@ -123,36 +123,7 @@ $stmt = $pdo->prepare($query_preferencias);
 $stmt->execute($params);
 $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Organizar los datos por nivel y menú
-$niveles = [
-    'Nivel Inicial' => ['Nivel Inicial Sala 3A', 'Nivel Inicial Sala 3B', 'Nivel Inicial Sala 4A', 'Nivel Inicial Sala 4B', 'Nivel Inicial Sala 5A', 'Nivel Inicial Sala 5B'],
-    'Primaria' => ['Primaria Primer Grado A', 'Primaria Primer Grado B', 'Primaria Segundo Grado', 'Primaria Tercer Grado', 'Primaria cuarto Grado', 'Primaria Quinto Grado', 'Primaria Sexto Grado', 'Primaria Septimo Grado'],
-    'Secundaria' => ['Secundaria Primer Año', 'Secundaria Segundo Año', 'Secundaria Tercer año']
-];
-
-$niveles_data = [];
-foreach ($colegios as $colegio) {
-    foreach ($niveles as $nivel => $cursos) {
-        if (in_array($colegio['CursoNombre'], $cursos)) {
-            if (!isset($niveles_data[$nivel])) {
-                $niveles_data[$nivel] = [];
-            }
-            $key = $colegio['MenuNombre'] . '-' . $colegio['FechaEntrega'];
-            if (!isset($niveles_data[$nivel][$key])) {
-                $niveles_data[$nivel][$key] = [
-                    'ColegioNombre' => $colegio['ColegioNombre'],
-                    'MenuNombre' => $colegio['MenuNombre'],
-                    'Cantidad' => 0,
-                    'FechaEntrega' => $colegio['FechaEntrega']
-                ];
-            }
-            $niveles_data[$nivel][$key]['Cantidad'] += $colegio['Cantidad'];
-        }
-    }
-}
-
 ?>
-
 
 <!DOCTYPE html>
 <html lang="es">
@@ -226,7 +197,14 @@ foreach ($colegios as $colegio) {
     </div>
 
     <h2>Totalidad de Viandas por Colegio y Nivel</h2>
-    <?php foreach ($niveles_data as $nivel => $menus) : ?>
+    <?php
+
+    
+// Asegúrate de que $niveles_data esté inicializado como un array vacío si no se ha llenado.
+$niveles_data = isset($niveles_data) ? $niveles_data : [];
+
+if (!empty($niveles_data)) :
+    foreach ($niveles_data as $nivel => $menus) : ?>
         <h3><?php echo htmlspecialchars($nivel); ?></h3>
         <table border="1">
             <tr>
@@ -253,7 +231,10 @@ foreach ($colegios as $colegio) {
                 <td></td>
             </tr>
         </table>
-    <?php endforeach; ?>
+    <?php endforeach;
+else : ?>
+    <p>No hay datos disponibles para mostrar.</p>
+<?php endif; ?>
 
     <h2>Preferencias Alimenticias</h2>
     <table border="1">
