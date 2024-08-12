@@ -47,16 +47,12 @@ if (!empty($colegio_filtro)) {
 $query_menus .= " GROUP BY m.Nombre, pc.Fecha_entrega";
 
 // Mostrar la consulta y los parámetros
-echo "Reached var_dump point 1<br>";
+var_dump($query_menus);
+var_dump($params);
+
 $stmt = $pdo->prepare($query_menus);
-var_dump($stmt); // Verificar si $stmt está bien preparado
 $stmt->execute($params);
 $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
-var_dump($menus); // Verificar si hay resultados
-
-
-
-
 
 // Obtener la cantidad total de viandas compradas, divididas por colegio y cursos
 $query_colegios = "
@@ -84,19 +80,12 @@ if (!empty($colegio_filtro)) {
 $query_colegios .= " GROUP BY c.Nombre, cu.Nombre, m.Nombre, pc.Fecha_entrega";
 
 // Mostrar la consulta y los parámetros
-echo "Reached var_dump point 1<br>";
 var_dump($query_colegios);
 var_dump($params);
 
 $stmt = $pdo->prepare($query_colegios);
 $stmt->execute($params);
 $colegios = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-
-
-
-
-
 
 // Obtener los alumnos con preferencias alimenticias
 $query_preferencias = "
@@ -127,18 +116,12 @@ if (!empty($colegio_filtro)) {
 }
 
 // Mostrar la consulta y los parámetros
-echo "Reached var_dump point 1<br>";
 var_dump($query_preferencias);
 var_dump($params);
 
 $stmt = $pdo->prepare($query_preferencias);
 $stmt->execute($params);
 $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-
-
-
-
 
 // Organizar los datos por nivel y menú
 $niveles = [
@@ -169,6 +152,7 @@ foreach ($colegios as $colegio) {
 }
 
 ?>
+
 
 <!DOCTYPE html>
 <html lang="es">
