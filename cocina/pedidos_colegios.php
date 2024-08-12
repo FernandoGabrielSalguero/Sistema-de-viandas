@@ -23,29 +23,30 @@ $query_menus = "
     SELECT m.Nombre AS MenuNombre, DATE_FORMAT(pc.Fecha_entrega, '%d/%m/%y') AS FechaEntrega, COUNT(*) AS Cantidad
     FROM Pedidos_Comida pc
     JOIN Menú m ON pc.Menú_Id = m.Id
-    WHERE pc.Estado = 'Procesando'";  // Asegúrate de que esta línea esté presente y correcta
+    WHERE pc.Estado = 'Procesando'";  // Filtro base por Estado
 
-if (!empty($fecha_filtro) || !empty($colegio_filtro)) {
-    $query_menus .= " AND ";
-    if (!empty($fecha_filtro)) {
-        $query_menus .= "pc.Fecha_entrega = ? ";
-    }
-    if (!empty($fecha_filtro) && !empty($colegio_filtro)) {
-        $query_menus .= "AND ";
-    }
-    if (!empty($colegio_filtro)) {
-        $query_menus .= "h.Colegio_Id = ? ";
-    }
-}
-$query_menus .= " GROUP BY m.Nombre, pc.Fecha_entrega";
-$stmt = $pdo->prepare($query_menus);
+// Inicializar arreglo de parámetros
 $params = [];
+
+// Aplicar filtros adicionales si están presentes
 if (!empty($fecha_filtro)) {
+    $query_menus .= " AND pc.Fecha_entrega = ? ";
     $params[] = $fecha_filtro;
 }
+
 if (!empty($colegio_filtro)) {
+    // Necesitamos unir con la tabla Hijos para filtrar por colegio
+    $query_menus .= "
+        AND pc.Hijo_Id IN (
+            SELECT h.Id FROM Hijos h WHERE h.Colegio_Id = ?
+        )
+    ";
     $params[] = $colegio_filtro;
 }
+
+$query_menus .= " GROUP BY m.Nombre, pc.Fecha_entrega";
+
+$stmt = $pdo->prepare($query_menus);
 $stmt->execute($params);
 $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -61,27 +62,27 @@ $query_colegios = "
     JOIN Colegios c ON h.Colegio_Id = c.Id
     JOIN Cursos cu ON h.Curso_Id = cu.Id
     JOIN Menú m ON pc.Menú_Id = m.Id
-    WHERE pc.Estado = 'Procesando'
-";
-if (!empty($fecha_filtro) || !empty($colegio_filtro)) {
-    if (!empty($fecha_filtro)) {
-        $query_colegios .= " AND pc.Fecha_entrega = ? ";
-    }
-    if (!empty($colegio_filtro)) {
-        $query_colegios .= " AND h.Colegio_Id = ? ";
-    }
-}
-$query_colegios .= " GROUP BY c.Nombre, cu.Nombre, m.Nombre, pc.Fecha_entrega";
-$stmt = $pdo->prepare($query_colegios);
+    WHERE pc.Estado = 'Procesando'";  // Filtro base por Estado
+
+// Inicializar arreglo de parámetros
 $params = [];
+
 if (!empty($fecha_filtro)) {
+    $query_colegios .= " AND pc.Fecha_entrega = ? ";
     $params[] = $fecha_filtro;
 }
+
 if (!empty($colegio_filtro)) {
+    $query_colegios .= " AND c.Id = ? ";
     $params[] = $colegio_filtro;
 }
+
+$query_colegios .= " GROUP BY c.Nombre, cu.Nombre, m.Nombre, pc.Fecha_entrega";
+
+$stmt = $pdo->prepare($query_colegios);
 $stmt->execute($params);
 $colegios = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 
 
 
@@ -98,12 +99,23 @@ $query_preferencias = "
     JOIN Cursos cu ON h.Curso_Id = cu.Id
     JOIN Menú m ON pc.Menú_Id = m.Id
     JOIN Preferencias_Alimenticias p ON pc.Preferencias_alimenticias = p.Id
-    WHERE pc.Estado = 'Procesando' AND pc.Preferencias_alimenticias IS NOT NULL AND p.Nombre != 'Sin preferencias'
-";
+    WHERE pc.Estado = 'Procesando' 
+      AND pc.Preferencias_alimenticias IS NOT NULL 
+      AND p.Nombre != 'Sin preferencias'";
+
+// Inicializar arreglo de parámetros
+$params = [];
+
 if (!empty($fecha_filtro)) {
-    $query_preferencias .= " AND pc.Fecha_entrega = ?";
+    $query_preferencias .= " AND pc.Fecha_entrega = ? ";
     $params[] = $fecha_filtro;
 }
+
+if (!empty($colegio_filtro)) {
+    $query_preferencias .= " AND c.Id = ? ";
+    $params[] = $colegio_filtro;
+}
+
 $stmt = $pdo->prepare($query_preferencias);
 $stmt->execute($params);
 $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
