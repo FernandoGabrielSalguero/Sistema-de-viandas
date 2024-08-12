@@ -23,17 +23,14 @@ $query_menus = "
     SELECT m.Nombre AS MenuNombre, DATE_FORMAT(pc.Fecha_entrega, '%d/%m/%y') AS FechaEntrega, COUNT(*) AS Cantidad
     FROM Pedidos_Comida pc
     JOIN Menú m ON pc.Menú_Id = m.Id
+    WHERE pc.Estado = 'Procesando'
 ";
 if (!empty($fecha_filtro) || !empty($colegio_filtro)) {
-    $query_menus .= " WHERE ";
     if (!empty($fecha_filtro)) {
-        $query_menus .= "pc.Fecha_entrega = ? ";
-    }
-    if (!empty($fecha_filtro) && !empty($colegio_filtro)) {
-        $query_menus .= "AND ";
+        $query_menus .= " AND pc.Fecha_entrega = ? ";
     }
     if (!empty($colegio_filtro)) {
-        $query_menus .= "h.Colegio_Id = ? ";
+        $query_menus .= " AND h.Colegio_Id = ? ";
     }
 }
 $query_menus .= " GROUP BY m.Nombre, pc.Fecha_entrega";
@@ -56,17 +53,14 @@ $query_colegios = "
     JOIN Colegios c ON h.Colegio_Id = c.Id
     JOIN Cursos cu ON h.Curso_Id = cu.Id
     JOIN Menú m ON pc.Menú_Id = m.Id
+    WHERE pc.Estado = 'Procesando'
 ";
 if (!empty($fecha_filtro) || !empty($colegio_filtro)) {
-    $query_colegios .= " WHERE ";
     if (!empty($fecha_filtro)) {
-        $query_colegios .= "pc.Fecha_entrega = ? ";
-    }
-    if (!empty($fecha_filtro) && !empty($colegio_filtro)) {
-        $query_colegios .= "AND ";
+        $query_colegios .= " AND pc.Fecha_entrega = ? ";
     }
     if (!empty($colegio_filtro)) {
-        $query_colegios .= "h.Colegio_Id = ? ";
+        $query_colegios .= " AND h.Colegio_Id = ? ";
     }
 }
 $query_colegios .= " GROUP BY c.Nombre, cu.Nombre, m.Nombre, pc.Fecha_entrega";
@@ -92,7 +86,8 @@ $query_preferencias = "
     JOIN Cursos cu ON h.Curso_Id = cu.Id
     JOIN Menú m ON pc.Menú_Id = m.Id
     JOIN Preferencias_Alimenticias p ON pc.Preferencias_alimenticias = p.Id
-    WHERE pc.Preferencias_alimenticias IS NOT NULL
+    WHERE pc.Estado = 'Procesando'
+    AND pc.Preferencias_alimenticias IS NOT NULL
     AND p.Nombre != 'Sin preferencias'
 ";
 if (!empty($fecha_filtro)) {
