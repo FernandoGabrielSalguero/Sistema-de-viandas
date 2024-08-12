@@ -23,14 +23,18 @@ $query_menus = "
     SELECT m.Nombre AS MenuNombre, DATE_FORMAT(pc.Fecha_entrega, '%d/%m/%y') AS FechaEntrega, COUNT(*) AS Cantidad
     FROM Pedidos_Comida pc
     JOIN Menú m ON pc.Menú_Id = m.Id
-    WHERE pc.Estado = 'Procesando'
-";
+    WHERE pc.Estado = 'Procesando'";  // Asegúrate de que esta línea esté presente y correcta
+
 if (!empty($fecha_filtro) || !empty($colegio_filtro)) {
+    $query_menus .= " AND ";
     if (!empty($fecha_filtro)) {
-        $query_menus .= " AND pc.Fecha_entrega = ? ";
+        $query_menus .= "pc.Fecha_entrega = ? ";
+    }
+    if (!empty($fecha_filtro) && !empty($colegio_filtro)) {
+        $query_menus .= "AND ";
     }
     if (!empty($colegio_filtro)) {
-        $query_menus .= " AND h.Colegio_Id = ? ";
+        $query_menus .= "h.Colegio_Id = ? ";
     }
 }
 $query_menus .= " GROUP BY m.Nombre, pc.Fecha_entrega";
@@ -44,6 +48,7 @@ if (!empty($colegio_filtro)) {
 }
 $stmt->execute($params);
 $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 
 
 
