@@ -117,6 +117,7 @@ $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Dashboard Cocina</title>
@@ -127,6 +128,7 @@ $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
             flex-wrap: wrap;
             justify-content: space-between;
         }
+
         .kpi {
             border: 1px solid #000;
             border-radius: 5px;
@@ -135,21 +137,24 @@ $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
             text-align: center;
             width: 200px;
         }
+
         .filter-container {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
             margin-bottom: 20px;
         }
+
         .filter-item {
             flex: 1 1 200px;
         }
     </style>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
+
 <body>
     <h1>Dashboard Cocina</h1>
-    
+
     <form method="post" action="pedidos_colegios.php" class="filter-container">
         <div class="filter-item">
             <label for="fecha_entrega">Filtrar por Fecha de Entrega:</label>
@@ -166,7 +171,7 @@ $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <button type="submit" name="eliminar_filtro">Eliminar Filtro</button>
         </div>
     </form>
-    
+
     <h2>Total de Menús</h2>
     <div class="kpi-container">
         <?php
@@ -189,71 +194,71 @@ $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <h2>Totalidad de Viandas por Colegio y Nivel</h2>
     <?php
 
-// Asegúrate de que $niveles_data esté inicializado como un array vacío si no se ha llenado.
+    // Asegúrate de que $niveles_data esté inicializado como un array vacío si no se ha llenado.
 
-// Definir niveles y cursos
-$niveles = [
-    'Nivel Inicial' => ['Nivel Inicial Sala 3A', 'Nivel Inicial Sala 3B', 'Nivel Inicial Sala 4A', 'Nivel Inicial Sala 4B', 'Nivel Inicial Sala 5A', 'Nivel Inicial Sala 5B'],
-    'Primaria' => ['Primaria Primer Grado A', 'Primaria Primer Grado B', 'Primaria Segundo Grado', 'Primaria Tercer Grado', 'Primaria cuarto Grado', 'Primaria Quinto Grado', 'Primaria Sexto Grado', 'Primaria Septimo Grado'],
-    'Secundaria' => ['Secundaria Primer Año', 'Secundaria Segundo Año', 'Secundaria Tercer año']
-];
+    // Definir niveles y cursos
+    $niveles = [
+        'Nivel Inicial' => ['Nivel Inicial Sala 3A', 'Nivel Inicial Sala 3B', 'Nivel Inicial Sala 4A', 'Nivel Inicial Sala 4B', 'Nivel Inicial Sala 5A', 'Nivel Inicial Sala 5B'],
+        'Primaria' => ['Primaria Primer Grado A', 'Primaria Primer Grado B', 'Primaria Segundo Grado', 'Primaria Tercer Grado', 'Primaria cuarto Grado', 'Primaria Quinto Grado', 'Primaria Sexto Grado', 'Primaria Septimo Grado'],
+        'Secundaria' => ['Secundaria Primer Año', 'Secundaria Segundo Año', 'Secundaria Tercer año']
+    ];
 
-// Inicializar el array $niveles_data
-$niveles_data = [];
+    // Inicializar el array $niveles_data
+    $niveles_data = [];
 
-foreach ($colegios as $colegio) {
-    foreach ($niveles as $nivel => $cursos) {
-        if (in_array($colegio['CursoNombre'], $cursos)) {
-            if (!isset($niveles_data[$nivel])) {
-                $niveles_data[$nivel] = [];
+    foreach ($colegios as $colegio) {
+        foreach ($niveles as $nivel => $cursos) {
+            if (in_array($colegio['CursoNombre'], $cursos)) {
+                if (!isset($niveles_data[$nivel])) {
+                    $niveles_data[$nivel] = [];
+                }
+                $key = $colegio['MenuNombre'] . '-' . $colegio['FechaEntrega'];
+                if (!isset($niveles_data[$nivel][$key])) {
+                    $niveles_data[$nivel][$key] = [
+                        'ColegioNombre' => $colegio['ColegioNombre'],
+                        'MenuNombre' => $colegio['MenuNombre'],
+                        'Cantidad' => 0,
+                        'FechaEntrega' => $colegio['FechaEntrega']
+                    ];
+                }
+                $niveles_data[$nivel][$key]['Cantidad'] += $colegio['Cantidad'];
             }
-            $key = $colegio['MenuNombre'] . '-' . $colegio['FechaEntrega'];
-            if (!isset($niveles_data[$nivel][$key])) {
-                $niveles_data[$nivel][$key] = [
-                    'ColegioNombre' => $colegio['ColegioNombre'],
-                    'MenuNombre' => $colegio['MenuNombre'],
-                    'Cantidad' => 0,
-                    'FechaEntrega' => $colegio['FechaEntrega']
-                ];
-            }
-            $niveles_data[$nivel][$key]['Cantidad'] += $colegio['Cantidad'];
         }
     }
-}
 
-// Comprobamos si $niveles_data está vacío o si tiene datos
-if (!empty($niveles_data)) :
-    foreach ($niveles_data as $nivel => $menus) : ?>
-        <h3><?php echo htmlspecialchars($nivel); ?></h3>
-        <table border="1">
-            <tr>
-                <th>Colegio</th>
-                <th>Menú</th>
-                <th>Cantidad</th>
-                <th>Fecha de entrega</th>
-            </tr>
-            <?php
-            $nivel_total = 0;
-            foreach ($menus as $menu) :
-                $nivel_total += $menu['Cantidad'];
-            ?>
+    // Comprobamos si $niveles_data está vacío o si tiene datos
+    if (!empty($niveles_data)) :
+        foreach ($niveles_data as $nivel => $menus) : ?>
+            <h3><?php echo htmlspecialchars($nivel); ?></h3>
+            <table border="1">
                 <tr>
-                    <td><?php echo htmlspecialchars($menu['ColegioNombre']); ?></td>
-                    <td><?php echo htmlspecialchars($menu['MenuNombre']); ?></td>
-                    <td><?php echo htmlspecialchars($menu['Cantidad']); ?></td>
-                    <td><?php echo htmlspecialchars($menu['FechaEntrega']); ?></td>
+                    <th>Colegio</th>
+                    <th>Menú</th>
+                    <th>Cantidad</th>
+                    <th>Fecha de entrega</th>
                 </tr>
-            <?php endforeach; ?>
-            <tr>
-                <td colspan="2"><strong>Total</strong></td>
-                <td><strong><?php echo $nivel_total; ?></strong></td>
-                <td></td>
-            </tr>
-        </table>
-    <?php endforeach;
-else : ?>
-    <p>No hay datos disponibles para mostrar.</p>
-<?php endif; ?>
+                <?php
+                $nivel_total = 0;
+                foreach ($menus as $menu) :
+                    $nivel_total += $menu['Cantidad'];
+                ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($menu['ColegioNombre']); ?></td>
+                        <td><?php echo htmlspecialchars($menu['MenuNombre']); ?></td>
+                        <td><?php echo htmlspecialchars($menu['Cantidad']); ?></td>
+                        <td><?php echo htmlspecialchars($menu['FechaEntrega']); ?></td>
+                    </tr>
+                <?php endforeach; ?>
+                <tr>
+                    <td colspan="2"><strong>Total</strong></td>
+                    <td><strong><?php echo $nivel_total; ?></strong></td>
+                    <td></td>
+                </tr>
+            </table>
+        <?php endforeach;
+    else : ?>
+        <p>No hay datos disponibles para mostrar.</p>
+    <?php endif; ?>
 
 
 
@@ -280,4 +285,5 @@ else : ?>
         <?php endforeach; ?>
     </table>
 </body>
+
 </html>

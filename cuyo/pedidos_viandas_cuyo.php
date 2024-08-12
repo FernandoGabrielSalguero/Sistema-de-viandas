@@ -8,7 +8,6 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-
 // Verificar si el usuario está autenticado y tiene el rol correcto
 if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'cuyo_placa') {
     header("Location: ../index.php");
@@ -34,18 +33,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 // Definir las plantas, turnos y menús
 $plantas = ['Aglomerado', 'Revestimiento', 'Impregnacion', 'Muebles', 'Transporte (Revestimiento)'];
-$turnos = ['Mañana', 'Tarde', 'Noche'];
-$menus = [
-    'Desayuno día siguiente',
-    'Almuerzo Caliente',
-    'Media tarde',
-    'Refrigerio sandwich almuerzo',
-    'Cena caliente',
-    'Refrigerio sandwich cena',
-    'Desayuno noche',
-    'Sandwich noche'
+$turnos_menus = [
+    'Mañana' => ['Desayuno día siguiente', 'Almuerzo Caliente'],
+    'Tarde' => ['Media tarde', 'Refrigerio sandwich almuerzo'],
+    'Noche' => ['Cena caliente', 'Refrigerio sandwich cena', 'Desayuno noche', 'Sandwich noche']
 ];
-
 ?>
 
 <!DOCTYPE html>
@@ -54,6 +46,9 @@ $menus = [
     <meta charset="UTF-8">
     <title>Pedidos Viandas Cuyo Placa</title>
     <link rel="stylesheet" href="../css/cuyo_placas.css">
+    <style>
+        /* Estilos adicionales si es necesario */
+    </style>
 </head>
 <body>
     <div class="container">
@@ -67,34 +62,47 @@ $menus = [
             <label for="fecha">Fecha:</label>
             <input type="date" id="fecha" name="fecha" required>
 
-            <?php foreach ($turnos as $turno) : ?>
-                <div class="turno-header">
-                    Turno: <?php echo htmlspecialchars($turno); ?>
-                </div>
-                
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Planta</th>
-                            <?php foreach ($menus as $menu) : ?>
-                                <th><?php echo htmlspecialchars($menu); ?></th>
-                            <?php endforeach; ?>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($plantas as $planta) : ?>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Turno</th>
+                        <th>Planta</th>
+                        <?php
+                        $all_menus = [];
+                        foreach ($turnos_menus as $turno => $menus) {
+                            foreach ($menus as $menu) {
+                                if (!in_array($menu, $all_menus)) {
+                                    $all_menus[] = $menu;
+                                }
+                            }
+                        }
+                        foreach ($all_menus as $menu) {
+                            echo "<th>$menu</th>";
+                        }
+                        ?>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($plantas as $planta) : ?>
+                        <?php foreach ($turnos_menus as $turno => $menus) : ?>
                             <tr>
+                                <td><?php echo htmlspecialchars($turno); ?></td>
                                 <td><?php echo htmlspecialchars($planta); ?></td>
-                                <?php foreach ($menus as $menu) : ?>
+                                <?php foreach ($all_menus as $menu) : ?>
                                     <td>
-                                        <input type="number" name="pedidos[<?php echo $turno; ?>][<?php echo $planta; ?>][<?php echo $menu; ?>]" min="0" value="0">
+                                        <?php if (in_array($menu, $menus)) : ?>
+                                            <input type="number" name="pedidos[<?php echo $turno; ?>][<?php echo $planta; ?>][<?php echo $menu; ?>]" min="0" value="0">
+                                        <?php else : ?>
+                                            <!-- Si el menú no corresponde al turno, deja la celda vacía -->
+                                            -
+                                        <?php endif; ?>
                                     </td>
                                 <?php endforeach; ?>
                             </tr>
                         <?php endforeach; ?>
-                    </tbody>
-                </table>
-            <?php endforeach; ?>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
 
             <button type="submit">Guardar Pedidos</button>
         </form>
