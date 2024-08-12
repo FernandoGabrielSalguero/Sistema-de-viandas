@@ -45,6 +45,9 @@ if (!empty($colegio_filtro)) {
 $stmt->execute($params);
 $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+
+
+
 // Obtener la cantidad total de viandas compradas, divididas por colegio y cursos
 $query_colegios = "
     SELECT c.Nombre AS ColegioNombre, cu.Nombre AS CursoNombre, m.Nombre AS MenuNombre, COUNT(*) AS Cantidad, DATE_FORMAT(pc.Fecha_entrega, '%d/%m/%y') AS FechaEntrega
@@ -75,6 +78,10 @@ if (!empty($colegio_filtro)) {
 $stmt->execute($params);
 $colegios = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+
+
+
+
 // Obtener los alumnos con preferencias alimenticias
 $query_preferencias = "
     SELECT m.Nombre AS MenuNombre, DATE_FORMAT(pc.Fecha_entrega, '%d/%m/%y') AS FechaEntrega, 
@@ -86,20 +93,19 @@ $query_preferencias = "
     JOIN Cursos cu ON h.Curso_Id = cu.Id
     JOIN Menú m ON pc.Menú_Id = m.Id
     JOIN Preferencias_Alimenticias p ON pc.Preferencias_alimenticias = p.Id
-    WHERE pc.Estado = 'Procesando'
-    AND pc.Preferencias_alimenticias IS NOT NULL
-    AND p.Nombre != 'Sin preferencias'
+    WHERE pc.Estado = 'Procesando' AND pc.Preferencias_alimenticias IS NOT NULL AND p.Nombre != 'Sin preferencias'
 ";
 if (!empty($fecha_filtro)) {
     $query_preferencias .= " AND pc.Fecha_entrega = ?";
-}
-$stmt = $pdo->prepare($query_preferencias);
-$params = [];
-if (!empty($fecha_filtro)) {
     $params[] = $fecha_filtro;
 }
+$stmt = $pdo->prepare($query_preferencias);
 $stmt->execute($params);
 $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+
+
 
 // Organizar los datos por nivel y menú
 $niveles = [
