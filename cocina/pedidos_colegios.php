@@ -23,10 +23,9 @@ $query_menus = "
     SELECT m.Nombre AS MenuNombre, DATE_FORMAT(pc.Fecha_entrega, '%d/%m/%y') AS FechaEntrega, COUNT(*) AS Cantidad
     FROM Pedidos_Comida pc
     JOIN Menú m ON pc.Menú_Id = m.Id
-    WHERE pc.Estado = 'Procesando'
 ";
 if (!empty($fecha_filtro) || !empty($colegio_filtro)) {
-    $query_menus .= " AND ";
+    $query_menus .= " WHERE ";
     if (!empty($fecha_filtro)) {
         $query_menus .= "pc.Fecha_entrega = ? ";
     }
@@ -57,10 +56,9 @@ $query_colegios = "
     JOIN Colegios c ON h.Colegio_Id = c.Id
     JOIN Cursos cu ON h.Curso_Id = cu.Id
     JOIN Menú m ON pc.Menú_Id = m.Id
-    WHERE pc.Estado = 'Procesando'
 ";
 if (!empty($fecha_filtro) || !empty($colegio_filtro)) {
-    $query_colegios .= " AND ";
+    $query_colegios .= " WHERE ";
     if (!empty($fecha_filtro)) {
         $query_colegios .= "pc.Fecha_entrega = ? ";
     }
@@ -94,8 +92,7 @@ $query_preferencias = "
     JOIN Cursos cu ON h.Curso_Id = cu.Id
     JOIN Menú m ON pc.Menú_Id = m.Id
     JOIN Preferencias_Alimenticias p ON pc.Preferencias_alimenticias = p.Id
-    WHERE pc.Estado = 'Procesando' 
-    AND pc.Preferencias_alimenticias IS NOT NULL
+    WHERE pc.Preferencias_alimenticias IS NOT NULL
     AND p.Nombre != 'Sin preferencias'
 ";
 if (!empty($fecha_filtro)) {
@@ -136,6 +133,7 @@ foreach ($colegios as $colegio) {
         }
     }
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -173,7 +171,7 @@ foreach ($colegios as $colegio) {
 <body>
     <h1>Dashboard Cocina</h1>
     
-    <form method="post" action="pedidos_colegios.php" class="filter-container">
+    <form method="post" action="dashboard.php" class="filter-container">
         <div class="filter-item">
             <label for="fecha_entrega">Filtrar por Fecha de Entrega:</label>
             <input type="date" id="fecha_entrega" name="fecha_entrega" value="<?php echo htmlspecialchars($fecha_filtro); ?>">
