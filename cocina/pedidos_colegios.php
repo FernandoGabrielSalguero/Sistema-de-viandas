@@ -46,13 +46,14 @@ if (!empty($colegio_filtro)) {
 
 $query_menus .= " GROUP BY m.Nombre, pc.Fecha_entrega";
 
-// Mostrar la consulta y los parámetros para depuración
+// Mostrar la consulta y los parámetros
 var_dump($query_menus);
 var_dump($params);
 
 $stmt = $pdo->prepare($query_menus);
 $stmt->execute($params);
 $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 
 // Obtener la cantidad total de viandas compradas, divididas por colegio y cursos
 $query_colegios = "
@@ -79,13 +80,14 @@ if (!empty($colegio_filtro)) {
 
 $query_colegios .= " GROUP BY c.Nombre, cu.Nombre, m.Nombre, pc.Fecha_entrega";
 
-// Mostrar la consulta y los parámetros para depuración
+// Mostrar la consulta y los parámetros
 var_dump($query_colegios);
 var_dump($params);
 
 $stmt = $pdo->prepare($query_colegios);
 $stmt->execute($params);
 $colegios = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 
 // Obtener los alumnos con preferencias alimenticias
 $query_preferencias = "
@@ -115,7 +117,7 @@ if (!empty($colegio_filtro)) {
     $params[] = $colegio_filtro;
 }
 
-// Mostrar la consulta y los parámetros para depuración
+// Mostrar la consulta y los parámetros
 var_dump($query_preferencias);
 var_dump($params);
 
@@ -199,7 +201,7 @@ $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <h2>Totalidad de Viandas por Colegio y Nivel</h2>
     <?php
 
-    
+
 // Asegúrate de que $niveles_data esté inicializado como un array vacío si no se ha llenado.
 $niveles_data = isset($niveles_data) ? $niveles_data : [];
 
