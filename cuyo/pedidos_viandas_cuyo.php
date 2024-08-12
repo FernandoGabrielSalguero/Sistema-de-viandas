@@ -8,7 +8,6 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-
 // Verificar si el usuario está autenticado y tiene el rol correcto
 if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'cuyo_placa') {
     header("Location: ../index.php");
@@ -34,18 +33,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 // Definir las plantas, turnos y menús
 $plantas = ['Aglomerado', 'Revestimiento', 'Impregnacion', 'Muebles', 'Transporte (Revestimiento)'];
-$turnos = ['Mañana', 'Tarde', 'Noche'];
-$menus = [
-    'Desayuno día siguiente',
-    'Almuerzo Caliente',
-    'Media tarde',
-    'Refrigerio sandwich almuerzo',
-    'Cena caliente',
-    'Refrigerio sandwich cena',
-    'Desayuno noche',
-    'Sandwich noche'
+$turnos_menus = [
+    'Mañana' => ['Desayuno día siguiente', 'Almuerzo Caliente'],
+    'Tarde' => ['Media tarde', 'Refrigerio sandwich almuerzo'],
+    'Noche' => ['Cena caliente', 'Refrigerio sandwich cena', 'Desayuno noche', 'Sandwich noche']
 ];
-
 ?>
 
 <!DOCTYPE html>
@@ -54,6 +46,20 @@ $menus = [
     <meta charset="UTF-8">
     <title>Pedidos Viandas Cuyo Placa</title>
     <link rel="stylesheet" href="../css/cuyo_placas.css">
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: center;
+        }
+        th[colspan] {
+            background-color: #d9e5f3;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -67,34 +73,44 @@ $menus = [
             <label for="fecha">Fecha:</label>
             <input type="date" id="fecha" name="fecha" required>
 
-            <?php foreach ($turnos as $turno) : ?>
-                <div class="turno-header">
-                    Turno: <?php echo htmlspecialchars($turno); ?>
-                </div>
-                
-                <table>
-                    <thead>
+            <table>
+                <thead>
+                    <tr>
+                        <th rowspan="2">Planta</th>
+                        <th colspan="2">Mañana</th>
+                        <th colspan="2">Tarde</th>
+                        <th colspan="4">Noche</th>
+                    </tr>
+                    <tr>
+                        <th>Desayuno día siguiente</th>
+                        <th>Almuerzo Caliente</th>
+                        <th>Media tarde</th>
+                        <th>Refrigerio sandwich almuerzo</th>
+                        <th>Cena caliente</th>
+                        <th>Refrigerio sandwich cena</th>
+                        <th>Desayuno noche</th>
+                        <th>Sandwich noche</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($plantas as $planta) : ?>
                         <tr>
-                            <th>Planta</th>
-                            <?php foreach ($menus as $menu) : ?>
-                                <th><?php echo htmlspecialchars($menu); ?></th>
-                            <?php endforeach; ?>
+                            <td><?php echo htmlspecialchars($planta); ?></td>
+                            <!-- Mañana -->
+                            <td><input type="number" name="pedidos[Mañana][<?php echo $planta; ?>][Desayuno día siguiente]" min="0" value="0"></td>
+                            <td><input type="number" name="pedidos[Mañana][<?php echo $planta; ?>][Almuerzo Caliente]" min="0" value="0"></td>
+                            <!-- Tarde -->
+                            <td><input type="number" name="pedidos[Tarde][<?php echo $planta; ?>][Media tarde]" min="0" value="0"></td>
+                            <td><input type="number" name="pedidos[Tarde][<?php echo $planta; ?>][Refrigerio sandwich almuerzo]" min="0" value="0"></td>
+                            <!-- Noche -->
+                            <td><input type="number" name="pedidos[Noche][<?php echo $planta; ?>][Cena caliente]" min="0" value="0"></td>
+                            <td><input type="number" name="pedidos[Noche][<?php echo $planta; ?>][Refrigerio sandwich cena]" min="0" value="0"></td>
+                            <td><input type="number" name="pedidos[Noche][<?php echo $planta; ?>][Desayuno noche]" min="0" value="0"></td>
+                            <td><input type="number" name="pedidos[Noche][<?php echo $planta; ?>][Sandwich noche]" min="0" value="0"></td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($plantas as $planta) : ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($planta); ?></td>
-                                <?php foreach ($menus as $menu) : ?>
-                                    <td>
-                                        <input type="number" name="pedidos[<?php echo $turno; ?>][<?php echo $planta; ?>][<?php echo $menu; ?>]" min="0" value="0">
-                                    </td>
-                                <?php endforeach; ?>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            <?php endforeach; ?>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
 
             <button type="submit">Guardar Pedidos</button>
         </form>
