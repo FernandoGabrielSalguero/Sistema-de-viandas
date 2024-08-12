@@ -46,6 +46,10 @@ if (!empty($colegio_filtro)) {
 
 $query_menus .= " GROUP BY m.Nombre, pc.Fecha_entrega";
 
+// Mostrar la consulta y los parámetros
+var_dump($query_menus);
+var_dump($params);
+
 $stmt = $pdo->prepare($query_menus);
 $stmt->execute($params);
 $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -79,9 +83,14 @@ if (!empty($colegio_filtro)) {
 
 $query_colegios .= " GROUP BY c.Nombre, cu.Nombre, m.Nombre, pc.Fecha_entrega";
 
+// Mostrar la consulta y los parámetros
+var_dump($query_colegios);
+var_dump($params);
+
 $stmt = $pdo->prepare($query_colegios);
 $stmt->execute($params);
 $colegios = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 
 
 
@@ -116,9 +125,14 @@ if (!empty($colegio_filtro)) {
     $params[] = $colegio_filtro;
 }
 
+// Mostrar la consulta y los parámetros
+var_dump($query_preferencias);
+var_dump($params);
+
 $stmt = $pdo->prepare($query_preferencias);
 $stmt->execute($params);
 $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 
 
 
