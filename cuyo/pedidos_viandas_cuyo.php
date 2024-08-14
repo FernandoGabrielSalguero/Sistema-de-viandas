@@ -2,7 +2,6 @@
 session_start();
 include '../includes/header_cuyo_placa.php';
 include '../includes/db.php';
-include '../includes/load_env.php';
 
 // Habilitar la muestra de errores
 ini_set('display_errors', 1);
@@ -15,36 +14,9 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'cuyo_placa') {
     exit();
 }
 
-// Cargar variables del archivo .env
-loadEnv(__DIR__ . '/../.env');
-
-// Función para enviar correo electrónico usando SMTP
-function enviarCorreo($to, $subject, $message) {
-    $headers = "From: " . getenv('SMTP_USERNAME') . "\r\n" .
-               "Reply-To: " . getenv('SMTP_USERNAME') . "\r\n" .
-               "X-Mailer: PHP/" . phpversion();
-
-    // Configuración del transporte SMTP
-    $params = [
-        'host' => getenv('SMTP_HOST'),
-        'port' => getenv('SMTP_PORT'),
-        'auth' => true,
-        'username' => getenv('SMTP_USERNAME'),
-        'password' => getenv('SMTP_PASSWORD'),
-    ];
-
-    // Usar la función mail() de PHP
-    ini_set('SMTP', $params['host']);
-    ini_set('smtp_port', $params['port']);
-    ini_set('sendmail_from', $params['username']);
-
-    return mail($to, $subject, $message, $headers);
-}
-
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $fecha = $_POST['fecha'];
     $pedidos = $_POST['pedidos'];
-    $detalle_pedidos = '';
 
     foreach ($pedidos as $turno => $plantas) {
         foreach ($plantas as $planta => $menus) {
@@ -53,9 +25,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                        VALUES (?, ?, ?, ?, ?)
                                        ON DUPLICATE KEY UPDATE Cantidad = VALUES(Cantidad)");
                 $stmt->execute([$fecha, $planta, $turno, $menu, $cantidad]);
-
-                // Construir el detalle del pedido para el correo electrónico
-                $detalle_pedidos .= "Planta: $planta, Turno: $turno, Menu: $menu, Cantidad: $cantidad\n";
             }
         }
     }
@@ -94,48 +63,6 @@ $turnos_menus = [
             font-size: 1.5em; /* Aumentar el tamaño de la fecha */
             padding: 10px; /* Añadir relleno para hacerlo más visible */
         }
-        /* Modal Styles */
-        #emailModal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgb(0, 0, 0);
-            background-color: rgba(0, 0, 0, 0.4);
-            padding-top: 60px;
-        }
-
-        #emailModalContent {
-            background-color: #fefefe;
-            margin: 5% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-        }
-
-        #emailModalContent input[type="email"] {
-            width: 100%;
-            padding: 10px;
-            margin: 5px 0;
-            box-sizing: border-box;
-        }
-
-        #emailModalContent button {
-            padding: 10px 20px;
-            background-color: #6200ea;
-            color: white;
-            border: none;
-            cursor: pointer;
-            float: right;
-        }
-
-        #emailModalContent button:hover {
-            background-color: #3700b3;
-        }
     </style>
 </head>
 <body>
@@ -143,9 +70,7 @@ $turnos_menus = [
         <h1>Pedidos de Viandas - Cuyo Placa</h1>
 
         <?php if (isset($success) && $success) : ?>
-            <script>
-                document.getElementById('emailModal').style.display = 'block';
-            </script>
+            <p>Pedidos guardados con éxito.</p>
         <?php endif; ?>
 
         <form method="post" action="pedidos_viandas_cuyo.php">
@@ -194,44 +119,5 @@ $turnos_menus = [
             <button type="submit">Guardar Pedidos</button>
         </form>
     </div>
-
-    <!-- Modal -->
-    <div id="emailModal">
-        <div id="emailModalContent">
-            <h2>Su pedido de viandas fue realizado con éxito</h2>
-            <p>Ingrese hasta 7 correos electrónicos para enviar el detalle del pedido:</p>
-            <form id="emailForm">
-                <?php for ($i = 1; $i <= 7; $i++) : ?>
-                    <input type="email" name="emails[]" placeholder="Correo electrónico <?php echo $i; ?>">
-                <?php endfor; ?>
-                <input type="hidden" name="detalle" value="<?php echo htmlspecialchars($detalle_pedidos); ?>">
-                <button type="button" onclick="sendEmails()">Aceptar</button>
-            </form>
-        </div>
-    </div>
-
-    <script>
-        function sendEmails() {
-            var form = document.getElementById('emailForm');
-            var formData = new FormData(form);
-
-            fetch('send_emails.php', {
-                method: 'POST',
-                body: formData
-            }).then(response => response.json())
-              .then(data => {
-                  if (data.status === 'success') {
-                      alert('Correos enviados exitosamente.');
-                      window.location.href = "dashboard_cuyo_placa.php";
-                  } else {
-                      alert('Error al enviar correos: ' + data.message);
-                  }
-              })
-              .catch(error => {
-                  console.error('Error:', error);
-                  alert('Ocurrió un error al enviar los correos.');
-              });
-        }
-    </script>
 </body>
 </html>
