@@ -18,6 +18,7 @@ $fecha_inicio = '';
 $fecha_fin = '';
 $pedidos_agrupados = [];
 $total_viandas = 0;
+$totales_por_menu = [];
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $fecha_inicio = $_POST['fecha_inicio'];
@@ -26,32 +27,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Validar fechas
     if ($fecha_inicio && $fecha_fin && strtotime($fecha_fin) >= strtotime($fecha_inicio)) {
         // Obtener los pedidos y detalles de la base de datos
-        $stmt = $pdo->prepare("SELECT p.fecha, d.planta, d.menu, d.periodo, SUM(d.cantidad) as cantidad 
+        $stmt = $pdo->prepare("SELECT p.fecha, d.planta, d.menu, SUM(d.cantidad) as cantidad 
                                FROM Pedidos_Cuyo_Placa p 
                                JOIN Detalle_Pedidos_Cuyo_Placa d ON p.id = d.pedido_id 
                                WHERE p.fecha BETWEEN ? AND ? 
-                               GROUP BY p.fecha, d.planta, d.menu, d.periodo
-                               ORDER BY p.fecha, d.planta, d.periodo");
+                               GROUP BY p.fecha, d.planta, d.menu
+                               ORDER BY p.fecha, d.planta");
         $stmt->execute([$fecha_inicio, $fecha_fin]);
         $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Agrupar los pedidos por fecha, planta, y periodo
+        // Agrupar los pedidos por fecha y planta
         foreach ($pedidos as $pedido) {
             $fecha = $pedido['fecha'];
             $planta = $pedido['planta'];
-            $periodo = $pedido['periodo'];
+            $menu = $pedido['menu'];
+            $cantidad = $pedido['cantidad'];
+
             if (!isset($pedidos_agrupados[$fecha])) {
                 $pedidos_agrupados[$fecha] = [];
             }
             if (!isset($pedidos_agrupados[$fecha][$planta])) {
-                $pedidos_agrupados[$fecha][$planta] = [
-                    'Mañana' => [],
-                    'Tarde' => [],
-                    'Noche' => [],
-                ];
+                $pedidos_agrupados[$fecha][$planta] = [];
             }
-            $pedidos_agrupados[$fecha][$planta][$periodo][] = $pedido;
-            $total_viandas += $pedido['cantidad'];
+            $pedidos_agrupados[$fecha][$planta][] = $pedido;
+            $total_viandas += $cantidad;
+
+            if (!isset($totales_por_menu[$menu])) {
+                $totales_por_menu[$menu] = 0;
+            }
+            $totales_por_menu[$menu] += $cantidad;
         }
     } else {
         $error = "Por favor, seleccione un rango de fechas válido.";
@@ -65,12 +69,10 @@ function generarCSV($fecha, $planta, $pedidos) {
     header('Content-Disposition: attachment;filename=' . $filename);
 
     $output = fopen('php://output', 'w');
-    fputcsv($output, ['Fecha', 'Planta', 'Menú', 'Periodo', 'Cantidad']);
+    fputcsv($output, ['Fecha', 'Planta', 'Menú', 'Cantidad']);
     
-    foreach ($pedidos as $periodo => $detalle_pedidos) {
-        foreach ($detalle_pedidos as $pedido) {
-            fputcsv($output, [$pedido['fecha'], $pedido['planta'], $pedido['menu'], $periodo, $pedido['cantidad']]);
-        }
+    foreach ($pedidos as $pedido) {
+        fputcsv($output, [$pedido['fecha'], $pedido['planta'], $pedido['menu'], $pedido['cantidad']]);
     }
     fclose($output);
     exit;
@@ -85,26 +87,6 @@ if (isset($_GET['descargar']) && $_GET['descargar'] == 'csv' && isset($_GET['fec
     }
 }
 
-// Función para generar imagenes JPG de las tarjetas
-function generarJPG($fecha, $planta, $pedidos) {
-    // Código para generar y descargar la imagen JPG
-    // Nota: Este es un proceso avanzado que requeriría bibliotecas adicionales como GD o Imagick en PHP
-    // Aquí solo se esboza el proceso
-    // header('Content-Type: image/jpeg');
-    // Código para dibujar y renderizar la imagen basada en $pedidos
-    // ...
-    exit;
-}
-
-// Manejo de la descarga de JPG
-if (isset($_GET['descargar']) && $_GET['descargar'] == 'jpg' && isset($_GET['fecha']) && isset($_GET['planta'])) {
-    $fecha = $_GET['fecha'];
-    $planta = $_GET['planta'];
-    if (isset($pedidos_agrupados[$fecha][$planta])) {
-        generarJPG($fecha, $planta, $pedidos_agrupados[$fecha][$planta]);
-    }
-}
-
 ?>
 
 <!DOCTYPE html>
@@ -113,8 +95,181 @@ if (isset($_GET['descargar']) && $_GET['descargar'] == 'jpg' && isset($_GET['fec
     <meta charset="UTF-8">
     <title>Pedidos de Viandas - Dashboard</title>
     <style>
-        /* Estilos existentes */
-        /* (No se repiten aquí por brevedad, asume que los estilos originales se mantienen) */
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2em;
+            color: #343a40;
+        }
+
+        form {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            margin-right: 10px;
+            align-self: center;
+            color: #343a40;
+        }
+
+        input[type="date"] {
+            padding: 8px;
+            margin-right: 10px;
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+            font-size: 1em;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .kpi-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .kpi {
+            background-color: #28a745;
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 1.2em;
+            width: 200px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .card {
+            background-color: white;
+            border: none;
+            border-radius: 10px;
+            width: 320px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            font-size: 1.4em;
+            color: #007bff;
+            text-align: center;
+        }
+
+        .card table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .card table, .card th, .card td {
+            border: 1px solid #e9ecef;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .card th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .card td {
+            background-color: #ffffff;
+        }
+
+        .card button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background-color 0.3s ease;
+        }
+
+        .card button:hover {
+            background-color: #0056b3;
+        }
+
+        .totales-menu {
+            margin: 20px auto;
+            max-width: 600px;
+            background-color: #ffffff;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .totales-menu h3 {
+            font-size: 1.5em;
+            color: #343a40;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .totales-menu table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .totales-menu table, .totales-menu th, .totales-menu td {
+            border: 1px solid #e9ecef;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .totales-menu th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .totales-menu td {
+            background-color: #ffffff;
+        }
+
+        .error {
+            color: red;
+            text-align: center;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
@@ -139,10 +294,30 @@ if (isset($_GET['descargar']) && $_GET['descargar'] == 'jpg' && isset($_GET['fec
         </div>
     </div>
 
+    <div class="totales-menu">
+        <h3>Totales por Menú</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Menú</th>
+                    <th>Total Pedidos</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($totales_por_menu as $menu => $total): ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($menu); ?></td>
+                    <td><?php echo htmlspecialchars($total); ?></td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+
     <div class="card-container">
         <?php if (!empty($pedidos_agrupados)) : ?>
             <?php foreach ($pedidos_agrupados as $fecha => $plantas) : ?>
-                <?php foreach ($plantas as $planta => $pedidos_por_periodo) : ?>
+                <?php foreach ($plantas as $planta => $pedidos) : ?>
                     <div class="card">
                         <h3><?php echo htmlspecialchars($planta); ?></h3>
                         <table>
@@ -154,24 +329,14 @@ if (isset($_GET['descargar']) && $_GET['descargar'] == 'jpg' && isset($_GET['fec
                             <tbody>
                                 <?php 
                                 $total = 0;
-                                foreach (['Mañana', 'Tarde', 'Noche'] as $periodo) : 
-                                    if (!empty($pedidos_por_periodo[$periodo])) :
+                                foreach ($pedidos as $pedido) : 
+                                    $total += $pedido['cantidad'];
                                 ?>
                                     <tr>
-                                        <td colspan="2"><strong><?php echo $periodo; ?></strong></td>
+                                        <td><?php echo htmlspecialchars($pedido['menu']); ?></td>
+                                        <td><?php echo htmlspecialchars($pedido['cantidad']); ?></td>
                                     </tr>
-                                    <?php foreach ($pedidos_por_periodo[$periodo] as $pedido) : 
-                                        $total += $pedido['cantidad'];
-                                    ?>
-                                        <tr>
-                                            <td><?php echo htmlspecialchars($pedido['menu']); ?></td>
-                                            <td><?php echo htmlspecialchars($pedido['cantidad']); ?></td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                <?php 
-                                    endif; 
-                                endforeach; 
-                                ?>
+                                <?php endforeach; ?>
                                 <tr>
                                     <td><strong>Total:</strong></td>
                                     <td><strong><?php echo $total; ?></strong></td>
@@ -179,7 +344,6 @@ if (isset($_GET['descargar']) && $_GET['descargar'] == 'jpg' && isset($_GET['fec
                             </tbody>
                         </table>
                         <button onclick="window.location.href='dashboard_cuyo_placa.php?descargar=csv&fecha=<?php echo urlencode($fecha); ?>&planta=<?php echo urlencode($planta); ?>'">Descargar CSV</button>
-                        <button onclick="window.location.href='dashboard_cuyo_placa.php?descargar=jpg&fecha=<?php echo urlencode($fecha); ?>&planta=<?php echo urlencode($planta); ?>'">Descargar JPG</button>
                     </div>
                 <?php endforeach; ?>
             <?php endforeach; ?>
