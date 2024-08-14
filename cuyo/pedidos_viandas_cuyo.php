@@ -17,6 +17,8 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'cuyo_placa') {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $fecha = $_POST['fecha'];
     $pedidos = $_POST['pedidos'];
+    $usuario_email = $_SESSION['usuario_email']; // Supongo que tienes el correo electrónico del usuario en la sesión
+    $detalle_pedidos = '';
 
     foreach ($pedidos as $turno => $plantas) {
         foreach ($plantas as $planta => $menus) {
@@ -25,18 +27,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                        VALUES (?, ?, ?, ?, ?)
                                        ON DUPLICATE KEY UPDATE Cantidad = VALUES(Cantidad)");
                 $stmt->execute([$fecha, $planta, $turno, $menu, $cantidad]);
+
+                // Construir el detalle del pedido para el correo electrónico
+                $detalle_pedidos .= "Planta: $planta, Turno: $turno, Menu: $menu, Cantidad: $cantidad\n";
             }
         }
     }
     $success = "Pedidos guardados con éxito.";
+
+    // Enviar correo con el detalle del pedido
+    $asunto = "Detalle de Pedido de Viandas - Cuyo Placa";
+    $mensaje = "Estimado usuario,\n\nSe ha registrado el siguiente pedido de viandas para la fecha $fecha:\n\n$detalle_pedidos\n\nSaludos cordiales.";
+    $headers = "From: no-reply@cuyoplaca.com";
+
+    mail($usuario_email, $asunto, $mensaje, $headers);
 }
 
 // Definir las plantas, turnos y menús
 $plantas = ['Aglomerado', 'Revestimiento', 'Impregnacion', 'Muebles', 'Transporte (Revestimiento)'];
 $turnos_menus = [
-    'Mañana' => ['Desayuno día siguiente', 'Almuerzo Caliente'],
-    'Tarde' => ['Media tarde', 'Refrigerio sandwich almuerzo'],
-    'Noche' => ['Cena caliente', 'Refrigerio sandwich cena', 'Desayuno noche', 'Sandwich noche']
+    'Mañana' => ['Desayuno día siguiente', 'Almuerzo Caliente', 'Refrigerio sandwich almuerzo'],
+    'Tarde' => ['Media tarde', 'Cena caliente', 'Refrigerio sandwich cena'],
+    'Noche' => ['Desayuno noche', 'Sandwich noche']
 ];
 ?>
 
@@ -59,6 +71,10 @@ $turnos_menus = [
         th[colspan] {
             background-color: #d9e5f3;
         }
+        #fecha {
+            font-size: 1.5em; /* Aumentar el tamaño de la fecha */
+            padding: 10px; /* Añadir relleno para hacerlo más visible */
+        }
     </style>
 </head>
 <body>
@@ -77,15 +93,15 @@ $turnos_menus = [
                 <thead>
                     <tr>
                         <th rowspan="2">Planta</th>
-                        <th colspan="2">Mañana</th>
-                        <th colspan="2">Tarde</th>
-                        <th colspan="4">Noche</th>
+                        <th colspan="3">Mañana</th>
+                        <th colspan="3">Tarde</th>
+                        <th colspan="2">Noche</th>
                     </tr>
                     <tr>
                         <th>Desayuno día siguiente</th>
                         <th>Almuerzo Caliente</th>
-                        <th>Media tarde</th>
                         <th>Refrigerio sandwich almuerzo</th>
+                        <th>Media tarde</th>
                         <th>Cena caliente</th>
                         <th>Refrigerio sandwich cena</th>
                         <th>Desayuno noche</th>
@@ -99,12 +115,12 @@ $turnos_menus = [
                             <!-- Mañana -->
                             <td><input type="number" name="pedidos[Mañana][<?php echo $planta; ?>][Desayuno día siguiente]" min="0" value="0"></td>
                             <td><input type="number" name="pedidos[Mañana][<?php echo $planta; ?>][Almuerzo Caliente]" min="0" value="0"></td>
+                            <td><input type="number" name="pedidos[Mañana][<?php echo $planta; ?>][Refrigerio sandwich almuerzo]" min="0" value="0"></td>
                             <!-- Tarde -->
                             <td><input type="number" name="pedidos[Tarde][<?php echo $planta; ?>][Media tarde]" min="0" value="0"></td>
-                            <td><input type="number" name="pedidos[Tarde][<?php echo $planta; ?>][Refrigerio sandwich almuerzo]" min="0" value="0"></td>
+                            <td><input type="number" name="pedidos[Tarde][<?php echo $planta; ?>][Cena caliente]" min="0" value="0"></td>
+                            <td><input type="number" name="pedidos[Tarde][<?php echo $planta; ?>][Refrigerio sandwich cena]" min="0" value="0"></td>
                             <!-- Noche -->
-                            <td><input type="number" name="pedidos[Noche][<?php echo $planta; ?>][Cena caliente]" min="0" value="0"></td>
-                            <td><input type="number" name="pedidos[Noche][<?php echo $planta; ?>][Refrigerio sandwich cena]" min="0" value="0"></td>
                             <td><input type="number" name="pedidos[Noche][<?php echo $planta; ?>][Desayuno noche]" min="0" value="0"></td>
                             <td><input type="number" name="pedidos[Noche][<?php echo $planta; ?>][Sandwich noche]" min="0" value="0"></td>
                         </tr>

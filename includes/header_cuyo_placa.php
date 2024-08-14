@@ -46,7 +46,8 @@
     <nav>
         <ul>
             <li><a href="dashboard_cuyo_placa.php">Inicio</a></li>
-            <li><a href="pedidos_viandas_cuyo.php">Pedido de viandas</a></li>
+            <li><a href="pedidos_viandas_cuyo.php">Crear pedidos</a></li>
+            <li><a href="mod_pedidos_viandas_cuyo.php">Modificar pedidos</a></li>
             <li><a href="../admin/logout.php">Salir</a></li>
         </ul>
     </nav>
