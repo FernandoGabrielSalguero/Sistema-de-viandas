@@ -65,23 +65,100 @@ $turnos_menus = [
 <head>
     <meta charset="UTF-8">
     <title>Pedidos Viandas Cuyo Placa</title>
-    <link rel="stylesheet" href="../css/cuyo_placas.css">
     <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2em;
+            color: #343a40;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
         table {
             width: 100%;
+            margin: 20px 0;
             border-collapse: collapse;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
         }
+
         th, td {
-            border: 1px solid #000;
+            border: 1px solid #e9ecef;
             padding: 8px;
             text-align: center;
         }
-        th[colspan] {
-            background-color: #d9e5f3;
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
         }
-        #fecha {
-            font-size: 1.5em; /* Aumentar el tamaño de la fecha */
-            padding: 10px; /* Añadir relleno para hacerlo más visible */
+
+        input[type="date"] {
+            padding: 8px;
+            margin-right: 10px;
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+            font-size: 1em;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        input[type="number"] {
+            width: 60px;
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+            text-align: center;
+            font-size: 1em;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+            display: block;
+            margin: 20px auto;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .success-message {
+            color: green;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        .error-message {
+            color: red;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.2em;
         }
     </style>
 </head>
@@ -90,9 +167,9 @@ $turnos_menus = [
         <h1>Pedidos de Viandas - Cuyo Placa</h1>
 
         <?php if (isset($success) && $success) : ?>
-            <p>Pedidos guardados con éxito.</p>
+            <p class="success-message">Pedidos guardados con éxito.</p>
         <?php elseif (isset($error)) : ?>
-            <p style="color: red;"><?php echo htmlspecialchars($error); ?></p>
+            <p class="error-message"><?php echo htmlspecialchars($error); ?></p>
         <?php endif; ?>
 
         <form method="post" action="pedidos_viandas_cuyo.php">
