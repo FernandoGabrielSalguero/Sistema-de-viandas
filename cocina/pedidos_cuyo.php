@@ -2,6 +2,7 @@
 session_start();
 include '../includes/header_cocina.php'; // Asegúrate de que este archivo header sea específico para el rol de cocina
 include '../includes/db.php';
+date_default_timezone_set('America/Argentina/Buenos_Aires');
 
 // Habilitar la muestra de errores
 ini_set('display_errors', 1);
@@ -95,35 +96,46 @@ foreach ($totales_pedidos as $turno => $plantas_totales) {
     <style>
         body {
             margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
-        }
-
-        .container {
-            width: 100%;
             padding: 20px;
-            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
         }
 
         h1 {
             text-align: center;
             margin-bottom: 20px;
+            font-size: 2em;
+            color: #343a40;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         form {
-            width: 100%;
-            margin: 0 auto 20px auto;
-            text-align: center;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            gap: 10px;
         }
 
         label {
             font-weight: bold;
+            align-self: center;
+            color: #343a40;
         }
 
         input[type="date"] {
-            padding: 5px;
-            margin: 0 10px;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+            font-size: 1em;
         }
 
         button {
@@ -134,6 +146,7 @@ foreach ($totales_pedidos as $turno => $plantas_totales) {
             color: white;
             border: none;
             border-radius: 5px;
+            transition: background-color 0.3s ease;
         }
 
         button:hover {
@@ -145,46 +158,55 @@ foreach ($totales_pedidos as $turno => $plantas_totales) {
             flex-wrap: wrap;
             justify-content: space-around;
             margin-top: 20px;
+            margin-bottom: 20px;
         }
 
         .kpi {
             background-color: #007bff;
             color: white;
             padding: 20px;
-            margin: 10px;
-            border-radius: 5px;
+            border-radius: 10px;
             text-align: center;
+            margin: 10px;
             flex: 1;
-            min-width: 200px;
+            min-width: 180px;
+        }
+
+        table {
+            width: 100%;
+            margin: 20px 0;
+            border-collapse: collapse;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th, td {
+            border: 1px solid #e9ecef;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+        }
+
+        td {
+            background-color: #ffffff;
         }
 
         .turno-header {
             background-color: #007bff;
             color: white;
             padding: 10px;
-            text-align: left;
+            border-radius: 5px;
             margin-top: 20px;
-            margin-bottom: 10px;
+            text-align: center;
             font-size: 1.2em;
         }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-
-        th, td {
-            padding: 10px;
-            text-align: center;
-            border: 1px solid #ddd;
-        }
-
-        th {
-            background-color: #007bff;
-            color: white;
-        }
-
     </style>
 </head>
 <body>
@@ -192,7 +214,7 @@ foreach ($totales_pedidos as $turno => $plantas_totales) {
         <h1>Pedidos de Viandas - Cuyo (Cocina)</h1>
 
         <?php if (isset($error)) : ?>
-            <p class="error"><?php echo $error; ?></p>
+            <p style="color: red; text-align: center;"><?php echo htmlspecialchars($error); ?></p>
         <?php endif; ?>
 
         <form method="post" action="pedidos_cuyo.php">
@@ -229,7 +251,7 @@ foreach ($totales_pedidos as $turno => $plantas_totales) {
                             <?php foreach ($menus as $menu) : ?>
                                 <th><?php echo htmlspecialchars($menu); ?></th>
                             <?php endforeach; ?>
-                            <th>Total por Planta</th> <!-- Nueva columna para total de cada fila -->
+                            <th>Total por Planta</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -239,7 +261,7 @@ foreach ($totales_pedidos as $turno => $plantas_totales) {
                             $total_por_planta = 0; // Inicializar el total por planta
                         ?>
                             <tr>
-                                <td><?php echo htmlspecialchars(is_array($planta) ? implode(', ', $planta) : $planta); ?></td>
+                                <td><?php echo htmlspecialchars($planta); ?></td>
                                 <?php foreach ($menus as $menu) : ?>
                                     <td>
                                         <?php 
@@ -250,7 +272,7 @@ foreach ($totales_pedidos as $turno => $plantas_totales) {
                                         ?>
                                     </td>
                                 <?php endforeach; ?>
-                                <td><strong><?php echo htmlspecialchars($total_por_planta); ?></strong></td> <!-- Mostrar total de la planta -->
+                                <td><strong><?php echo htmlspecialchars($total_por_planta); ?></strong></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -260,7 +282,7 @@ foreach ($totales_pedidos as $turno => $plantas_totales) {
                             <?php foreach ($menus as $menu) : ?>
                                 <th><strong><?php echo htmlspecialchars($total_por_turno[$menu]); ?></strong></th>
                             <?php endforeach; ?>
-                            <th></th> <!-- Columna vacía para el total por fila -->
+                            <th></th>
                         </tr>
                     </tfoot>
                 </table>
