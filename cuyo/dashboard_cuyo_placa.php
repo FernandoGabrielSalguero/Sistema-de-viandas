@@ -53,6 +53,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
+// Función para generar el archivo CSV
+function generarCSV($fecha, $planta, $pedidos) {
+    $filename = "pedido_{$planta}_{$fecha}.csv";
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment;filename=' . $filename);
+
+    $output = fopen('php://output', 'w');
+    fputcsv($output, ['Fecha', 'Planta', 'Menú', 'Cantidad']);
+    
+    foreach ($pedidos as $pedido) {
+        fputcsv($output, [$pedido['fecha'], $pedido['planta'], $pedido['menu'], $pedido['cantidad']]);
+    }
+    fclose($output);
+    exit;
+}
+
+// Manejo de la descarga de CSV
+if (isset($_GET['descargar']) && $_GET['descargar'] == 'csv' && isset($_GET['fecha']) && isset($_GET['planta'])) {
+    $fecha = $_GET['fecha'];
+    $planta = $_GET['planta'];
+    if (isset($pedidos_agrupados[$fecha][$planta])) {
+        generarCSV($fecha, $planta, $pedidos_agrupados[$fecha][$planta]);
+    }
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -122,10 +147,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         .card-container {
             display: flex;
-            flex-direction: column;
+            flex-wrap: wrap;
             gap: 20px;
             justify-content: center;
-            align-items: center;
         }
 
         .card {
@@ -135,6 +159,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             width: 300px;
             padding: 20px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: relative;
         }
 
         .card h3 {
@@ -162,6 +187,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         .card td {
             background-color: #ffffff;
+        }
+
+        .card button {
+            padding: 8px 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .card button:hover {
+            background-color: #0056b3;
         }
 
         .error {
@@ -222,6 +261,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 </tr>
                             </tbody>
                         </table>
+                        <button onclick="window.location.href='dashboard_cuyo_placa.php?descargar=csv&fecha=<?php echo urlencode($fecha); ?>&planta=<?php echo urlencode($planta); ?>'">Descargar CSV</button>
                     </div>
                 <?php endforeach; ?>
             <?php endforeach; ?>
