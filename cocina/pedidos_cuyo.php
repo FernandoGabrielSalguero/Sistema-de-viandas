@@ -1,6 +1,6 @@
 <?php
 session_start();
-include '../includes/header_cocina.php'; // Asegúrate de que este archivo header sea específico para el rol de cocina
+include '../includes/header_cocina.php';
 include '../includes/db.php';
 date_default_timezone_set('America/Argentina/Buenos_Aires');
 
@@ -26,7 +26,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Validar fechas
     if ($fecha_inicio && $fecha_fin && strtotime($fecha_fin) >= strtotime($fecha_inicio)) {
-        // Modificar la consulta SQL según las columnas actuales de la base de datos
         $stmt = $pdo->prepare("SELECT d.planta, d.turno, d.menu, SUM(d.cantidad) as CantidadTotal 
                                FROM Detalle_Pedidos_Cuyo_Placa d
                                JOIN Pedidos_Cuyo_Placa p ON d.pedido_id = p.id 
@@ -41,51 +40,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 // Definir las plantas, turnos y menús
 $plantas = ['Aglomerado', 'Revestimiento', 'Impregnacion', 'Muebles', 'Transporte (Revestimiento)'];
-$turnos = ['Mañana', 'Tarde', 'Noche'];
-$menus = [
-    'Desayuno día siguiente',
-    'Almuerzo Caliente',
-    'Media tarde',
-    'Refrigerio sandwich almuerzo',
-    'Cena caliente',
-    'Refrigerio sandwich cena',
-    'Desayuno noche',
-    'Sandwich noche'
+$turnos_menus = [
+    'Mañana' => ['Desayuno día siguiente', 'Almuerzo Caliente', 'Refrigerio sandwich almuerzo'],
+    'Tarde' => ['Media tarde', 'Cena caliente', 'Refrigerio sandwich cena'],
+    'Noche' => ['Desayuno noche', 'Sandwich noche']
 ];
 
 // Inicializar array para los totales por planta y menú
 $totales_pedidos = [];
-foreach ($turnos as $turno) {
-    $totales_pedidos[$turno] = [];
-    foreach ($plantas as $planta) {
-        $totales_pedidos[$turno][$planta] = array_fill_keys($menus, 0);
+foreach ($plantas as $planta) {
+    $totales_pedidos[$planta] = [];
+    foreach ($turnos_menus as $turno => $menus) {
+        foreach ($menus as $menu) {
+            $totales_pedidos[$planta][$menu] = 0;
+        }
     }
 }
 
 // Rellenar los totales con los resultados obtenidos de la base de datos
 foreach ($pedidos_totales as $pedido) {
-    $turno = $pedido['turno'];
     $planta = $pedido['planta'];
     $menu = $pedido['menu'];
     $cantidad = $pedido['CantidadTotal'];
 
-    if (isset($totales_pedidos[$turno][$planta][$menu])) {
-        $totales_pedidos[$turno][$planta][$menu] += $cantidad;
-    }
-}
-
-// Inicializar array para los totales de cada tipo de comida
-$totales_comida = [];
-foreach ($menus as $menu) {
-    $totales_comida[$menu] = 0;
-}
-
-// Sumar los totales por tipo de comida
-foreach ($totales_pedidos as $turno => $plantas_totales) {
-    foreach ($plantas_totales as $planta => $menus_totales) {
-        foreach ($menus_totales as $menu => $cantidad) {
-            $totales_comida[$menu] += $cantidad;
-        }
+    if (isset($totales_pedidos[$planta][$menu])) {
+        $totales_pedidos[$planta][$menu] += $cantidad;
     }
 }
 ?>
@@ -155,25 +134,6 @@ foreach ($totales_pedidos as $turno => $plantas_totales) {
             background-color: #0056b3;
         }
 
-        .kpi-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-around;
-            margin-top: 20px;
-            margin-bottom: 20px;
-        }
-
-        .kpi {
-            background-color: #007bff;
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            margin: 10px;
-            flex: 1;
-            min-width: 180px;
-        }
-
         table {
             width: 100%;
             margin: 20px 0;
@@ -191,8 +151,8 @@ foreach ($totales_pedidos as $turno => $plantas_totales) {
         }
 
         th {
-            background-color: #007bff;
-            color: white;
+            background-color: #f8f9fa;
+            color: #343a40;
             font-weight: bold;
         }
 
@@ -240,66 +200,35 @@ foreach ($totales_pedidos as $turno => $plantas_totales) {
             <button type="submit">Filtrar</button>
         </form>
 
-        <!-- Mostrar KPIs -->
-        <div class="kpi-container">
-            <?php foreach ($totales_comida as $menu => $total) : ?>
-                <div class="kpi">
-                    <h3><?php echo htmlspecialchars($menu); ?></h3>
-                    <p><?php echo htmlspecialchars($total); ?> viandas</p>
-                </div>
-            <?php endforeach; ?>
-        </div>
-
-        <!-- Mostrar tablas de totales por turno -->
+        <!-- Mostrar la tabla con la estructura solicitada -->
         <?php if (!empty($pedidos_totales)) : ?>
-            <?php foreach ($turnos as $turno) : ?>
-                <div class="turno-header">
-                    Turno: <?php echo htmlspecialchars($turno); ?>
-                </div>
-                
-                <table>
-                    <thead>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Planta</th>
+                        <th>Desayuno día siguiente</th>
+                        <th>Almuerzo Caliente</th>
+                        <th>Refrigerio sandwich almuerzo</th>
+                        <th>Media tarde</th>
+                        <th>Cena caliente</th>
+                        <th>Refrigerio sandwich cena</th>
+                        <th>Desayuno noche</th>
+                        <th>Sandwich noche</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($plantas as $planta) : ?>
                         <tr>
-                            <th>Planta</th>
-                            <?php foreach ($menus as $menu) : ?>
-                                <th><?php echo htmlspecialchars($menu); ?></th>
-                            <?php endforeach; ?>
-                            <th>Total por Planta</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php 
-                        $total_por_turno = array_fill_keys($menus, 0); // Inicializar array para totales por columna
-                        foreach ($plantas as $planta) : 
-                            $total_por_planta = 0; // Inicializar el total por planta
-                        ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($planta); ?></td>
+                            <td><?php echo htmlspecialchars($planta); ?></td>
+                            <?php foreach ($turnos_menus as $turno => $menus) : ?>
                                 <?php foreach ($menus as $menu) : ?>
-                                    <td>
-                                        <?php 
-                                        $cantidad = $totales_pedidos[$turno][$planta][$menu];
-                                        echo htmlspecialchars($cantidad);
-                                        $total_por_planta += $cantidad; // Sumar al total de la planta
-                                        $total_por_turno[$menu] += $cantidad; // Sumar al total por turno
-                                        ?>
-                                    </td>
+                                    <td><?php echo htmlspecialchars($totales_pedidos[$planta][$menu]); ?></td>
                                 <?php endforeach; ?>
-                                <td><strong><?php echo htmlspecialchars($total_por_planta); ?></strong></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <th>Total por Menú</th>
-                            <?php foreach ($menus as $menu) : ?>
-                                <th><strong><?php echo htmlspecialchars($total_por_turno[$menu]); ?></strong></th>
                             <?php endforeach; ?>
-                            <th></th>
                         </tr>
-                    </tfoot>
-                </table>
-            <?php endforeach; ?>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
         <?php endif; ?>
     </div>
 </body>
