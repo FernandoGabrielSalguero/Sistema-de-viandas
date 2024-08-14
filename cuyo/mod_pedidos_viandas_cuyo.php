@@ -41,9 +41,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (isset($_POST['actualizar'])) {
             // Actualizar los pedidos según los datos enviados desde el formulario
             foreach ($pedidos_del_dia as $pedido) {
-                $nuevo_valor = $_POST['cantidad_' . $pedido['id']];
-                $stmt = $pdo->prepare("UPDATE Detalle_Pedidos_Cuyo_Placa SET cantidad = ? WHERE id = ?");
-                $stmt->execute([$nuevo_valor, $pedido['id']]);
+                $pedido_id = $pedido['id'];
+                if (isset($_POST['cantidad_' . $pedido_id])) {
+                    $nuevo_valor = $_POST['cantidad_' . $pedido_id];
+                    $stmt = $pdo->prepare("UPDATE Detalle_Pedidos_Cuyo_Placa SET cantidad = ? WHERE id = ?");
+                    $stmt->execute([$nuevo_valor, $pedido_id]);
+                }
             }
             $mensaje = "Pedidos actualizados correctamente.";
         }
@@ -211,14 +214,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <td><?php echo $planta; ?></td>
                             <?php foreach ($menus as $menu => $turno) : 
                                 $cantidad = 0;
+                                $pedido_id = null;
                                 foreach ($pedidos_del_dia as $pedido) {
                                     if ($pedido['planta'] == $planta && $pedido['menu'] == $menu && $pedido['turno'] == $turno) {
                                         $cantidad = $pedido['cantidad'];
+                                        $pedido_id = $pedido['id'];
                                     }
                                 }
                             ?>
                                 <td>
-                                    <input type="number" name="cantidad_<?php echo htmlspecialchars($planta . '_' . $menu); ?>" value="<?php echo htmlspecialchars($cantidad); ?>" min="0" <?php echo ($es_mismo_dia && $hora_actual >= $hora_limite) ? 'readonly' : ''; ?>>
+                                    <?php if ($pedido_id !== null): ?>
+                                        <input type="number" name="cantidad_<?php echo htmlspecialchars($pedido_id); ?>" value="<?php echo htmlspecialchars($cantidad); ?>" min="0" <?php echo ($es_mismo_dia && $hora_actual >= $hora_limite) ? 'readonly' : ''; ?>>
+                                    <?php else: ?>
+                                        <input type="number" value="0" readonly>
+                                    <?php endif; ?>
                                 </td>
                             <?php endforeach; ?>
                         </tr>
