@@ -48,9 +48,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $stmt->execute([$nuevo_valor, $pedido_id]);
                 }
             }
-            // Redirigir para mostrar el pop-up después de la actualización
-            echo "<script>alert('Pedidos actualizados correctamente.'); window.location.href='dashboard_cuyo_placa.php';</script>";
-            exit();
+            $mensaje = "Pedidos actualizados correctamente.";
+            echo "<script>document.addEventListener('DOMContentLoaded', function() { document.getElementById('modal').style.display = 'block'; });</script>";
         }
     }
 }
@@ -147,16 +146,50 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             cursor: not-allowed;
         }
 
-        .mensaje {
-            color: green;
-            text-align: center;
-            margin-bottom: 20px;
+        /* Estilos del Modal */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1; 
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4); 
+            padding-top: 60px;
         }
 
-        .error {
-            color: red;
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 300px;
             text-align: center;
+            border-radius: 10px;
+        }
+
+        .modal-content p {
             margin-bottom: 20px;
+            font-size: 1.2em;
+            color: #343a40;
+        }
+
+        .close, .modal-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        .close:hover, .modal-button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
@@ -239,5 +272,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <button type="submit" name="actualizar" <?php echo ($es_mismo_dia && $hora_actual >= $hora_limite) ? 'disabled' : ''; ?>>Actualizar pedido</button>
         </form>
     <?php endif; ?>
+
+    <!-- Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <p>Pedidos actualizados correctamente.</p>
+            <button class="modal-button" onclick="redirigirAlDashboard()">Aceptar</button>
+        </div>
+    </div>
+
+    <script>
+        function redirigirAlDashboard() {
+            window.location.href = 'dashboard_cuyo_placa.php';
+        }
+    </script>
 </body>
 </html>
