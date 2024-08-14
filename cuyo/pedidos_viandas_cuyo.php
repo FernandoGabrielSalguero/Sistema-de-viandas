@@ -45,12 +45,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if (!mail($usuario_email, $asunto, $mensaje, $headers)) {
             echo "Error al enviar el correo.";
-        } else {
-            echo "Correo enviado exitosamente.";
         }
     } else {
         error_log("El correo electrónico del usuario no está disponible. No se pudo enviar el detalle del pedido.");
-        echo "El correo electrónico del usuario no está disponible. No se pudo enviar el detalle del pedido.";
     }
 }
 
@@ -93,7 +90,10 @@ $turnos_menus = [
         <h1>Pedidos de Viandas - Cuyo Placa</h1>
 
         <?php if (isset($success) && $success) : ?>
-            <p>Pedidos guardados con éxito.</p>
+            <script>
+                alert('Su pedido de viandas fue realizado con éxito.');
+                window.location.href = "dashboard_cuyo_placa.php";
+            </script>
         <?php endif; ?>
 
         <form method="post" action="pedidos_viandas_cuyo.php">
