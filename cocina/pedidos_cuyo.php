@@ -26,10 +26,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Validar fechas
     if ($fecha_inicio && $fecha_fin && strtotime($fecha_fin) >= strtotime($fecha_inicio)) {
-        $stmt = $pdo->prepare("SELECT Planta, Turno, Menu, SUM(Cantidad) as CantidadTotal 
-                               FROM Pedidos_Cuyo_Placa 
-                               WHERE Fecha BETWEEN ? AND ? 
-                               GROUP BY Planta, Turno, Menu");
+        // Modificar la consulta SQL según las columnas actuales de la base de datos
+        $stmt = $pdo->prepare("SELECT d.planta, d.turno, d.menu, SUM(d.cantidad) as CantidadTotal 
+                               FROM Detalle_Pedidos_Cuyo_Placa d
+                               JOIN Pedidos_Cuyo_Placa p ON d.pedido_id = p.id 
+                               WHERE p.fecha BETWEEN ? AND ? 
+                               GROUP BY d.planta, d.turno, d.menu");
         $stmt->execute([$fecha_inicio, $fecha_fin]);
         $pedidos_totales = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } else {
@@ -62,9 +64,9 @@ foreach ($turnos as $turno) {
 
 // Rellenar los totales con los resultados obtenidos de la base de datos
 foreach ($pedidos_totales as $pedido) {
-    $turno = $pedido['Turno'];
-    $planta = $pedido['Planta'];
-    $menu = $pedido['Menu'];
+    $turno = $pedido['turno'];
+    $planta = $pedido['planta'];
+    $menu = $pedido['menu'];
     $cantidad = $pedido['CantidadTotal'];
 
     if (isset($totales_pedidos[$turno][$planta][$menu])) {
