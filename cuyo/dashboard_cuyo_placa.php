@@ -8,16 +8,12 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Verificar si el usuario está autenticado y tiene el rol correcto
-if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'cuyo_placa') {
-    header("Location: ../index.php");
-    exit();
-}
-
+// Procesar formulario de filtro de fechas
 $fecha_inicio = '';
 $fecha_fin = '';
-$pedidos_agrupados = [];
-$total_viandas = 0;
+$pedidos_totales = [];
+$totales_comida = [];
+$totales_menus_globales = [];
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $fecha_inicio = $_POST['fecha_inicio'];
@@ -25,57 +21,60 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Validar fechas
     if ($fecha_inicio && $fecha_fin && strtotime($fecha_fin) >= strtotime($fecha_inicio)) {
-        // Obtener los pedidos y detalles de la base de datos
-        $stmt = $pdo->prepare("SELECT p.fecha, d.planta, d.menu, SUM(d.cantidad) as cantidad 
-                               FROM Pedidos_Cuyo_Placa p 
-                               JOIN Detalle_Pedidos_Cuyo_Placa d ON p.id = d.pedido_id 
-                               WHERE p.fecha BETWEEN ? AND ? 
-                               GROUP BY p.fecha, d.planta, d.menu
-                               ORDER BY p.fecha, d.planta");
+        $stmt = $pdo->prepare("SELECT pcp.Fecha, pcp.Planta, dpcp.Menu, SUM(dpcp.Cantidad) as CantidadTotal 
+                               FROM Pedidos_Cuyo_Placa pcp 
+                               JOIN Detalle_Pedidos_Cuyo_Placa dpcp ON pcp.Id = dpcp.Pedido_Id 
+                               WHERE pcp.Fecha BETWEEN ? AND ? 
+                               GROUP BY pcp.Fecha, pcp.Planta, dpcp.Menu");
         $stmt->execute([$fecha_inicio, $fecha_fin]);
-        $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $pedidos_totales = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Agrupar los pedidos por fecha y planta
-        foreach ($pedidos as $pedido) {
-            $fecha = $pedido['fecha'];
-            $planta = $pedido['planta'];
-            if (!isset($pedidos_agrupados[$fecha])) {
-                $pedidos_agrupados[$fecha] = [];
+        // Inicializar totales de comida
+        foreach ($pedidos_totales as $pedido) {
+            $menu = $pedido['Menu'];
+            if (!isset($totales_comida[$menu])) {
+                $totales_comida[$menu] = 0;
             }
-            if (!isset($pedidos_agrupados[$fecha][$planta])) {
-                $pedidos_agrupados[$fecha][$planta] = [];
+            $totales_comida[$menu] += $pedido['CantidadTotal'];
+        }
+
+        // Inicializar totales globales de menús
+        foreach ($pedidos_totales as $pedido) {
+            $menu = $pedido['Menu'];
+            if (!isset($totales_menus_globales[$menu])) {
+                $totales_menus_globales[$menu] = 0;
             }
-            $pedidos_agrupados[$fecha][$planta][] = $pedido;
-            $total_viandas += $pedido['cantidad'];
+            $totales_menus_globales[$menu] += $pedido['CantidadTotal'];
         }
     } else {
         $error = "Por favor, seleccione un rango de fechas válido.";
     }
 }
 
-// Función para generar el archivo CSV
-function generarCSV($fecha, $planta, $pedidos) {
-    $filename = "pedido_{$planta}_{$fecha}.csv";
-    header('Content-Type: text/csv');
-    header('Content-Disposition: attachment;filename=' . $filename);
-
-    $output = fopen('php://output', 'w');
-    fputcsv($output, ['Fecha', 'Planta', 'Menú', 'Cantidad']);
-    
-    foreach ($pedidos as $pedido) {
-        fputcsv($output, [$pedido['fecha'], $pedido['planta'], $pedido['menu'], $pedido['cantidad']]);
-    }
-    fclose($output);
-    exit;
-}
-
-// Manejo de la descarga de CSV
-if (isset($_GET['descargar']) && $_GET['descargar'] == 'csv' && isset($_GET['fecha']) && isset($_GET['planta'])) {
+// Función para generar el CSV
+if (isset($_GET['descargar_csv'])) {
     $fecha = $_GET['fecha'];
     $planta = $_GET['planta'];
-    if (isset($pedidos_agrupados[$fecha][$planta])) {
-        generarCSV($fecha, $planta, $pedidos_agrupados[$fecha][$planta]);
+
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment; filename="pedido_' . $fecha . '_' . $planta . '.csv"');
+
+    $output = fopen('php://output', 'w');
+    fputcsv($output, ['Planta', 'Fecha', 'Menu', 'Cantidad']);
+
+    $stmt = $pdo->prepare("SELECT pcp.Planta, pcp.Fecha, dpcp.Menu, dpcp.Cantidad 
+                           FROM Pedidos_Cuyo_Placa pcp 
+                           JOIN Detalle_Pedidos_Cuyo_Placa dpcp ON pcp.Id = dpcp.Pedido_Id 
+                           WHERE pcp.Fecha = ? AND pcp.Planta = ?");
+    $stmt->execute([$fecha, $planta]);
+    $pedido_detalles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($pedido_detalles as $detalle) {
+        fputcsv($output, [$detalle['Planta'], $detalle['Fecha'], $detalle['Menu'], $detalle['Cantidad']]);
     }
+
+    fclose($output);
+    exit();
 }
 
 ?>
@@ -88,9 +87,15 @@ if (isset($_GET['descargar']) && $_GET['descargar'] == 'csv' && isset($_GET['fec
     <style>
         body {
             margin: 0;
-            padding: 20px;
+            padding: 0;
             font-family: Arial, sans-serif;
             background-color: #f8f9fa;
+        }
+
+        .container {
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
         }
 
         h1 {
@@ -99,20 +104,18 @@ if (isset($_GET['descargar']) && $_GET['descargar'] == 'csv' && isset($_GET['fec
         }
 
         form {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
+            width: 100%;
+            margin: 0 auto 20px auto;
+            text-align: center;
         }
 
         label {
             font-weight: bold;
-            margin-right: 10px;
-            align-self: center;
         }
 
         input[type="date"] {
             padding: 5px;
-            margin-right: 10px;
+            margin: 0 10px;
         }
 
         button {
@@ -132,6 +135,8 @@ if (isset($_GET['descargar']) && $_GET['descargar'] == 'csv' && isset($_GET['fec
         .kpi-container {
             display: flex;
             justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
             margin-bottom: 20px;
         }
 
@@ -141,8 +146,8 @@ if (isset($_GET['descargar']) && $_GET['descargar'] == 'csv' && isset($_GET['fec
             padding: 20px;
             border-radius: 5px;
             text-align: center;
-            font-size: 1.2em;
             width: 200px;
+            margin-bottom: 20px;
         }
 
         .card-container {
@@ -157,116 +162,116 @@ if (isset($_GET['descargar']) && $_GET['descargar'] == 'csv' && isset($_GET['fec
             border: 1px solid #ddd;
             border-radius: 5px;
             width: 300px;
-            padding: 20px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            position: relative;
+            padding: 10px;
+            box-sizing: border-box;
         }
 
         .card h3 {
-            margin-top: 0;
-            font-size: 1.2em;
-            color: #007bff;
+            background-color: #007bff;
+            color: white;
+            margin: 0 -10px 10px -10px;
+            padding: 10px;
+            border-radius: 5px 5px 0 0;
             text-align: center;
         }
 
         .card table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
         }
 
-        .card table, .card th, .card td {
-            border: 1px solid #ddd;
+        .card th, .card td {
             padding: 5px;
-            text-align: center;
+            border: 1px solid #ddd;
+            text-align: left;
         }
 
-        .card th {
-            background-color: #f8f9fa;
-        }
-
-        .card td {
-            background-color: #ffffff;
-        }
-
-        .card button {
-            padding: 8px 12px;
+        .download-btn {
             background-color: #007bff;
             color: white;
+            padding: 10px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             margin-top: 10px;
-        }
-
-        .card button:hover {
-            background-color: #0056b3;
-        }
-
-        .error {
-            color: red;
+            width: 100%;
             text-align: center;
-            margin-bottom: 20px;
+        }
+
+        .download-btn:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
-    <h1>Pedidos de Viandas - Dashboard</h1>
+    <div class="container">
+        <h1>Pedidos de Viandas - Dashboard</h1>
 
-    <?php if (isset($error)) : ?>
-        <p class="error"><?php echo $error; ?></p>
-    <?php endif; ?>
+        <form method="post" action="dashboard_cuyo_placa.php">
+            <label for="fecha_inicio">Desde:</label>
+            <input type="date" id="fecha_inicio" name="fecha_inicio" required value="<?php echo htmlspecialchars($fecha_inicio); ?>">
 
-    <form method="post" action="dashboard_cuyo_placa.php">
-        <label for="fecha_inicio">Desde:</label>
-        <input type="date" id="fecha_inicio" name="fecha_inicio" required value="<?php echo htmlspecialchars($fecha_inicio); ?>">
-        <label for="fecha_fin">Hasta:</label>
-        <input type="date" id="fecha_fin" name="fecha_fin" required value="<?php echo htmlspecialchars($fecha_fin); ?>">
-        <button type="submit">Filtrar</button>
-    </form>
+            <label for="fecha_fin">Hasta:</label>
+            <input type="date" id="fecha_fin" name="fecha_fin" required value="<?php echo htmlspecialchars($fecha_fin); ?>">
 
-    <div class="kpi-container">
-        <div class="kpi">
-            <p>Total Viandas</p>
-            <p><?php echo $total_viandas; ?></p>
-        </div>
-    </div>
+            <button type="submit">Filtrar</button>
+        </form>
 
-    <div class="card-container">
-        <?php if (!empty($pedidos_agrupados)) : ?>
-            <?php foreach ($pedidos_agrupados as $fecha => $plantas) : ?>
-                <?php foreach ($plantas as $planta => $pedidos) : ?>
+        <?php if (!empty($pedidos_totales)) : ?>
+            <div class="kpi-container">
+                <div class="kpi">
+                    <h3>Total Viandas</h3>
+                    <p><?php echo array_sum($totales_comida); ?></p>
+                </div>
+                <?php foreach ($totales_menus_globales as $menu => $total) : ?>
+                    <div class="kpi">
+                        <h3><?php echo htmlspecialchars($menu); ?></h3>
+                        <p><?php echo htmlspecialchars($total); ?></p>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+            <div class="card-container">
+                <?php foreach ($pedidos_totales as $pedido) : ?>
                     <div class="card">
-                        <h3><?php echo htmlspecialchars($planta); ?></h3>
+                        <h3><?php echo htmlspecialchars($pedido['Planta']); ?></h3>
                         <table>
                             <thead>
                                 <tr>
-                                    <th colspan="2"><?php echo htmlspecialchars($fecha); ?></th>
+                                    <th>Fecha</th>
+                                    <th><?php echo htmlspecialchars($pedido['Fecha']); ?></th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php 
-                                $total = 0;
-                                foreach ($pedidos as $pedido) : 
-                                    $total += $pedido['cantidad'];
+                                <?php
+                                $stmt = $pdo->prepare("SELECT dpcp.Menu, dpcp.Cantidad 
+                                                       FROM Detalle_Pedidos_Cuyo_Placa dpcp 
+                                                       JOIN Pedidos_Cuyo_Placa pcp ON dpcp.Pedido_Id = pcp.Id 
+                                                       WHERE pcp.Fecha = ? AND pcp.Planta = ?");
+                                $stmt->execute([$pedido['Fecha'], $pedido['Planta']]);
+                                $detalle_pedido = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                                $total_viandas = 0;
+                                foreach ($detalle_pedido as $detalle) {
+                                    echo "<tr><td>" . htmlspecialchars($detalle['Menu']) . "</td><td>" . htmlspecialchars($detalle['Cantidad']) . "</td></tr>";
+                                    $total_viandas += $detalle['Cantidad'];
+                                }
                                 ?>
-                                    <tr>
-                                        <td><?php echo htmlspecialchars($pedido['menu']); ?></td>
-                                        <td><?php echo htmlspecialchars($pedido['cantidad']); ?></td>
-                                    </tr>
-                                <?php endforeach; ?>
                                 <tr>
                                     <td><strong>Total:</strong></td>
-                                    <td><strong><?php echo $total; ?></strong></td>
+                                    <td><strong><?php echo $total_viandas; ?></strong></td>
                                 </tr>
                             </tbody>
                         </table>
-                        <button onclick="window.location.href='dashboard_cuyo_placa.php?descargar=csv&fecha=<?php echo urlencode($fecha); ?>&planta=<?php echo urlencode($planta); ?>'">Descargar CSV</button>
+                        <form method="get" action="dashboard_cuyo_placa.php">
+                            <input type="hidden" name="fecha" value="<?php echo htmlspecialchars($pedido['Fecha']); ?>">
+                            <input type="hidden" name="planta" value="<?php echo htmlspecialchars($pedido['Planta']); ?>">
+                            <input type="hidden" name="descargar_csv" value="1">
+                            <button type="submit" class="download-btn">Descargar CSV</button>
+                        </form>
                     </div>
                 <?php endforeach; ?>
-            <?php endforeach; ?>
-        <?php else : ?>
-            <p style="text-align: center;">No hay pedidos para mostrar en el rango de fechas seleccionado.</p>
+            </div>
         <?php endif; ?>
     </div>
 </body>
