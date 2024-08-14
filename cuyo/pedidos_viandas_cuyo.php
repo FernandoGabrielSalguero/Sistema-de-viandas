@@ -18,17 +18,37 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $fecha = $_POST['fecha'];
     $pedidos = $_POST['pedidos'];
 
-    foreach ($pedidos as $turno => $plantas) {
-        foreach ($plantas as $planta => $menus) {
-            foreach ($menus as $menu => $cantidad) {
-                $stmt = $pdo->prepare("INSERT INTO Pedidos_Cuyo_Placa (Fecha, Planta, Turno, Menu, Cantidad)
-                                       VALUES (?, ?, ?, ?, ?)
-                                       ON DUPLICATE KEY UPDATE Cantidad = VALUES(Cantidad)");
-                $stmt->execute([$fecha, $planta, $turno, $menu, $cantidad]);
+    // Iniciar transacción
+    $pdo->beginTransaction();
+
+    try {
+        // Insertar el nuevo pedido en la tabla Pedidos_Cuyo_Placa
+        $stmt = $pdo->prepare("INSERT INTO Pedidos_Cuyo_Placa (usuario_id, fecha, created_at) VALUES (?, ?, NOW())");
+        $stmt->execute([$_SESSION['usuario_id'], $fecha]);
+
+        // Obtener el ID del pedido recién insertado
+        $pedido_id = $pdo->lastInsertId();
+
+        foreach ($pedidos as $turno => $plantas) {
+            foreach ($plantas as $planta => $menus) {
+                foreach ($menus as $menu => $cantidad) {
+                    // Insertar cada detalle del pedido en la tabla Detalle_Pedidos_Cuyo_Placa
+                    $stmt = $pdo->prepare("INSERT INTO Detalle_Pedidos_Cuyo_Placa (pedido_id, planta, turno, menu, cantidad)
+                                           VALUES (?, ?, ?, ?, ?)");
+                    $stmt->execute([$pedido_id, $planta, $turno, $menu, $cantidad]);
+                }
             }
         }
+
+        // Confirmar la transacción
+        $pdo->commit();
+        $success = true; // Indicar que el pedido se guardó con éxito
+
+    } catch (Exception $e) {
+        // Revertir la transacción en caso de error
+        $pdo->rollBack();
+        $error = "Hubo un problema al guardar el pedido: " . $e->getMessage();
     }
-    $success = true; // Indicar que el pedido se guardó con éxito
 }
 
 // Definir las plantas, turnos y menús
@@ -71,6 +91,8 @@ $turnos_menus = [
 
         <?php if (isset($success) && $success) : ?>
             <p>Pedidos guardados con éxito.</p>
+        <?php elseif (isset($error)) : ?>
+            <p style="color: red;"><?php echo htmlspecialchars($error); ?></p>
         <?php endif; ?>
 
         <form method="post" action="pedidos_viandas_cuyo.php">
