@@ -48,7 +48,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $stmt->execute([$nuevo_valor, $pedido_id]);
                 }
             }
-            $mensaje = "Pedidos actualizados correctamente.";
+            // Redirigir para mostrar el pop-up después de la actualización
+            echo "<script>alert('Pedidos actualizados correctamente.'); window.location.href='dashboard_cuyo_placa.php';</script>";
+            exit();
         }
     }
 }
@@ -234,7 +236,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <?php endforeach; ?>
                 </tbody>
             </table>
-            <button type="submit" name="actualizar" <?php echo ($es_mismo_dia && $hora_actual >= $hora_limite) ? 'disabled' : ''; ?>>Guardar Pedidos</button>
+            <button type="submit" name="actualizar" <?php echo ($es_mismo_dia && $hora_actual >= $hora_limite) ? 'disabled' : ''; ?>>Actualizar pedido</button>
         </form>
     <?php endif; ?>
 </body>
