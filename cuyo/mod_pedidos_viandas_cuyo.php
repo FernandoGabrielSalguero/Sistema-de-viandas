@@ -30,11 +30,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $mensaje = "No se pueden actualizar los pedidos después de las 10:00 AM del día seleccionado.";
     } else {
         // Obtener los pedidos del día seleccionado
-        $stmt = $pdo->prepare("SELECT d.id, d.menu, d.cantidad, d.turno 
+        $stmt = $pdo->prepare("SELECT d.id, d.planta, d.menu, d.turno, d.cantidad 
                                FROM Detalle_Pedidos_Cuyo_Placa d 
                                JOIN Pedidos_Cuyo_Placa p ON d.pedido_id = p.id 
                                WHERE p.fecha = ? 
-                               ORDER BY d.turno, d.menu");
+                               ORDER BY d.planta, d.turno, d.menu");
         $stmt->execute([$fecha_seleccionada]);
         $pedidos_del_dia = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -93,7 +93,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         table {
-            width: 80%;
+            width: 100%;
             margin: 20px auto;
             border-collapse: collapse;
             background-color: #ffffff;
@@ -122,6 +122,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             padding: 5px;
             border-radius: 5px;
             border: 1px solid #ced4da;
+            text-align: center;
         }
 
         button {
@@ -164,7 +165,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <?php endif; ?>
 
     <form method="post" action="mod_pedidos_viandas_cuyo.php">
-        <label for="fecha">Seleccione la Fecha:</label>
+        <label for="fecha">Fecha:</label>
         <input type="date" id="fecha" name="fecha" required value="<?php echo htmlspecialchars($fecha_seleccionada); ?>">
         <button type="submit">Buscar</button>
     </form>
@@ -175,24 +176,56 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <table>
                 <thead>
                     <tr>
-                        <th>Turno</th>
-                        <th>Menú</th>
-                        <th>Cantidad</th>
+                        <th rowspan="2">Planta</th>
+                        <th colspan="3">Mañana</th>
+                        <th colspan="3">Tarde</th>
+                        <th colspan="2">Noche</th>
+                    </tr>
+                    <tr>
+                        <th>Desayuno día siguiente</th>
+                        <th>Almuerzo Caliente</th>
+                        <th>Refrigerio sandwich almuerzo</th>
+                        <th>Media tarde</th>
+                        <th>Cena caliente</th>
+                        <th>Refrigerio sandwich cena</th>
+                        <th>Desayuno noche</th>
+                        <th>Sandwich noche</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($pedidos_del_dia as $pedido): ?>
+                    <?php 
+                    $plantas = ['Aglomerado', 'Revestimiento', 'Impregnacion', 'Muebles', 'Transporte (Revestimiento)'];
+                    $menus = [
+                        'Desayuno día siguiente' => 'Mañana',
+                        'Almuerzo Caliente' => 'Mañana',
+                        'Refrigerio sandwich almuerzo' => 'Mañana',
+                        'Media tarde' => 'Tarde',
+                        'Cena caliente' => 'Tarde',
+                        'Refrigerio sandwich cena' => 'Tarde',
+                        'Desayuno noche' => 'Noche',
+                        'Sandwich noche' => 'Noche'
+                    ];
+
+                    foreach ($plantas as $planta) : ?>
                         <tr>
-                            <td><?php echo htmlspecialchars($pedido['turno']); ?></td>
-                            <td><?php echo htmlspecialchars($pedido['menu']); ?></td>
-                            <td>
-                                <input type="number" name="cantidad_<?php echo htmlspecialchars($pedido['id']); ?>" value="<?php echo htmlspecialchars($pedido['cantidad']); ?>" min="0" <?php echo ($es_mismo_dia && $hora_actual >= $hora_limite) ? 'readonly' : ''; ?>>
-                            </td>
+                            <td><?php echo $planta; ?></td>
+                            <?php foreach ($menus as $menu => $turno) : 
+                                $cantidad = 0;
+                                foreach ($pedidos_del_dia as $pedido) {
+                                    if ($pedido['planta'] == $planta && $pedido['menu'] == $menu && $pedido['turno'] == $turno) {
+                                        $cantidad = $pedido['cantidad'];
+                                    }
+                                }
+                            ?>
+                                <td>
+                                    <input type="number" name="cantidad_<?php echo htmlspecialchars($planta . '_' . $menu); ?>" value="<?php echo htmlspecialchars($cantidad); ?>" min="0" <?php echo ($es_mismo_dia && $hora_actual >= $hora_limite) ? 'readonly' : ''; ?>>
+                                </td>
+                            <?php endforeach; ?>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
-            <button type="submit" name="actualizar" <?php echo ($es_mismo_dia && $hora_actual >= $hora_limite) ? 'disabled' : ''; ?>>Actualizar</button>
+            <button type="submit" name="actualizar" <?php echo ($es_mismo_dia && $hora_actual >= $hora_limite) ? 'disabled' : ''; ?>>Guardar Pedidos</button>
         </form>
     <?php endif; ?>
 </body>
