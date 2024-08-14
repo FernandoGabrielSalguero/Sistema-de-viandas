@@ -2,6 +2,7 @@
 session_start();
 include '../includes/header_cuyo_placa.php';
 include '../includes/db.php';
+include '../includes/load_env.php';
 
 // Habilitar la muestra de errores
 ini_set('display_errors', 1);
@@ -12,6 +13,32 @@ error_reporting(E_ALL);
 if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'cuyo_placa') {
     header("Location: ../index.php");
     exit();
+}
+
+// Cargar variables del archivo .env
+loadEnv(__DIR__ . '/../.env');
+
+// Función para enviar correo electrónico usando SMTP
+function enviarCorreo($to, $subject, $message) {
+    $headers = "From: " . getenv('SMTP_USERNAME') . "\r\n" .
+               "Reply-To: " . getenv('SMTP_USERNAME') . "\r\n" .
+               "X-Mailer: PHP/" . phpversion();
+
+    // Configuración del transporte SMTP
+    $params = [
+        'host' => getenv('SMTP_HOST'),
+        'port' => getenv('SMTP_PORT'),
+        'auth' => true,
+        'username' => getenv('SMTP_USERNAME'),
+        'password' => getenv('SMTP_PASSWORD'),
+    ];
+
+    // Usar la función mail() de PHP
+    ini_set('SMTP', $params['host']);
+    ini_set('smtp_port', $params['port']);
+    ini_set('sendmail_from', $params['username']);
+
+    return mail($to, $subject, $message, $headers);
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -175,8 +202,9 @@ $turnos_menus = [
             <p>Ingrese hasta 7 correos electrónicos para enviar el detalle del pedido:</p>
             <form id="emailForm">
                 <?php for ($i = 1; $i <= 7; $i++) : ?>
-                    <input type="email" name="email<?php echo $i; ?>" placeholder="Correo electrónico <?php echo $i; ?>">
+                    <input type="email" name="emails[]" placeholder="Correo electrónico <?php echo $i; ?>">
                 <?php endfor; ?>
+                <input type="hidden" name="detalle" value="<?php echo htmlspecialchars($detalle_pedidos); ?>">
                 <button type="button" onclick="sendEmails()">Aceptar</button>
             </form>
         </div>
@@ -184,28 +212,25 @@ $turnos_menus = [
 
     <script>
         function sendEmails() {
-            const form = document.getElementById('emailForm');
-            const formData = new FormData(form);
+            var form = document.getElementById('emailForm');
+            var formData = new FormData(form);
 
-            const emails = [];
-            for (let [key, value] of formData.entries()) {
-                if (value) emails.push(value);
-            }
-
-            if (emails.length > 0) {
-                const xhr = new XMLHttpRequest();
-                xhr.open("POST", "send_emails.php", true);
-                xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-                xhr.onreadystatechange = function () {
-                    if (xhr.readyState === 4 && xhr.status === 200) {
-                        alert("Correos enviados exitosamente.");
-                        window.location.href = "dashboard_cuyo_placa.php";
-                    }
-                };
-                xhr.send(JSON.stringify({ emails: emails, detalle: `<?php echo addslashes($detalle_pedidos); ?>` }));
-            } else {
-                alert("Debe ingresar al menos un correo electrónico.");
-            }
+            fetch('send_emails.php', {
+                method: 'POST',
+                body: formData
+            }).then(response => response.json())
+              .then(data => {
+                  if (data.status === 'success') {
+                      alert('Correos enviados exitosamente.');
+                      window.location.href = "dashboard_cuyo_placa.php";
+                  } else {
+                      alert('Error al enviar correos: ' + data.message);
+                  }
+              })
+              .catch(error => {
+                  console.error('Error:', error);
+                  alert('Ocurrió un error al enviar los correos.');
+              });
         }
     </script>
 </body>
