@@ -209,6 +209,17 @@ foreach ($totales_pedidos as $turno => $plantas_totales) {
             text-align: center;
             font-size: 1.2em;
         }
+
+        /* Estilo específico para alinear los totales */
+        tfoot th {
+            background-color: #e9ecef;
+            color: #343a40;
+            font-weight: bold;
+        }
+
+        tfoot th:first-child {
+            text-align: right;
+        }
     </style>
 </head>
 <body>
