@@ -14,9 +14,6 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'cuyo_placa') {
     exit();
 }
 
-// Verifica si el correo electrónico del usuario está disponible en la sesión
-$usuario_email = isset($_SESSION['usuario_email']) ? $_SESSION['usuario_email'] : null;
-
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $fecha = $_POST['fecha'];
     $pedidos = $_POST['pedidos'];
@@ -36,19 +33,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
     $success = true; // Indicar que el pedido se guardó con éxito
-
-    // Enviar correo con el detalle del pedido si el correo del usuario está disponible
-    if ($usuario_email) {
-        $asunto = "Detalle de Pedido de Viandas - Cuyo Placa";
-        $mensaje = "Estimado usuario,\n\nSe ha registrado el siguiente pedido de viandas para la fecha $fecha:\n\n$detalle_pedidos\n\nSaludos cordiales.";
-        $headers = "From: no-reply@cuyoplaca.com";
-
-        if (!mail($usuario_email, $asunto, $mensaje, $headers)) {
-            echo "Error al enviar el correo.";
-        }
-    } else {
-        error_log("El correo electrónico del usuario no está disponible. No se pudo enviar el detalle del pedido.");
-    }
 }
 
 // Definir las plantas, turnos y menús
@@ -83,6 +67,48 @@ $turnos_menus = [
             font-size: 1.5em; /* Aumentar el tamaño de la fecha */
             padding: 10px; /* Añadir relleno para hacerlo más visible */
         }
+        /* Modal Styles */
+        #emailModal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0, 0, 0);
+            background-color: rgba(0, 0, 0, 0.4);
+            padding-top: 60px;
+        }
+
+        #emailModalContent {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        #emailModalContent input[type="email"] {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            box-sizing: border-box;
+        }
+
+        #emailModalContent button {
+            padding: 10px 20px;
+            background-color: #6200ea;
+            color: white;
+            border: none;
+            cursor: pointer;
+            float: right;
+        }
+
+        #emailModalContent button:hover {
+            background-color: #3700b3;
+        }
     </style>
 </head>
 <body>
@@ -91,8 +117,7 @@ $turnos_menus = [
 
         <?php if (isset($success) && $success) : ?>
             <script>
-                alert('Su pedido de viandas fue realizado con éxito.');
-                window.location.href = "dashboard_cuyo_placa.php";
+                document.getElementById('emailModal').style.display = 'block';
             </script>
         <?php endif; ?>
 
@@ -142,5 +167,46 @@ $turnos_menus = [
             <button type="submit">Guardar Pedidos</button>
         </form>
     </div>
+
+    <!-- Modal -->
+    <div id="emailModal">
+        <div id="emailModalContent">
+            <h2>Su pedido de viandas fue realizado con éxito</h2>
+            <p>Ingrese hasta 7 correos electrónicos para enviar el detalle del pedido:</p>
+            <form id="emailForm">
+                <?php for ($i = 1; $i <= 7; $i++) : ?>
+                    <input type="email" name="email<?php echo $i; ?>" placeholder="Correo electrónico <?php echo $i; ?>">
+                <?php endfor; ?>
+                <button type="button" onclick="sendEmails()">Aceptar</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function sendEmails() {
+            const form = document.getElementById('emailForm');
+            const formData = new FormData(form);
+
+            const emails = [];
+            for (let [key, value] of formData.entries()) {
+                if (value) emails.push(value);
+            }
+
+            if (emails.length > 0) {
+                const xhr = new XMLHttpRequest();
+                xhr.open("POST", "send_emails.php", true);
+                xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        alert("Correos enviados exitosamente.");
+                        window.location.href = "dashboard_cuyo_placa.php";
+                    }
+                };
+                xhr.send(JSON.stringify({ emails: emails, detalle: `<?php echo addslashes($detalle_pedidos); ?>` }));
+            } else {
+                alert("Debe ingresar al menos un correo electrónico.");
+            }
+        }
+    </script>
 </body>
 </html>
