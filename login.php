@@ -20,6 +20,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($user && password_verify($contrasena, $user['Contrasena'])) {
         $_SESSION['usuario_id'] = $user['Id'];
         $_SESSION['rol'] = $user['Rol'];
+        $_SESSION['usuario_email'] = $usuario_email; //ultimo elemento agregado
         
         // Imprimir el rol del usuario y verificar que se establece correctamente
         echo "<script>console.log('Rol del usuario: " . $user['Rol'] . "');</script>";

@@ -14,10 +14,12 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'cuyo_placa') {
     exit();
 }
 
+// Verifica si el correo electrónico del usuario está disponible en la sesión
+$usuario_email = isset($_SESSION['usuario_email']) ? $_SESSION['usuario_email'] : null;
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $fecha = $_POST['fecha'];
     $pedidos = $_POST['pedidos'];
-    $usuario_email = $_SESSION['usuario_email']; // Supongo que tienes el correo electrónico del usuario en la sesión
     $detalle_pedidos = '';
 
     foreach ($pedidos as $turno => $plantas) {
@@ -33,14 +35,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
     }
-    $success = "Pedidos guardados con éxito.";
+    $success = true; // Indicar que el pedido se guardó con éxito
 
-    // Enviar correo con el detalle del pedido
-    $asunto = "Detalle de Pedido de Viandas - Cuyo Placa";
-    $mensaje = "Estimado usuario,\n\nSe ha registrado el siguiente pedido de viandas para la fecha $fecha:\n\n$detalle_pedidos\n\nSaludos cordiales.";
-    $headers = "From: no-reply@cuyoplaca.com";
+    // Enviar correo con el detalle del pedido si el correo del usuario está disponible
+    if ($usuario_email) {
+        $asunto = "Detalle de Pedido de Viandas - Cuyo Placa";
+        $mensaje = "Estimado usuario,\n\nSe ha registrado el siguiente pedido de viandas para la fecha $fecha:\n\n$detalle_pedidos\n\nSaludos cordiales.";
+        $headers = "From: no-reply@cuyoplaca.com";
 
-    mail($usuario_email, $asunto, $mensaje, $headers);
+        mail($usuario_email, $asunto, $mensaje, $headers);
+    } else {
+        error_log("El correo electrónico del usuario no está disponible. No se pudo enviar el detalle del pedido.");
+    }
 }
 
 // Definir las plantas, turnos y menús
@@ -75,14 +81,47 @@ $turnos_menus = [
             font-size: 1.5em; /* Aumentar el tamaño de la fecha */
             padding: 10px; /* Añadir relleno para hacerlo más visible */
         }
+        .modal {
+            display: none; /* Oculto por defecto */
+            position: fixed; 
+            z-index: 1; 
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.4); 
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 300px;
+            text-align: center;
+        }
+        .close-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Pedidos de Viandas - Cuyo Placa</h1>
 
-        <?php if (isset($success)) : ?>
-            <p class="success"><?php echo $success; ?></p>
+        <?php if (isset($success) && $success) : ?>
+            <div id="modal" class="modal">
+                <div class="modal-content">
+                    <p>Su pedido de viandas fue realizado con éxito</p>
+                    <button class="close-btn" onclick="closeModal()">Aceptar</button>
+                </div>
+            </div>
         <?php endif; ?>
 
         <form method="post" action="pedidos_viandas_cuyo.php">
@@ -131,5 +170,17 @@ $turnos_menus = [
             <button type="submit">Guardar Pedidos</button>
         </form>
     </div>
+
+    <script>
+        // Mostrar el modal si el pedido fue exitoso
+        <?php if (isset($success) && $success) : ?>
+        document.getElementById('modal').style.display = 'block';
+        <?php endif; ?>
+
+        // Función para cerrar el modal y redirigir
+        function closeModal() {
+            window.location.href = 'dashboard_cuyo_placa.php';
+        }
+    </script>
 </body>
 </html>
