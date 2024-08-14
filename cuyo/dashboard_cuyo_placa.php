@@ -19,6 +19,7 @@ $fecha_fin = '';
 $pedidos_agrupados = [];
 $total_viandas = 0;
 $totales_por_menu = [];
+$pedido_ids = [];
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $fecha_inicio = $_POST['fecha_inicio'];
@@ -27,63 +28,48 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Validar fechas
     if ($fecha_inicio && $fecha_fin && strtotime($fecha_fin) >= strtotime($fecha_inicio)) {
         // Obtener los pedidos y detalles de la base de datos
-        $stmt = $pdo->prepare("SELECT p.fecha, d.planta, d.menu, SUM(d.cantidad) as cantidad 
+        $stmt = $pdo->prepare("SELECT p.id, p.fecha, d.planta, d.menu, d.turno, SUM(d.cantidad) as cantidad 
                                FROM Pedidos_Cuyo_Placa p 
                                JOIN Detalle_Pedidos_Cuyo_Placa d ON p.id = d.pedido_id 
                                WHERE p.fecha BETWEEN ? AND ? 
-                               GROUP BY p.fecha, d.planta, d.menu
-                               ORDER BY p.fecha, d.planta");
+                               GROUP BY p.id, p.fecha, d.planta, d.menu, d.turno
+                               ORDER BY p.fecha, d.planta, d.turno");
         $stmt->execute([$fecha_inicio, $fecha_fin]);
         $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Agrupar los pedidos por fecha y planta
+        // Agrupar los pedidos por fecha, planta, y turno
         foreach ($pedidos as $pedido) {
-            $fecha = $pedido['fecha'];
+            $fecha = date("d/m/Y", strtotime($pedido['fecha']));
             $planta = $pedido['planta'];
+            $turno = $pedido['turno'];
             $menu = $pedido['menu'];
             $cantidad = $pedido['cantidad'];
+            $pedido_id = $pedido['id'];
 
             if (!isset($pedidos_agrupados[$fecha])) {
                 $pedidos_agrupados[$fecha] = [];
             }
             if (!isset($pedidos_agrupados[$fecha][$planta])) {
-                $pedidos_agrupados[$fecha][$planta] = [];
+                $pedidos_agrupados[$fecha][$planta] = [
+                    'Mañana' => [],
+                    'Tarde' => [],
+                    'Noche' => [],
+                ];
             }
-            $pedidos_agrupados[$fecha][$planta][] = $pedido;
+            $pedidos_agrupados[$fecha][$planta][$turno][] = $pedido;
             $total_viandas += $cantidad;
 
             if (!isset($totales_por_menu[$menu])) {
                 $totales_por_menu[$menu] = 0;
             }
             $totales_por_menu[$menu] += $cantidad;
+
+            if (!in_array($pedido_id, $pedido_ids)) {
+                $pedido_ids[] = $pedido_id;
+            }
         }
     } else {
         $error = "Por favor, seleccione un rango de fechas válido.";
-    }
-}
-
-// Función para generar el archivo CSV
-function generarCSV($fecha, $planta, $pedidos) {
-    $filename = "pedido_{$planta}_{$fecha}.csv";
-    header('Content-Type: text/csv');
-    header('Content-Disposition: attachment;filename=' . $filename);
-
-    $output = fopen('php://output', 'w');
-    fputcsv($output, ['Fecha', 'Planta', 'Menú', 'Cantidad']);
-    
-    foreach ($pedidos as $pedido) {
-        fputcsv($output, [$pedido['fecha'], $pedido['planta'], $pedido['menu'], $pedido['cantidad']]);
-    }
-    fclose($output);
-    exit;
-}
-
-// Manejo de la descarga de CSV
-if (isset($_GET['descargar']) && $_GET['descargar'] == 'csv' && isset($_GET['fecha']) && isset($_GET['planta'])) {
-    $fecha = $_GET['fecha'];
-    $planta = $_GET['planta'];
-    if (isset($pedidos_agrupados[$fecha][$planta])) {
-        generarCSV($fecha, $planta, $pedidos_agrupados[$fecha][$planta]);
     }
 }
 
@@ -145,22 +131,48 @@ if (isset($_GET['descargar']) && $_GET['descargar'] == 'csv' && isset($_GET['fec
             background-color: #0056b3;
         }
 
-        .kpi-container {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-bottom: 20px;
+        .totales-menu {
+            margin: 20px auto;
+            max-width: 600px;
+            background-color: #ffffff;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
-        .kpi {
-            background-color: #28a745;
-            color: white;
-            padding: 20px;
-            border-radius: 5px;
+        .totales-menu h3 {
+            font-size: 1.5em;
+            color: #343a40;
             text-align: center;
-            font-size: 1.2em;
-            width: 200px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+        }
+
+        .totales-menu table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .totales-menu table, .totales-menu th, .totales-menu td {
+            border: 1px solid #e9ecef;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .totales-menu th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .totales-menu td {
+            background-color: #ffffff;
+        }
+
+        .totales-menu .total-final {
+            text-align: right;
+            font-weight: bold;
+            padding-right: 15px;
+            color: #28a745;
         }
 
         .card-container {
@@ -213,56 +225,18 @@ if (isset($_GET['descargar']) && $_GET['descargar'] == 'csv' && isset($_GET['fec
             background-color: #ffffff;
         }
 
-        .card button {
-            padding: 10px 15px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 15px;
-            transition: background-color 0.3s ease;
-        }
-
-        .card button:hover {
-            background-color: #0056b3;
-        }
-
-        .totales-menu {
-            margin: 20px auto;
-            max-width: 600px;
-            background-color: #ffffff;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .totales-menu h3 {
-            font-size: 1.5em;
-            color: #343a40;
-            text-align: center;
-            margin-bottom: 15px;
-        }
-
-        .totales-menu table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        .totales-menu table, .totales-menu th, .totales-menu td {
-            border: 1px solid #e9ecef;
-            padding: 8px;
-            text-align: center;
-        }
-
-        .totales-menu th {
-            background-color: #f8f9fa;
+        .card .turno-title {
+            text-align: left;
             font-weight: bold;
+            margin-top: 15px;
+            color: #343a40;
         }
 
-        .totales-menu td {
-            background-color: #ffffff;
+        .card .pedido-id {
+            font-size: 0.9em;
+            color: #6c757d;
+            text-align: center;
+            margin-bottom: 10px;
         }
 
         .error {
@@ -287,13 +261,6 @@ if (isset($_GET['descargar']) && $_GET['descargar'] == 'csv' && isset($_GET['fec
         <button type="submit">Filtrar</button>
     </form>
 
-    <div class="kpi-container">
-        <div class="kpi">
-            <p>Total Viandas</p>
-            <p><?php echo $total_viandas; ?></p>
-        </div>
-    </div>
-
     <div class="totales-menu">
         <h3>Totales por Menú</h3>
         <table>
@@ -311,15 +278,21 @@ if (isset($_GET['descargar']) && $_GET['descargar'] == 'csv' && isset($_GET['fec
                 </tr>
                 <?php endforeach; ?>
             </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="2" class="total-final">Total General: <?php echo $total_viandas; ?></td>
+                </tr>
+            </tfoot>
         </table>
     </div>
 
     <div class="card-container">
         <?php if (!empty($pedidos_agrupados)) : ?>
             <?php foreach ($pedidos_agrupados as $fecha => $plantas) : ?>
-                <?php foreach ($plantas as $planta => $pedidos) : ?>
+                <?php foreach ($plantas as $planta => $turnos) : ?>
                     <div class="card">
                         <h3><?php echo htmlspecialchars($planta); ?></h3>
+                        <div class="pedido-id">ID Pedido(s): <?php echo implode(', ', $pedido_ids); ?></div>
                         <table>
                             <thead>
                                 <tr>
@@ -327,23 +300,25 @@ if (isset($_GET['descargar']) && $_GET['descargar'] == 'csv' && isset($_GET['fec
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php 
-                                $total = 0;
-                                foreach ($pedidos as $pedido) : 
-                                    $total += $pedido['cantidad'];
-                                ?>
-                                    <tr>
-                                        <td><?php echo htmlspecialchars($pedido['menu']); ?></td>
-                                        <td><?php echo htmlspecialchars($pedido['cantidad']); ?></td>
-                                    </tr>
+                                <?php foreach (['Mañana', 'Tarde', 'Noche'] as $turno) : ?>
+                                    <?php if (!empty($turnos[$turno])) : ?>
+                                        <tr>
+                                            <td colspan="2" class="turno-title"><?php echo $turno; ?></td>
+                                        </tr>
+                                        <?php 
+                                        $total = 0;
+                                        foreach ($turnos[$turno] as $pedido) : 
+                                            $total += $pedido['cantidad'];
+                                        ?>
+                                            <tr>
+                                                <td><?php echo htmlspecialchars($pedido['menu']); ?></td>
+                                                <td><?php echo htmlspecialchars($pedido['cantidad']); ?></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
                                 <?php endforeach; ?>
-                                <tr>
-                                    <td><strong>Total:</strong></td>
-                                    <td><strong><?php echo $total; ?></strong></td>
-                                </tr>
                             </tbody>
                         </table>
-                        <button onclick="window.location.href='dashboard_cuyo_placa.php?descargar=csv&fecha=<?php echo urlencode($fecha); ?>&planta=<?php echo urlencode($planta); ?>'">Descargar CSV</button>
                     </div>
                 <?php endforeach; ?>
             <?php endforeach; ?>
