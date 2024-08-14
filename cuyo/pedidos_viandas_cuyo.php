@@ -43,9 +43,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $mensaje = "Estimado usuario,\n\nSe ha registrado el siguiente pedido de viandas para la fecha $fecha:\n\n$detalle_pedidos\n\nSaludos cordiales.";
         $headers = "From: no-reply@cuyoplaca.com";
 
-        mail($usuario_email, $asunto, $mensaje, $headers);
+        if (!mail($usuario_email, $asunto, $mensaje, $headers)) {
+            echo "Error al enviar el correo.";
+        } else {
+            echo "Correo enviado exitosamente.";
+        }
     } else {
         error_log("El correo electrónico del usuario no está disponible. No se pudo enviar el detalle del pedido.");
+        echo "El correo electrónico del usuario no está disponible. No se pudo enviar el detalle del pedido.";
     }
 }
 
@@ -81,34 +86,6 @@ $turnos_menus = [
             font-size: 1.5em; /* Aumentar el tamaño de la fecha */
             padding: 10px; /* Añadir relleno para hacerlo más visible */
         }
-        .modal {
-            display: none; /* Oculto por defecto */
-            position: fixed; 
-            z-index: 1; 
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto; 
-            background-color: rgba(0,0,0,0.4); 
-        }
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 300px;
-            text-align: center;
-        }
-        .close-btn {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            cursor: pointer;
-            font-size: 1em;
-        }
     </style>
 </head>
 <body>
@@ -116,12 +93,7 @@ $turnos_menus = [
         <h1>Pedidos de Viandas - Cuyo Placa</h1>
 
         <?php if (isset($success) && $success) : ?>
-            <div id="modal" class="modal">
-                <div class="modal-content">
-                    <p>Su pedido de viandas fue realizado con éxito</p>
-                    <button class="close-btn" onclick="closeModal()">Aceptar</button>
-                </div>
-            </div>
+            <p>Pedidos guardados con éxito.</p>
         <?php endif; ?>
 
         <form method="post" action="pedidos_viandas_cuyo.php">
@@ -170,17 +142,5 @@ $turnos_menus = [
             <button type="submit">Guardar Pedidos</button>
         </form>
     </div>
-
-    <script>
-        // Mostrar el modal si el pedido fue exitoso
-        <?php if (isset($success) && $success) : ?>
-        document.getElementById('modal').style.display = 'block';
-        <?php endif; ?>
-
-        // Función para cerrar el modal y redirigir
-        function closeModal() {
-            window.location.href = 'dashboard_cuyo_placa.php';
-        }
-    </script>
 </body>
 </html>
