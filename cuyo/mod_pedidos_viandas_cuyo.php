@@ -18,7 +18,6 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'cuyo_placa') {
 $fecha_seleccionada = '';
 $pedidos_del_dia = [];
 $mensaje = '';
-$mostrar_modal = false; // Variable para controlar si se muestra el modal
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $fecha_seleccionada = $_POST['fecha'];
@@ -29,7 +28,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($es_mismo_dia && $hora_actual >= $hora_limite) {
         $mensaje = "No se pueden actualizar los pedidos después de las 10:00 AM del día seleccionado.";
-        $mostrar_modal = true;
     } else {
         // Obtener los pedidos del día seleccionado
         $stmt = $pdo->prepare("SELECT d.id, d.planta, d.menu, d.turno, d.cantidad 
@@ -47,8 +45,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Verificar si el pedido está dentro del límite de tiempo permitido
             if ($fecha_seleccionada == $fecha_actual && $hora_actual >= $hora_limite) {
                 // Mostrar el modal y no actualizar
-                $mensaje = "Este pedido se podía actualizar hasta el $fecha_seleccionada a las 10hs.";
-                $mostrar_modal = true;
+                echo "<script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const modalText = document.getElementById('modalText');
+                        modalText.innerText = 'Este pedido se podía actualizar hasta el $fecha_seleccionada a las 10hs.';
+                        document.getElementById('modal').style.display = 'block';
+                    });
+                </script>";
             } else {
                 // Actualizar los pedidos según los datos enviados desde el formulario
                 foreach ($pedidos_del_dia as $pedido) {
@@ -60,7 +63,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     }
                 }
                 $mensaje = "Pedidos actualizados correctamente.";
-                $mostrar_modal = true;
+                echo "<script>document.addEventListener('DOMContentLoaded', function() { document.getElementById('modal').style.display = 'block'; });</script>";
             }
         }
     }
@@ -208,6 +211,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
     <h1>Modificar Pedidos de Viandas</h1>
 
+    <?php if ($mensaje): ?>
+        <p class="<?php echo strpos($mensaje, 'No') === false ? 'mensaje' : 'error'; ?>">
+            <?php echo $mensaje; ?>
+        </p>
+    <?php endif; ?>
+
     <form method="post" action="mod_pedidos_viandas_cuyo.php">
         <label for="fecha">Fecha:</label>
         <input type="date" id="fecha" name="fecha" required value="<?php echo htmlspecialchars($fecha_seleccionada); ?>">
@@ -280,9 +289,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <?php endif; ?>
 
     <!-- Modal -->
-    <div id="modal" class="modal" <?php if ($mostrar_modal) echo 'style="display:block;"'; ?>>
+    <div id="modal" class="modal">
         <div class="modal-content">
-            <p><?php echo htmlspecialchars($mensaje); ?></p>
+            <p id="modalText"></p>
             <button class="modal-button" onclick="redirigirAlDashboard()">Aceptar</button>
         </div>
     </div>
