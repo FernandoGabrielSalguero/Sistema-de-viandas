@@ -247,7 +247,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </style>
 </head>
 <body>
-    <h1>Pedidos de Viandas - Dashboard</h1>
+    <h1>Historial de pedidos</h1>
 
     <?php if (isset($error)) : ?>
         <p class="error"><?php echo $error; ?></p>
