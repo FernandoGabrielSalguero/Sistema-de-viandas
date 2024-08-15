@@ -202,14 +202,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </p>
     <?php endif; ?>
 
-    <form method="post" action="mod_pedidos_viandas_cuyo.php">
+    <form method="post" action="mod_pedidos_viandas_cuyo.php" id="formBuscar">
         <label for="fecha">Fecha:</label>
         <input type="date" id="fecha" name="fecha" required value="<?php echo htmlspecialchars($fecha_seleccionada); ?>">
         <button type="submit">Buscar</button>
     </form>
 
     <?php if ($pedidos_del_dia): ?>
-        <form method="post" action="mod_pedidos_viandas_cuyo.php">
+        <form method="post" action="mod_pedidos_viandas_cuyo.php" id="formActualizar">
             <input type="hidden" name="fecha" value="<?php echo htmlspecialchars($fecha_seleccionada); ?>">
             <table>
                 <thead>
@@ -269,21 +269,47 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <?php endforeach; ?>
                 </tbody>
             </table>
-            <button type="submit" name="actualizar" <?php echo ($es_mismo_dia && $hora_actual >= $hora_limite) ? 'disabled' : ''; ?>>Actualizar pedido</button>
+            <button type="submit" name="actualizar" id="actualizarBtn" <?php echo ($es_mismo_dia && $hora_actual >= $hora_limite) ? 'disabled' : ''; ?>>Actualizar pedido</button>
         </form>
     <?php endif; ?>
 
     <!-- Modal -->
     <div id="modal" class="modal">
         <div class="modal-content">
-            <p>Pedidos actualizados correctamente.</p>
-            <button class="modal-button" onclick="redirigirAlDashboard()">Aceptar</button>
+            <p id="modalText"></p>
+            <button class="modal-button" onclick="cerrarModal()">Aceptar</button>
         </div>
     </div>
 
     <script>
-        function redirigirAlDashboard() {
-            window.location.href = 'dashboard_cuyo_placa.php';
+        document.addEventListener('DOMContentLoaded', function() {
+            const actualizarBtn = document.getElementById('actualizarBtn');
+            const fechaInput = document.getElementById('fecha');
+            const modal = document.getElementById('modal');
+            const modalText = document.getElementById('modalText');
+
+            function verificarHora() {
+                const fechaSeleccionada = new Date(fechaInput.value + 'T10:00:00');
+                const ahora = new Date();
+
+                if (fechaSeleccionada.toDateString() === ahora.toDateString() && ahora >= fechaSeleccionada) {
+                    actualizarBtn.disabled = true;
+                    modalText.innerText = `Este pedido se podía actualizar hasta el ${fechaSeleccionada.toLocaleDateString('es-ES')} a las 10hs.`;
+                    modal.style.display = 'block';
+                }
+            }
+
+            fechaInput.addEventListener('change', function() {
+                actualizarBtn.disabled = false; // Permitir el botón si se cambia la fecha
+                modal.style.display = 'none'; // Ocultar el modal al cambiar la fecha
+            });
+
+            verificarHora();
+        });
+
+        function cerrarModal() {
+            const modal = document.getElementById('modal');
+            modal.style.display = 'none';
         }
     </script>
 </body>
