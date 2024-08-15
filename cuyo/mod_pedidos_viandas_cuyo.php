@@ -63,7 +63,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     }
                 }
                 $mensaje = "Pedidos actualizados correctamente.";
-                echo "<script>document.addEventListener('DOMContentLoaded', function() { document.getElementById('modal').style.display = 'block'; });</script>";
+                echo "<script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const modalText = document.getElementById('modalText');
+                    modalText.innerText = 'Pedido actualizado';
+                    document.getElementById('modal').style.display = 'block';
+                    });
+                    </script>";
             }
         }
     }
