@@ -40,35 +40,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-// Función para generar archivo Excel
-function generarExcel($tabla_pedidos) {
-    header('Content-Type: application/vnd.ms-excel');
-    header('Content-Disposition: attachment; filename="pedidos_cuyo_placa.xls"');
-    header('Pragma: no-cache');
-    header('Expires: 0');
+// Función para generar archivo CSV
+function generarCSV($tabla_pedidos) {
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment; filename="pedidos_cuyo_placa.csv"');
     $output = fopen('php://output', 'w');
-    fputcsv($output, ['Fecha', 'Created At', 'Pedido ID', 'Planta', 'Turno', 'Menu', 'Cantidad'], "\t");
-
+    
+    // Encabezados
+    fputcsv($output, ['Fecha', 'Created At', 'Pedido ID', 'Planta', 'Turno', 'Menu', 'Cantidad']);
+    
+    // Datos
     foreach ($tabla_pedidos as $pedido) {
         fputcsv($output, [
-            $pedido['fecha'],
-            $pedido['created_at'],
-            $pedido['pedido_id'],
-            $pedido['planta'],
-            $pedido['turno'],
-            $pedido['menu'],
+            $pedido['fecha'], 
+            $pedido['created_at'], 
+            $pedido['pedido_id'], 
+            $pedido['planta'], 
+            $pedido['turno'], 
+            $pedido['menu'], 
             $pedido['cantidad']
-        ], "\t");
+        ]);
     }
+    
     fclose($output);
     exit;
 }
 
-// Manejar la descarga del archivo Excel
+// Manejar la descarga del archivo CSV
 if (isset($_POST['descargar_excel'])) {
-    generarExcel($tabla_pedidos);
+    generarCSV($tabla_pedidos);
 }
-
 ?>
 
 <!DOCTYPE html>
