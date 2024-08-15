@@ -217,12 +217,12 @@ if (isset($_POST['descargar_excel'])) {
         <table>
             <thead>
                 <tr>
-                    <th>Fecha</th>
+                    <th>Fecha de entrega</th>
                     <th>Fecha de pedidos</th>
-                    <th>Pedido ID</th>
+                    <th>Remito N°</th>
                     <th>Planta</th>
                     <th>Turno</th>
-                    <th>Menu</th>
+                    <th>Servicio</th>
                     <th>Cantidad</th>
                 </tr>
             </thead>
