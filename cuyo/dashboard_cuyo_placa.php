@@ -292,7 +292,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <?php foreach ($plantas as $planta => $turnos) : ?>
                     <div class="card">
                         <h3><?php echo htmlspecialchars($planta); ?></h3>
-                        <div class="pedido-id">ID Pedido(s): <?php echo implode(', ', $pedido_ids); ?></div>
+                        <div class="pedido-id">N° remito digital: <?php echo implode(', ', $pedido_ids); ?></div>
                         <table>
                             <thead>
                                 <tr>
