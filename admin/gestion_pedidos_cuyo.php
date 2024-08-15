@@ -218,7 +218,7 @@ if (isset($_POST['descargar_excel'])) {
             <thead>
                 <tr>
                     <th>Fecha</th>
-                    <th>Created At</th>
+                    <th>Fecha de pedidos</th>
                     <th>Pedido ID</th>
                     <th>Planta</th>
                     <th>Turno</th>
