@@ -39,17 +39,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $pedidos_del_dia = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         if (isset($_POST['actualizar'])) {
-            // Actualizar los pedidos según los datos enviados desde el formulario
-            foreach ($pedidos_del_dia as $pedido) {
-                $pedido_id = $pedido['id'];
-                if (isset($_POST['cantidad_' . $pedido_id])) {
-                    $nuevo_valor = $_POST['cantidad_' . $pedido_id];
-                    $stmt = $pdo->prepare("UPDATE Detalle_Pedidos_Cuyo_Placa SET cantidad = ? WHERE id = ?");
-                    $stmt->execute([$nuevo_valor, $pedido_id]);
+            $hora_actual = date('H:i');
+            $fecha_actual = date('Y-m-d');
+
+            // Verificar si el pedido está dentro del límite de tiempo permitido
+            if ($fecha_seleccionada == $fecha_actual && $hora_actual >= $hora_limite) {
+                // Mostrar el modal y no actualizar
+                echo "<script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const modalText = document.getElementById('modalText');
+                        modalText.innerText = 'Este pedido se podía actualizar hasta el $fecha_seleccionada a las 10hs.';
+                        document.getElementById('modal').style.display = 'block';
+                    });
+                </script>";
+            } else {
+                // Actualizar los pedidos según los datos enviados desde el formulario
+                foreach ($pedidos_del_dia as $pedido) {
+                    $pedido_id = $pedido['id'];
+                    if (isset($_POST['cantidad_' . $pedido_id])) {
+                        $nuevo_valor = $_POST['cantidad_' . $pedido_id];
+                        $stmt = $pdo->prepare("UPDATE Detalle_Pedidos_Cuyo_Placa SET cantidad = ? WHERE id = ?");
+                        $stmt->execute([$nuevo_valor, $pedido_id]);
+                    }
                 }
+                $mensaje = "Pedidos actualizados correctamente.";
+                echo "<script>document.addEventListener('DOMContentLoaded', function() { document.getElementById('modal').style.display = 'block'; });</script>";
             }
-            $mensaje = "Pedidos actualizados correctamente.";
-            echo "<script>document.addEventListener('DOMContentLoaded', function() { document.getElementById('modal').style.display = 'block'; });</script>";
         }
     }
 }
@@ -202,7 +217,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </p>
     <?php endif; ?>
 
-    <form method="post" action="mod_pedidos_viandas_cuyo.php" id="formBuscar">
+    <form method="post" action="mod_pedidos_viandas_cuyo.php">
         <label for="fecha">Fecha:</label>
         <input type="date" id="fecha" name="fecha" required value="<?php echo htmlspecialchars($fecha_seleccionada); ?>">
         <button type="submit">Buscar</button>
@@ -259,7 +274,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             ?>
                                 <td>
                                     <?php if ($pedido_id !== null): ?>
-                                        <input type="number" name="cantidad_<?php echo htmlspecialchars($pedido_id); ?>" value="<?php echo htmlspecialchars($cantidad); ?>" min="0" <?php echo ($es_mismo_dia && $hora_actual >= $hora_limite) ? 'readonly' : ''; ?>>
+                                        <input type="number" name="cantidad_<?php echo htmlspecialchars($pedido_id); ?>" value="<?php echo htmlspecialchars($cantidad); ?>" min="0" id="input_<?php echo htmlspecialchars($pedido_id); ?>">
                                     <?php else: ?>
                                         <input type="number" value="0" readonly>
                                     <?php endif; ?>
@@ -269,7 +284,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <?php endforeach; ?>
                 </tbody>
             </table>
-            <button type="submit" name="actualizar" id="actualizarBtn" <?php echo ($es_mismo_dia && $hora_actual >= $hora_limite) ? 'disabled' : ''; ?>>Actualizar pedido</button>
+            <button type="submit" name="actualizar" id="actualizarBtn">Actualizar pedido</button>
         </form>
     <?php endif; ?>
 
@@ -277,7 +292,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div id="modal" class="modal">
         <div class="modal-content">
             <p id="modalText"></p>
-            <button class="modal-button" onclick="cerrarModal()">Aceptar</button>
+            <button class="modal-button" onclick="redirigirAlDashboard()">Aceptar</button>
         </div>
     </div>
 
@@ -288,28 +303,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             const modal = document.getElementById('modal');
             const modalText = document.getElementById('modalText');
 
-            function verificarHora() {
+            actualizarBtn.addEventListener('click', function(event) {
                 const fechaSeleccionada = new Date(fechaInput.value + 'T10:00:00');
                 const ahora = new Date();
 
-                if (fechaSeleccionada.toDateString() === ahora.toDateString() && ahora >= fechaSeleccionada) {
-                    actualizarBtn.disabled = true;
+                if (ahora >= fechaSeleccionada) {
+                    event.preventDefault(); // Prevenir el envío del formulario
                     modalText.innerText = `Este pedido se podía actualizar hasta el ${fechaSeleccionada.toLocaleDateString('es-ES')} a las 10hs.`;
                     modal.style.display = 'block';
                 }
-            }
-
-            fechaInput.addEventListener('change', function() {
-                actualizarBtn.disabled = false; // Permitir el botón si se cambia la fecha
-                modal.style.display = 'none'; // Ocultar el modal al cambiar la fecha
             });
-
-            verificarHora();
         });
 
-        function cerrarModal() {
-            const modal = document.getElementById('modal');
-            modal.style.display = 'none';
+        function redirigirAlDashboard() {
+            window.location.href = 'dashboard_cuyo_placa.php';
         }
     </script>
 </body>
