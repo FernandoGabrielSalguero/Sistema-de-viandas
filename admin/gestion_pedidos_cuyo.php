@@ -1,3 +1,68 @@
+<?php
+session_start();
+include '../includes/header_admin.php'; // Asegúrate de que este archivo header sea específico para el rol de administrador
+include '../includes/db.php';
+date_default_timezone_set('America/Argentina/Buenos_Aires');
+
+// Verificar si el usuario está autenticado y tiene el rol correcto
+if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'admin') {
+    header("Location: ../index.php");
+    exit();
+}
+
+$fecha_inicio = '';
+$fecha_fin = '';
+$pedidos_totales = [];
+$kpis = [];
+$tabla_pedidos = [];
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $fecha_inicio = $_POST['fecha_inicio'];
+    $fecha_fin = $_POST['fecha_fin'];
+
+    // Validar fechas
+    if ($fecha_inicio && $fecha_fin && strtotime($fecha_fin) >= strtotime($fecha_inicio)) {
+        $stmt = $pdo->prepare("SELECT p.fecha, p.created_at, d.pedido_id, d.planta, d.turno, d.menu, d.cantidad 
+                               FROM Pedidos_Cuyo_Placa p
+                               JOIN Detalle_Pedidos_Cuyo_Placa d ON p.id = d.pedido_id
+                               WHERE p.fecha BETWEEN ? AND ?
+                               ORDER BY p.fecha, d.planta, d.turno");
+        $stmt->execute([$fecha_inicio, $fecha_fin]);
+        $pedidos_totales = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Calcular KPIs y organizar datos para la tabla
+        foreach ($pedidos_totales as $pedido) {
+            $menu = $pedido['menu'];
+            if (!isset($kpis[$menu])) {
+                $kpis[$menu] = 0;
+            }
+            $kpis[$menu] += $pedido['cantidad'];
+            $tabla_pedidos[] = $pedido;
+        }
+    } else {
+        $error = "Por favor, seleccione un rango de fechas válido.";
+    }
+}
+
+// Función para generar archivo Excel
+function generarExcel($tabla_pedidos) {
+    header('Content-Type: application/vnd.ms-excel');
+    header('Content-Disposition: attachment; filename="pedidos_cuyo_placa.xls"');
+    echo "Fecha\tCreated At\tPedido ID\tPlanta\tTurno\tMenu\tCantidad\n";
+    foreach ($tabla_pedidos as $pedido) {
+        echo "{$pedido['fecha']}\t{$pedido['created_at']}\t{$pedido['pedido_id']}\t{$pedido['planta']}\t{$pedido['turno']}\t{$pedido['menu']}\t{$pedido['cantidad']}\n";
+    }
+    exit;
+}
+
+// Manejar la descarga del archivo Excel
+if (isset($_POST['descargar_excel'])) {
+    generarExcel($tabla_pedidos);
+}
+
+?>
+
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
