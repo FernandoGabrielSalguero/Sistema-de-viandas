@@ -184,13 +184,17 @@ foreach ($pedidos_totales as $pedido) {
         }
 
         .turno-header {
-            background-color: #f8f9fa;
-            color: #343a40;
+            background-color: #007bff;
+            color: white;
             padding: 10px;
             border-radius: 5px;
-            margin-top: 20px;
             text-align: center;
             font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .planta-header {
+            background-color: #f8f9fa;
             font-weight: bold;
         }
     </style>
@@ -223,34 +227,46 @@ foreach ($pedidos_totales as $pedido) {
             <?php endforeach; ?>
         </div>
 
-        <!-- Mostrar la tabla con la estructura solicitada, dividida por turnos -->
-        <?php if (!empty($pedidos_totales)) : ?>
-            <?php foreach ($turnos_menus as $turno => $menus) : ?>
-                <div class="turno-header">
-                    Turno: <?php echo htmlspecialchars($turno); ?>
-                </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Planta</th>
-                            <?php foreach ($menus as $menu) : ?>
-                                <th><?php echo htmlspecialchars($menu); ?></th>
-                            <?php endforeach; ?>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($plantas as $planta) : ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($planta); ?></td>
-                                <?php foreach ($menus as $menu) : ?>
-                                    <td><?php echo htmlspecialchars($totales_pedidos[$planta][$menu]); ?></td>
-                                <?php endforeach; ?>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            <?php endforeach; ?>
-        <?php endif; ?>
+        <!-- Mostrar la tabla combinada -->
+        <table>
+            <thead>
+                <tr>
+                    <th rowspan="2" class="planta-header">Planta</th>
+                    <th colspan="3" class="turno-header">Mañana</th>
+                    <th colspan="3" class="turno-header">Tarde</th>
+                    <th colspan="2" class="turno-header">Noche</th>
+                </tr>
+                <tr>
+                    <th>Desayuno día siguiente</th>
+                    <th>Almuerzo Caliente</th>
+                    <th>Refrigerio sandwich almuerzo</th>
+                    <th>Media tarde</th>
+                    <th>Cena caliente</th>
+                    <th>Refrigerio sandwich cena</th>
+                    <th>Desayuno noche</th>
+                    <th>Sandwich noche</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($plantas as $planta) : ?>
+                    <tr>
+                        <td class="planta-header"><?php echo htmlspecialchars($planta); ?></td>
+                        <!-- Mañana -->
+                        <td><?php echo htmlspecialchars($totales_pedidos[$planta]['Desayuno día siguiente']); ?></td>
+                        <td><?php echo htmlspecialchars($totales_pedidos[$planta]['Almuerzo Caliente']); ?></td>
+                        <td><?php echo htmlspecialchars($totales_pedidos[$planta]['Refrigerio sandwich almuerzo']); ?></td>
+                        <!-- Tarde -->
+                        <td><?php echo htmlspecialchars($totales_pedidos[$planta]['Media tarde']); ?></td>
+                        <td><?php echo htmlspecialchars($totales_pedidos[$planta]['Cena caliente']); ?></td>
+                        <td><?php echo htmlspecialchars($totales_pedidos[$planta]['Refrigerio sandwich cena']); ?></td>
+                        <!-- Noche -->
+                        <td><?php echo htmlspecialchars($totales_pedidos[$planta]['Desayuno noche']); ?></td>
+                        <td><?php echo htmlspecialchars($totales_pedidos[$planta]['Sandwich noche']); ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
     </div>
 </body>
 </html>
+
