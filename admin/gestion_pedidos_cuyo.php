@@ -44,10 +44,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 function generarExcel($tabla_pedidos) {
     header('Content-Type: application/vnd.ms-excel');
     header('Content-Disposition: attachment; filename="pedidos_cuyo_placa.xls"');
-    echo "Fecha\tCreated At\tPedido ID\tPlanta\tTurno\tMenu\tCantidad\n";
+    header('Pragma: no-cache');
+    header('Expires: 0');
+    $output = fopen('php://output', 'w');
+    fputcsv($output, ['Fecha', 'Created At', 'Pedido ID', 'Planta', 'Turno', 'Menu', 'Cantidad'], "\t");
+
     foreach ($tabla_pedidos as $pedido) {
-        echo "{$pedido['fecha']}\t{$pedido['created_at']}\t{$pedido['pedido_id']}\t{$pedido['planta']}\t{$pedido['turno']}\t{$pedido['menu']}\t{$pedido['cantidad']}\n";
+        fputcsv($output, [
+            $pedido['fecha'],
+            $pedido['created_at'],
+            $pedido['pedido_id'],
+            $pedido['planta'],
+            $pedido['turno'],
+            $pedido['menu'],
+            $pedido['cantidad']
+        ], "\t");
     }
+    fclose($output);
     exit;
 }
 
@@ -57,7 +70,6 @@ if (isset($_POST['descargar_excel'])) {
 }
 
 ?>
-
 
 <!DOCTYPE html>
 <html lang="es">
