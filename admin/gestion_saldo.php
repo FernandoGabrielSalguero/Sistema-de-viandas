@@ -101,10 +101,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
         $stmt = $pdo->prepare("UPDATE Pedidos_Saldo SET Estado = ? WHERE Id = ?");
         if ($stmt->execute([$nuevo_estado, $id])) {
             echo "<script>
-                    alert('$mensaje_exito');
-                    window.location.href = window.location.href;
+                    document.getElementById('modal-message').innerText = '$mensaje_exito';
+                    document.getElementById('modal').style.display = 'block';
                   </script>";
-            exit();
         } else {
             $error = "Hubo un error al actualizar el estado del saldo: " . implode(", ", $stmt->errorInfo());
         }
@@ -120,6 +119,43 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
     <title>Gestión de Saldo</title>
     <link rel="stylesheet" href="../css/styles.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* Estilos para el modal */
+        #modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            justify-content: center;
+            align-items: center;
+        }
+
+        #modal-content {
+            background-color: #fff;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            text-align: center;
+            border-radius: 10px;
+        }
+
+        #modal-close {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
     <h1>Gestión de Saldo</h1>
@@ -160,6 +196,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
         </tr>
         <?php endforeach; ?>
     </table>
+
+    <div id="modal">
+        <div id="modal-content">
+            <p id="modal-message"></p>
+            <button id="modal-close">Aceptar</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('modal-close').addEventListener('click', function() {
+            document.getElementById('modal').style.display = 'none';
+            location.reload(); // Refresca la página después de cerrar el modal
+        });
+    </script>
 
     <div class="pagination">
         <?php if ($page > 1): ?>
