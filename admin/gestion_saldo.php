@@ -103,15 +103,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
         $stmt = $pdo->prepare("UPDATE Pedidos_Saldo SET Estado = ? WHERE Id = ?");
         if ($stmt->execute([$nuevo_estado, $id])) {
             echo "<script>
-                    document.getElementById('modal-message').innerText = '$mensaje_exito';
-                    document.getElementById('successModal').style.display = 'block';
+                    document.addEventListener('DOMContentLoaded', function() {
+                        document.getElementById('modal-message').innerText = '$mensaje_exito';
+                        document.getElementById('successModal').style.display = 'block';
+                    });
                   </script>";
         } else {
             $error = "Hubo un error al actualizar el estado del saldo: " . implode(", ", $stmt->errorInfo());
         }
     }
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -203,6 +204,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
         <?php endforeach; ?>
     </table>
 
+    <!-- Modal -->
     <div id="successModal">
         <div id="modalContent">
             <p id="modal-message"></p>
