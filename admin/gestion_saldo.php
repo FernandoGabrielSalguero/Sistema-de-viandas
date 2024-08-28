@@ -57,6 +57,8 @@ $stmt->bindParam(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
 $stmt->execute();
 $pedidosSaldo = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+$mensaje_exito = ''; // Inicializa la variable
+
 // Cambiar el estado del saldo
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
     $id = $_POST['id'];
@@ -102,13 +104,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
         if ($stmt->execute([$nuevo_estado, $id])) {
             echo "<script>
                     document.getElementById('modal-message').innerText = '$mensaje_exito';
-                    document.getElementById('modal').style.display = 'block';
+                    document.getElementById('successModal').style.display = 'block';
                   </script>";
         } else {
             $error = "Hubo un error al actualizar el estado del saldo: " . implode(", ", $stmt->errorInfo());
         }
     }
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -120,8 +123,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         /* Estilo para el modal */
-        #modal {
-            display: none; /* Inicialmente oculto */
+        #successModal {
+            display: none;
             position: fixed;
             z-index: 1;
             left: 0;
@@ -131,29 +134,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
             overflow: auto;
             background-color: rgb(0,0,0);
             background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
         }
 
-        #modal-content {
+        #modalContent {
             background-color: #fefefe;
-            margin: 15% auto;
+            margin: 5% auto;
             padding: 20px;
             border: 1px solid #888;
             width: 80%;
-            max-width: 600px;
-            border-radius: 10px;
+            max-width: 300px;
             text-align: center;
+            border-radius: 8px;
         }
 
-        #modal-close {
+        #closeModal {
             background-color: #4CAF50;
             color: white;
             padding: 10px 20px;
+            margin-top: 10px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
         }
 
-        #modal-close:hover {
+        #closeModal:hover {
             background-color: #45a049;
         }
     </style>
@@ -198,20 +203,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
         <?php endforeach; ?>
     </table>
 
-    <!-- Modal -->
-    <div id="modal">
-        <div id="modal-content">
+    <div id="successModal">
+        <div id="modalContent">
             <p id="modal-message"></p>
-            <button id="modal-close">Aceptar</button>
+            <button id="closeModal" onclick="closeModal()">Aceptar</button>
         </div>
     </div>
-
-    <script>
-        document.getElementById('modal-close').addEventListener('click', function() {
-            document.getElementById('modal').style.display = 'none';
-            location.reload(); // Recargar la página
-        });
-    </script>
 
     <div class="pagination">
         <?php if ($page > 1): ?>
@@ -230,5 +227,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
             <a href="?page=<?php echo $page + 1; ?>">Siguiente &raquo;</a>
         <?php endif; ?>
     </div>
+
+    <script>
+        function closeModal() {
+            document.getElementById('successModal').style.display = 'none';
+            location.reload();  // Refrescar la página cuando se cierra el modal
+        }
+    </script>
 </body>
 </html>
