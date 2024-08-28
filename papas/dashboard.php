@@ -134,8 +134,7 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </style>
 </head>
 <body>
-    <h1>Bienvenido, <?php echo htmlspecialchars($usuario['Nombre']); ?></h1>
-    <p>Correo: <?php echo htmlspecialchars($usuario['Correo']); ?></p>
+    <h1>Que gusto verte de nuevo, <?php echo htmlspecialchars($usuario['Nombre']); ?></h1>
     <p class="saldo">Saldo disponible: <?php echo number_format($usuario['Saldo'], 2); ?> ARS</p>
 
     <?php
