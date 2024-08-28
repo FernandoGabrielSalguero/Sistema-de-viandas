@@ -74,9 +74,9 @@ $stmt->execute($params);
 $pedidos_viandas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Depuración: ver los datos recuperados
-echo '<pre>';
-var_dump($pedidos_viandas);
-echo '</pre>';
+// echo '<pre>';
+// var_dump($pedidos_viandas);
+// echo '</pre>';
 
 // Obtener historial de pedidos de saldo
 $stmt = $pdo->prepare("SELECT Id, Saldo, Estado, Comprobante, DATE_FORMAT(Fecha_pedido, '%d/%b/%y %H:%i:%s') as Fecha_pedido FROM Pedidos_Saldo WHERE Usuario_Id = ?");
