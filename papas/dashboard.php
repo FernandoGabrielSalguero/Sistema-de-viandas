@@ -7,7 +7,6 @@ error_reporting(E_ALL);
 // Establecer la zona horaria
 date_default_timezone_set('America/Argentina/Buenos_Aires');
 
-
 session_start();
 include '../includes/header_papas.php';
 include '../includes/db.php';
@@ -24,6 +23,18 @@ $stmt = $pdo->prepare("SELECT Nombre, Correo, Saldo FROM Usuarios WHERE Id = ?")
 $stmt->execute([$usuario_id]);
 $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 
+// Obtener hijos, cursos y preferencias alimenticias del usuario
+$query_hijos = "
+    SELECT h.Nombre AS Hijo, c.Nombre AS Curso, COALESCE(pa.Nombre, 'Sin preferencias alimenticias') AS Preferencias
+    FROM Hijos h
+    JOIN Usuarios_Hijos uh ON h.Id = uh.Hijo_Id
+    JOIN Cursos c ON h.Curso_Id = c.Id
+    LEFT JOIN Preferencias_Alimenticias pa ON h.Preferencias_Alimenticias = pa.Id
+    WHERE uh.Usuario_Id = ?";
+$stmt = $pdo->prepare($query_hijos);
+$stmt->execute([$usuario_id]);
+$hijos_info = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 // Inicializar variables de filtros
 $filtro_fecha_entrega = isset($_GET['fecha_entrega']) ? $_GET['fecha_entrega'] : '';
 $filtro_estado = isset($_GET['estado']) ? $_GET['estado'] : '';
@@ -31,12 +42,14 @@ $filtro_hijo = isset($_GET['hijo']) ? $_GET['hijo'] : '';
 $filtro_menu = isset($_GET['menu']) ? $_GET['menu'] : '';
 
 // Construir la consulta con filtros
-$query_pedidos = "SELECT pc.Id, h.Nombre as Hijo, m.Nombre as Menú, DATE_FORMAT(m.Fecha_entrega, '%d/%b/%y') as Fecha_entrega, DATE_FORMAT(pc.Fecha_pedido, '%d/%b/%y %H:%i:%s') as Fecha_pedido, pc.Estado
-                  FROM Pedidos_Comida pc
-                  JOIN Hijos h ON pc.Hijo_Id = h.Id
-                  JOIN `Menú` m ON pc.Menú_Id = m.Id
-                  JOIN Usuarios_Hijos uh ON h.Id = uh.Hijo_Id
-                  WHERE uh.Usuario_Id = :usuario_id";
+$query_pedidos = "
+    SELECT pc.Id, h.Nombre as Hijo, m.Nombre as Menú, DATE_FORMAT(m.Fecha_entrega, '%d/%b/%y') as Fecha_entrega, 
+           DATE_FORMAT(pc.Fecha_pedido, '%d/%b/%y %H:%i:%s') as Fecha_pedido, pc.Estado
+    FROM Pedidos_Comida pc
+    JOIN Hijos h ON pc.Hijo_Id = h.Id
+    JOIN `Menú` m ON pc.Menú_Id = m.Id
+    JOIN Usuarios_Hijos uh ON h.Id = uh.Hijo_Id
+    WHERE uh.Usuario_Id = :usuario_id";
 
 $params = ['usuario_id' => $usuario_id];
 
@@ -76,6 +89,7 @@ $stmt->execute();
 $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -83,7 +97,6 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <title>Dashboard Papás</title>
     <link rel="stylesheet" href="../css/styles.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <style>
         .filters {
             display: flex;
@@ -132,11 +145,48 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
             background-color: #f2f2f2;
         }
     </style>
+    <script>
+        // Desactivar botones de cancelar automáticamente a las 9 AM del día de entrega
+        document.addEventListener("DOMContentLoaded", function() {
+            var currentTime = new Date();
+            var currentHours = currentTime.getHours();
+
+            document.querySelectorAll('tr').forEach(function(row) {
+                var fechaEntregaCell = row.querySelector('td:nth-child(3)');
+                var button = row.querySelector('button');
+
+                if (fechaEntregaCell && button) {
+                    var fechaEntrega = new Date(fechaEntregaCell.textContent + ' 09:00:00');
+                    if (currentHours >= 9 && currentTime.toDateString() === fechaEntrega.toDateString()) {
+                        button.disabled = true;
+                    }
+                }
+            });
+        });
+    </script>
 </head>
 <body>
-    <h1>Bienvenido, <?php echo htmlspecialchars($usuario['Nombre']); ?></h1>
+    <nav>
+        <ul>
+            <li><a href="cargar_saldo.php">Cargar Saldo</a></li>
+            <li><a href="comprar_viandas.php">Comprar Viandas</a></li>
+            <li><a href="logout.php">Salir</a></li>
+        </ul>
+    </nav>
+
+    <h1>Que gusto verte de nuevo, <?php echo htmlspecialchars($usuario['Nombre']); ?></h1>
     <p>Correo: <?php echo htmlspecialchars($usuario['Correo']); ?></p>
     <p class="saldo">Saldo disponible: <?php echo number_format($usuario['Saldo'], 2); ?> ARS</p>
+
+    <h3>Hijos:</h3>
+    <ul>
+        <?php foreach ($hijos_info as $hijo) : ?>
+            <li>
+                <?php echo htmlspecialchars($hijo['Hijo']); ?> - <?php echo htmlspecialchars($hijo['Curso']); ?> - 
+                Preferencias: <?php echo htmlspecialchars($hijo['Preferencias']); ?>
+            </li>
+        <?php endforeach; ?>
+    </ul>
 
     <?php
     if (isset($_GET['error'])) {
@@ -191,6 +241,7 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <div class="table-container">
         <table>
             <tr>
+                <th>ID Pedido</th>
                 <th>Hijo</th>
                 <th>Menú</th>
                 <th>Fecha de Entrega</th>
@@ -200,6 +251,7 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </tr>
             <?php foreach ($pedidos_viandas as $pedido) : ?>
             <tr>
+                <td><?php echo htmlspecialchars($pedido['Id']); ?></td>
                 <td><?php echo htmlspecialchars($pedido['Hijo']); ?></td>
                 <td><?php echo htmlspecialchars($pedido['Menú']); ?></td>
                 <td><?php echo htmlspecialchars($pedido['Fecha_entrega']); ?></td>
@@ -209,7 +261,10 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <?php if ($pedido['Estado'] == 'Procesando') : ?>
                         <form method="post" action="cancelar_pedido.php">
                             <input type="hidden" name="pedido_id" value="<?php echo htmlspecialchars($pedido['Id']); ?>">
-                            <button type="submit">Cancelar Pedido</button>
+                            <button type="submit" 
+                                    <?php echo (strtotime($pedido['Fecha_entrega'] . ' 09:00:00') <= time()) ? 'disabled' : ''; ?>>
+                                Cancelar Pedido
+                            </button>
                         </form>
                     <?php endif; ?>
                 </td>
