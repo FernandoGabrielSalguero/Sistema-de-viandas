@@ -243,7 +243,7 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <td><?php echo htmlspecialchars($pedido['Id']); ?></td> <!-- Agregado el ID del pedido -->
                 <td><?php echo htmlspecialchars($pedido['Hijo']); ?></td>
                 <td><?php echo htmlspecialchars($pedido['Menú']); ?></td>
-                <td><?php echo htmlspecialchars($pedido['Fecha_entrega']); ?></td>
+                <td><?php echo date('d-m-Y', strtotime($pedido['Fecha_entrega'])); ?></td>
                 <td><?php echo htmlspecialchars($pedido['Fecha_pedido']); ?></td>
                 <td><?php echo htmlspecialchars($pedido['Estado']); ?></td>
                 <td>
