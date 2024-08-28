@@ -97,6 +97,7 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Dashboard Papás</title>
@@ -109,47 +110,61 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
             flex-wrap: wrap;
             gap: 10px;
         }
+
         .filter-item {
             flex: 1 1 calc(25% - 10px);
             min-width: 200px;
         }
+
         @media (max-width: 768px) {
             .filter-item {
                 flex: 1 1 calc(50% - 10px);
             }
         }
+
         @media (max-width: 480px) {
             .filter-item {
                 flex: 1 1 100%;
             }
         }
+
         .filters form {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
         }
+
         .saldo {
             font-size: 24px;
             font-weight: bold;
             color: green;
         }
+
         .table-container {
             overflow-x: auto;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
         }
-        table, th, td {
+
+        table,
+        th,
+        td {
             border: 1px solid #ddd;
         }
-        th, td {
+
+        th,
+        td {
             padding: 8px;
             text-align: left;
         }
+
         th {
             background-color: #f2f2f2;
         }
+
         .disabled-button {
             background-color: grey;
             color: white;
@@ -157,9 +172,12 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
     </style>
 </head>
+
 <body>
     <h1>Bienvenido, <?php echo htmlspecialchars($usuario['Nombre']); ?></h1>
     <p>Correo: <?php echo htmlspecialchars($usuario['Correo']); ?></p>
+    <!-- Imprimir fecha y hora actual del servidor -->
+    <p>Fecha y Hora actual: <?php echo date('d-m-Y H:i:s'); ?></p>
     <p class="saldo">Saldo disponible: <?php echo number_format($usuario['Saldo'], 2); ?> ARS</p>
 
     <!-- Mostrar la información del hijo, colegio, curso y preferencias alimenticias en una tabla -->
@@ -173,12 +191,12 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <th>Preferencias Alimenticias</th>
             </tr>
             <?php foreach ($info_hijos as $info) : ?>
-            <tr>
-                <td><?php echo htmlspecialchars($info['Hijo']); ?></td>
-                <td><?php echo htmlspecialchars($info['Colegio']); ?></td>
-                <td><?php echo htmlspecialchars($info['Curso']); ?></td>
-                <td><?php echo htmlspecialchars($info['Preferencia']); ?></td>
-            </tr>
+                <tr>
+                    <td><?php echo htmlspecialchars($info['Hijo']); ?></td>
+                    <td><?php echo htmlspecialchars($info['Colegio']); ?></td>
+                    <td><?php echo htmlspecialchars($info['Curso']); ?></td>
+                    <td><?php echo htmlspecialchars($info['Preferencia']); ?></td>
+                </tr>
             <?php endforeach; ?>
         </table>
     </div>
@@ -198,7 +216,7 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <label for="fecha_entrega">Fecha de Entrega:</label>
             <input type="date" id="fecha_entrega" name="fecha_entrega" value="<?php echo htmlspecialchars($filtro_fecha_entrega); ?>">
         </div>
-        
+
         <div class="filter-item">
             <label for="estado">Estado:</label>
             <select id="estado" name="estado">
@@ -207,7 +225,7 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <option value="Cancelado" <?php if ($filtro_estado == 'Cancelado') echo 'selected'; ?>>Cancelado</option>
             </select>
         </div>
-        
+
         <div class="filter-item">
             <label for="hijo">Hijo:</label>
             <select id="hijo" name="hijo">
@@ -217,7 +235,7 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <?php endforeach; ?>
             </select>
         </div>
-        
+
         <div class="filter-item">
             <label for="menu">Menú:</label>
             <select id="menu" name="menu">
@@ -234,16 +252,23 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </form>
 
 
-    <!-- Imprimir fecha y hora actual del servidor -->
-    <p>Fecha y Hora actual del servidor: <?php echo date('d-m-Y H:i:s'); ?></p>
-
     <?php
     // Función para convertir la fecha al formato adecuado
-    function convertirFecha($fecha) {
+    function convertirFecha($fecha)
+    {
         $meses = [
-            'Jan' => '01', 'Feb' => '02', 'Mar' => '03', 'Apr' => '04',
-            'May' => '05', 'Jun' => '06', 'Jul' => '07', 'Aug' => '08',
-            'Sep' => '09', 'Oct' => '10', 'Nov' => '11', 'Dec' => '12'
+            'Jan' => '01',
+            'Feb' => '02',
+            'Mar' => '03',
+            'Apr' => '04',
+            'May' => '05',
+            'Jun' => '06',
+            'Jul' => '07',
+            'Aug' => '08',
+            'Sep' => '09',
+            'Oct' => '10',
+            'Nov' => '11',
+            'Dec' => '12'
         ];
 
         // Descomponer la fecha en partes
@@ -270,37 +295,37 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <th>Acción</th>
             </tr>
             <?php foreach ($pedidos_viandas as $pedido) : ?>
-            <tr>
-                <td><?php echo htmlspecialchars($pedido['Id']); ?></td>
-                <td><?php echo htmlspecialchars($pedido['Hijo']); ?></td>
-                <td><?php echo htmlspecialchars($pedido['Menú']); ?></td>
-                <td>
-                    <?php 
-                    if (!empty($pedido['Fecha_entrega'])) {
-                        $fecha_convertida = convertirFecha($pedido['Fecha_entrega']);
-                        echo date('d-m-Y', strtotime($fecha_convertida));
-                    } else {
-                        echo 'Fecha no disponible';
-                    }
-                    ?>
-                </td>
-                <td><?php echo htmlspecialchars($pedido['Fecha_pedido']); ?></td>
-                <td><?php echo htmlspecialchars($pedido['Estado']); ?></td>
-                <td>
-                    <?php
-                    $fecha_entrega_convertida = convertirFecha($pedido['Fecha_entrega']);
-                    $fecha_entrega = strtotime($fecha_entrega_convertida);
-                    $hoy = strtotime(date('Y-m-d'));
-                    $hora_actual = date('H:i:s');
+                <tr>
+                    <td><?php echo htmlspecialchars($pedido['Id']); ?></td>
+                    <td><?php echo htmlspecialchars($pedido['Hijo']); ?></td>
+                    <td><?php echo htmlspecialchars($pedido['Menú']); ?></td>
+                    <td>
+                        <?php
+                        if (!empty($pedido['Fecha_entrega'])) {
+                            $fecha_convertida = convertirFecha($pedido['Fecha_entrega']);
+                            echo date('d-m-Y', strtotime($fecha_convertida));
+                        } else {
+                            echo 'Fecha no disponible';
+                        }
+                        ?>
+                    </td>
+                    <td><?php echo htmlspecialchars($pedido['Fecha_pedido']); ?></td>
+                    <td><?php echo htmlspecialchars($pedido['Estado']); ?></td>
+                    <td>
+                        <?php
+                        $fecha_entrega_convertida = convertirFecha($pedido['Fecha_entrega']);
+                        $fecha_entrega = strtotime($fecha_entrega_convertida);
+                        $hoy = strtotime(date('Y-m-d'));
+                        $hora_actual = date('H:i:s');
 
-                    if ($pedido['Estado'] == 'Procesando' && ($fecha_entrega > $hoy || ($fecha_entrega == $hoy && $hora_actual < '09:00:00'))) : ?>
-                        <form method="post" action="cancelar_pedido.php">
-                            <input type="hidden" name="pedido_id" value="<?php echo htmlspecialchars($pedido['Id']); ?>">
-                            <button type="submit">Cancelar Pedido</button>
-                        </form>
-                    <?php endif; ?>
-                </td>
-            </tr>
+                        if ($pedido['Estado'] == 'Procesando' && ($fecha_entrega > $hoy || ($fecha_entrega == $hoy && $hora_actual < '09:00:00'))) : ?>
+                            <form method="post" action="cancelar_pedido.php">
+                                <input type="hidden" name="pedido_id" value="<?php echo htmlspecialchars($pedido['Id']); ?>">
+                                <button type="submit">Cancelar Pedido</button>
+                            </form>
+                        <?php endif; ?>
+                    </td>
+                </tr>
             <?php endforeach; ?>
         </table>
     </div>
@@ -317,20 +342,21 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <th>Fecha de Pedido</th>
             </tr>
             <?php foreach ($pedidos_saldo as $pedido) : ?>
-            <tr>
-                <td><?php echo number_format($pedido['Saldo'], 2); ?> ARS</td>
-                <td><?php echo htmlspecialchars($pedido['Estado']); ?></td>
-                <td>
-                    <?php if ($pedido['Comprobante']) : ?>
-                        <a href="../uploads/<?php echo htmlspecialchars($pedido['Comprobante']); ?>" target="_blank">Ver Comprobante</a>
-                    <?php else : ?>
-                        N/A
-                    <?php endif; ?>
-                </td>
-                <td><?php echo htmlspecialchars($pedido['Fecha_pedido']); ?></td>
-            </tr>
+                <tr>
+                    <td><?php echo number_format($pedido['Saldo'], 2); ?> ARS</td>
+                    <td><?php echo htmlspecialchars($pedido['Estado']); ?></td>
+                    <td>
+                        <?php if ($pedido['Comprobante']) : ?>
+                            <a href="../uploads/<?php echo htmlspecialchars($pedido['Comprobante']); ?>" target="_blank">Ver Comprobante</a>
+                        <?php else : ?>
+                            N/A
+                        <?php endif; ?>
+                    </td>
+                    <td><?php echo htmlspecialchars($pedido['Fecha_pedido']); ?></td>
+                </tr>
             <?php endforeach; ?>
         </table>
     </div>
 </body>
+
 </html>
