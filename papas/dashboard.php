@@ -154,14 +154,26 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <p>Correo: <?php echo htmlspecialchars($usuario['Correo']); ?></p>
     <p class="saldo">Saldo disponible: <?php echo number_format($usuario['Saldo'], 2); ?> ARS</p>
 
-    <!-- Mostrar la información del hijo, colegio, curso y preferencias alimenticias -->
-    <?php foreach ($info_hijos as $info) : ?>
-        <h2>Información del Hijo</h2>
-        <p>Nombre del Hijo: <?php echo htmlspecialchars($info['Hijo']); ?></p>
-        <p>Colegio: <?php echo htmlspecialchars($info['Colegio']); ?></p>
-        <p>Curso: <?php echo htmlspecialchars($info['Curso']); ?></p>
-        <p>Preferencias Alimenticias: <?php echo htmlspecialchars($info['Preferencia']); ?></p>
-    <?php endforeach; ?>
+    <!-- Mostrar la información del hijo, colegio, curso y preferencias alimenticias en una tabla -->
+    <h2>Información de los Hijos</h2>
+    <div class="table-container">
+        <table>
+            <tr>
+                <th>Nombre del Hijo</th>
+                <th>Colegio</th>
+                <th>Curso</th>
+                <th>Preferencias Alimenticias</th>
+            </tr>
+            <?php foreach ($info_hijos as $info) : ?>
+            <tr>
+                <td><?php echo htmlspecialchars($info['Hijo']); ?></td>
+                <td><?php echo htmlspecialchars($info['Colegio']); ?></td>
+                <td><?php echo htmlspecialchars($info['Curso']); ?></td>
+                <td><?php echo htmlspecialchars($info['Preferencia']); ?></td>
+            </tr>
+            <?php endforeach; ?>
+        </table>
+    </div>
 
     <?php
     if (isset($_GET['error'])) {
@@ -216,6 +228,7 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <div class="table-container">
         <table>
             <tr>
+                <th>ID del Pedido</th>
                 <th>Hijo</th>
                 <th>Menú</th>
                 <th>Fecha de Entrega</th>
@@ -225,6 +238,7 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </tr>
             <?php foreach ($pedidos_viandas as $pedido) : ?>
             <tr>
+                <td><?php echo htmlspecialchars($pedido['Id']); ?></td> <!-- Agregado el ID del pedido -->
                 <td><?php echo htmlspecialchars($pedido['Hijo']); ?></td>
                 <td><?php echo htmlspecialchars($pedido['Menú']); ?></td>
                 <td><?php echo htmlspecialchars($pedido['Fecha_entrega']); ?></td>
