@@ -102,17 +102,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
         // Actualizar el estado del pedido de saldo en la base de datos
         $stmt = $pdo->prepare("UPDATE Pedidos_Saldo SET Estado = ? WHERE Id = ?");
         if ($stmt->execute([$nuevo_estado, $id])) {
-            echo "<script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        document.getElementById('modal-message').innerText = '$mensaje_exito';
-                        document.getElementById('successModal').style.display = 'block';
-                    });
-                  </script>";
+            $_SESSION['modal_message'] = $mensaje_exito; // Guardamos el mensaje en la sesión
+            header('Location: ' . $_SERVER['REQUEST_URI']); // Redirigir para evitar reenvíos
+            exit();
         } else {
             $error = "Hubo un error al actualizar el estado del saldo: " . implode(", ", $stmt->errorInfo());
         }
     }
 }
+
+$mensaje_exito = isset($_SESSION['modal_message']) ? $_SESSION['modal_message'] : '';
+unset($_SESSION['modal_message']); // Limpiamos el mensaje de la sesión después de mostrarlo
 ?>
 
 <!DOCTYPE html>
@@ -207,7 +207,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
     <!-- Modal -->
     <div id="successModal">
         <div id="modalContent">
-            <p id="modal-message"></p>
+            <p id="modal-message"><?php echo htmlspecialchars($mensaje_exito); ?></p>
             <button id="closeModal" onclick="closeModal()">Aceptar</button>
         </div>
     </div>
@@ -231,9 +231,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var modalMessage = "<?php echo htmlspecialchars($mensaje_exito); ?>";
+            if (modalMessage) {
+                document.getElementById('successModal').style.display = 'block';
+            }
+        });
+
         function closeModal() {
             document.getElementById('successModal').style.display = 'none';
-            location.reload();  // Refrescar la página cuando se cierra el modal
+            window.location.href = window.location.href.split('?')[0]; // Refresca la página sin parámetros GET
         }
     </script>
 </body>
