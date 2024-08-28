@@ -49,6 +49,7 @@ $query_pedidos = "SELECT pc.Id, h.Nombre as Hijo, m.Nombre as Menú, DATE_FORMAT
                   JOIN Usuarios_Hijos uh ON h.Id = uh.Hijo_Id
                   WHERE uh.Usuario_Id = :usuario_id";
 
+
 $params = ['usuario_id' => $usuario_id];
 
 if ($filtro_fecha_entrega) {
@@ -71,6 +72,11 @@ if ($filtro_menu) {
 $stmt = $pdo->prepare($query_pedidos);
 $stmt->execute($params);
 $pedidos_viandas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Depuración: ver los datos recuperados
+echo '<pre>';
+var_dump($pedidos_viandas);
+echo '</pre>';
 
 // Obtener historial de pedidos de saldo
 $stmt = $pdo->prepare("SELECT Id, Saldo, Estado, Comprobante, DATE_FORMAT(Fecha_pedido, '%d/%b/%y %H:%i:%s') as Fecha_pedido FROM Pedidos_Saldo WHERE Usuario_Id = ?");
@@ -243,15 +249,7 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <td><?php echo htmlspecialchars($pedido['Id']); ?></td> <!-- Agregado el ID del pedido -->
                 <td><?php echo htmlspecialchars($pedido['Hijo']); ?></td>
                 <td><?php echo htmlspecialchars($pedido['Menú']); ?></td>
-                <td>
-    <?php 
-    if (!empty($pedido['Fecha_entrega']) && strtotime($pedido['Fecha_entrega']) !== false) {
-        echo date('d-m-Y', strtotime($pedido['Fecha_entrega']));
-    } else {
-        echo 'Fecha no disponible';
-    }
-    ?>
-</td>
+                <td><?php echo htmlspecialchars($pedido['Fecha_entrega']); ?></td>
                 <td><?php echo htmlspecialchars($pedido['Fecha_pedido']); ?></td>
                 <td><?php echo htmlspecialchars($pedido['Estado']); ?></td>
                 <td>
