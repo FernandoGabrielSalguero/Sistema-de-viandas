@@ -20,6 +20,16 @@ $stmt->execute([$usuario_id]);
 $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 
 ?>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
 <div class="info-papa">
     <h2>Información Adicional del Papá</h2>
     <p>Nombre: <?php echo htmlspecialchars($usuario['Nombre']); ?></p>
@@ -27,3 +37,5 @@ $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
     <p>Saldo disponible: <?php echo number_format($usuario['Saldo'], 2); ?> ARS</p>
     <!-- Agrega aquí más contenido o funcionalidades específicas -->
 </div>
+</body>
+</html>
