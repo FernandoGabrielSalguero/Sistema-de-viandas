@@ -25,7 +25,7 @@ $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 
 // Obtener información del hijo y su colegio, curso, etc.
 $stmt = $pdo->prepare("
-    SELECT h.Id, h.Nombre, h.Colegio_Id, h.Curso_Id, h.Preferencias
+    SELECT h.Id, h.Nombre, h.Colegio_Id, h.Curso_Id
     FROM Hijos h
     JOIN Usuarios_Hijos uh ON h.Id = uh.Hijo_Id
     WHERE uh.Usuario_Id = ?");
