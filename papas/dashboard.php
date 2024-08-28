@@ -93,6 +93,8 @@ $stmt->execute();
 $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
+
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -232,7 +234,30 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </form>
 
 
+    <!-- Imprimir fecha y hora actual del servidor -->
     <p>Fecha y Hora actual del servidor: <?php echo date('d-m-Y H:i:s'); ?></p>
+
+    <?php
+    // Función para convertir la fecha al formato adecuado
+    function convertirFecha($fecha) {
+        $meses = [
+            'Jan' => '01', 'Feb' => '02', 'Mar' => '03', 'Apr' => '04',
+            'May' => '05', 'Jun' => '06', 'Jul' => '07', 'Aug' => '08',
+            'Sep' => '09', 'Oct' => '10', 'Nov' => '11', 'Dec' => '12'
+        ];
+
+        // Descomponer la fecha en partes
+        list($dia, $mesTexto, $anio) = explode('/', $fecha);
+
+        // Convertir el mes en número
+        $mes = $meses[$mesTexto] ?? '01';  // Default to January if month is unknown
+
+        // Crear la fecha en formato yyyy-mm-dd para strtotime
+        $fecha_convertida = "$anio-$mes-$dia";
+        return $fecha_convertida;
+    }
+    ?>
+
     <div class="table-container">
         <table>
             <tr>
@@ -246,17 +271,26 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </tr>
             <?php foreach ($pedidos_viandas as $pedido) : ?>
             <tr>
-                <td><?php echo htmlspecialchars($pedido['Id']); ?></td> <!-- Agregado el ID del pedido -->
+                <td><?php echo htmlspecialchars($pedido['Id']); ?></td>
                 <td><?php echo htmlspecialchars($pedido['Hijo']); ?></td>
                 <td><?php echo htmlspecialchars($pedido['Menú']); ?></td>
-                <td><?php echo htmlspecialchars($pedido['Fecha_entrega']); ?></td>
+                <td>
+                    <?php 
+                    if (!empty($pedido['Fecha_entrega'])) {
+                        $fecha_convertida = convertirFecha($pedido['Fecha_entrega']);
+                        echo date('d-m-Y', strtotime($fecha_convertida));
+                    } else {
+                        echo 'Fecha no disponible';
+                    }
+                    ?>
+                </td>
                 <td><?php echo htmlspecialchars($pedido['Fecha_pedido']); ?></td>
                 <td><?php echo htmlspecialchars($pedido['Estado']); ?></td>
                 <td>
                     <?php
-                    // Verificar si se debe mostrar el botón "Cancelar Pedido"
-                    $fecha_entrega = strtotime($pedido['Fecha_entrega']);
-                    $hoy = strtotime(date('d/M/y'));
+                    $fecha_entrega_convertida = convertirFecha($pedido['Fecha_entrega']);
+                    $fecha_entrega = strtotime($fecha_entrega_convertida);
+                    $hoy = strtotime(date('Y-m-d'));
                     $hora_actual = date('H:i:s');
 
                     if ($pedido['Estado'] == 'Procesando' && ($fecha_entrega > $hoy || ($fecha_entrega == $hoy && $hora_actual < '09:00:00'))) : ?>
