@@ -27,7 +27,7 @@ $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 $query_info_hijo = "SELECT h.Nombre as Hijo, c.Nombre as Colegio, cu.Nombre as Curso, pa.Nombre as Preferencia
                     FROM Hijos h
                     JOIN Colegios c ON h.Colegio_Id = c.Id
-                    JOIN Curso cu ON h.Curso_Id = cu.Id
+                    JOIN Cursos cu ON h.Curso_Id = cu.Id
                     LEFT JOIN Preferencias_Alimenticias pa ON h.Preferencias_Alimenticias = pa.Id
                     WHERE h.Id IN (SELECT Hijo_Id FROM Usuarios_Hijos WHERE Usuario_Id = ?)";
 
