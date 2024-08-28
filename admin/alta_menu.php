@@ -60,33 +60,6 @@ $stmt->execute();
 $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-<?php
-// Verificar la fecha y hora actuales del servidor
-echo "Fecha y Hora actual del servidor: " . date('Y-m-d H:i:s') . "<br>";
-
-foreach ($pedidos_viandas as $pedido) {
-    $fecha_entrega = strtotime($pedido['Fecha_entrega']);
-    $hoy = strtotime(date('d/M/y'));
-    $hora_actual = date('H:i:s');
-    
-    // Mostrar la fecha de entrega y la hora actual para depuración
-    echo "Pedido ID: " . htmlspecialchars($pedido['Id']) . "<br>";
-    echo "Fecha de Entrega: " . date('Y-m-d H:i:s', $fecha_entrega) . "<br>";
-    echo "Hora actual: " . $hora_actual . "<br>";
-    
-    if ($pedido['Estado'] == 'Procesando' && ($fecha_entrega > $hoy || ($fecha_entrega == $hoy && $hora_actual < '09:00:00'))) {
-        echo "Mostrar botón 'Cancelar Pedido' para Pedido ID: " . htmlspecialchars($pedido['Id']) . "<br>";
-        ?>
-        <form method="post" action="cancelar_pedido.php">
-            <input type="hidden" name="pedido_id" value="<?php echo htmlspecialchars($pedido['Id']); ?>">
-            <button type="submit">Cancelar Pedido</button>
-        </form>
-        <?php
-    } else {
-        echo "No mostrar botón 'Cancelar Pedido' para Pedido ID: " . htmlspecialchars($pedido['Id']) . "<br>";
-    }
-}
-?>
 
 <!DOCTYPE html>
 <html lang="es">
