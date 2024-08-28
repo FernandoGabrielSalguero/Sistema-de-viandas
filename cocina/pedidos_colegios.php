@@ -155,11 +155,6 @@ $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <body>
     <h1>Dashboard Cocina</h1>
 
-    <!-- Botón de Actualizar pedidos -->
-    <form method="post">
-        <button type="submit" name="actualizar_pedidos">Actualizar pedidos</button>
-    </form>
-
     <form method="post" action="pedidos_colegios.php" class="filter-container">
         <div class="filter-item">
             <label for="fecha_entrega">Filtrar por Fecha de Entrega:</label>
@@ -198,6 +193,40 @@ $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     <h2>Totalidad de Viandas por Colegio y Nivel</h2>
     <?php
+
+    // Asegúrate de que $niveles_data esté inicializado como un array vacío si no se ha llenado.
+
+    // Definir niveles y cursos
+    $niveles = [
+        'Nivel Inicial' => ['Nivel Inicial Sala 3A', 'Nivel Inicial Sala 3B', 'Nivel Inicial Sala 4A', 'Nivel Inicial Sala 4B', 'Nivel Inicial Sala 5A', 'Nivel Inicial Sala 5B'],
+        'Primaria' => ['Primaria Primer Grado A', 'Primaria Primer Grado B', 'Primaria Segundo Grado', 'Primaria Tercer Grado', 'Primaria cuarto Grado', 'Primaria Quinto Grado', 'Primaria Sexto Grado', 'Primaria Septimo Grado'],
+        'Secundaria' => ['Secundaria Primer Año', 'Secundaria Segundo Año', 'Secundaria Tercer año']
+    ];
+
+    // Inicializar el array $niveles_data
+    $niveles_data = [];
+
+    foreach ($colegios as $colegio) {
+        foreach ($niveles as $nivel => $cursos) {
+            if (in_array($colegio['CursoNombre'], $cursos)) {
+                if (!isset($niveles_data[$nivel])) {
+                    $niveles_data[$nivel] = [];
+                }
+                $key = $colegio['MenuNombre'] . '-' . $colegio['FechaEntrega'];
+                if (!isset($niveles_data[$nivel][$key])) {
+                    $niveles_data[$nivel][$key] = [
+                        'ColegioNombre' => $colegio['ColegioNombre'],
+                        'MenuNombre' => $colegio['MenuNombre'],
+                        'Cantidad' => 0,
+                        'FechaEntrega' => $colegio['FechaEntrega']
+                    ];
+                }
+                $niveles_data[$nivel][$key]['Cantidad'] += $colegio['Cantidad'];
+            }
+        }
+    }
+
+    // Comprobamos si $niveles_data está vacío o si tiene datos
     if (!empty($niveles_data)) :
         foreach ($niveles_data as $nivel => $menus) : ?>
             <h3><?php echo htmlspecialchars($nivel); ?></h3>
@@ -230,6 +259,9 @@ $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
     else : ?>
         <p>No hay datos disponibles para mostrar.</p>
     <?php endif; ?>
+
+
+
 
     <h2>Preferencias Alimenticias</h2>
     <table border="1">
