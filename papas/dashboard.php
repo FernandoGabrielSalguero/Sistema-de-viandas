@@ -7,7 +7,6 @@ error_reporting(E_ALL);
 // Establecer la zona horaria
 date_default_timezone_set('America/Argentina/Buenos_Aires');
 
-
 session_start();
 include '../includes/header_papas.php';
 include '../includes/db.php';
@@ -23,6 +22,18 @@ $usuario_id = $_SESSION['usuario_id'];
 $stmt = $pdo->prepare("SELECT Nombre, Correo, Saldo FROM Usuarios WHERE Id = ?");
 $stmt->execute([$usuario_id]);
 $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Obtener información del hijo, colegio, curso y preferencias alimenticias
+$query_info_hijo = "SELECT h.Nombre as Hijo, c.Nombre as Colegio, cu.Nombre as Curso, pa.Nombre as Preferencia
+                    FROM Hijos h
+                    JOIN Colegio c ON h.Colegio_Id = c.Id
+                    JOIN Curso cu ON h.Curso_Id = cu.Id
+                    LEFT JOIN Preferencias_Alimenticias pa ON h.Preferencias_Alimenticias = pa.Id
+                    WHERE h.Id IN (SELECT Hijo_Id FROM Usuarios_Hijos WHERE Usuario_Id = ?)";
+
+$stmt = $pdo->prepare($query_info_hijo);
+$stmt->execute([$usuario_id]);
+$info_hijos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Inicializar variables de filtros
 $filtro_fecha_entrega = isset($_GET['fecha_entrega']) ? $_GET['fecha_entrega'] : '';
@@ -131,21 +142,26 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
         th {
             background-color: #f2f2f2;
         }
+        .disabled-button {
+            background-color: grey;
+            color: white;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
-    <h1>Que gusto verte de nuevo, <?php echo htmlspecialchars($usuario['Nombre']); ?></h1>
+    <h1>Bienvenido, <?php echo htmlspecialchars($usuario['Nombre']); ?></h1>
+    <p>Correo: <?php echo htmlspecialchars($usuario['Correo']); ?></p>
     <p class="saldo">Saldo disponible: <?php echo number_format($usuario['Saldo'], 2); ?> ARS</p>
 
-<!-- Aquí cargaremos el contenido de info_papa.php -->
-<div id="info-papa-container"></div>
-
-<script>
-    $(document).ready(function() {
-        // Cargar el contenido de info_papa.php en el contenedor
-        $('#info-papa-container').load('info_papa.php');
-    });
-</script>
+    <!-- Mostrar la información del hijo, colegio, curso y preferencias alimenticias -->
+    <?php foreach ($info_hijos as $info) : ?>
+        <h2>Información del Hijo</h2>
+        <p>Nombre del Hijo: <?php echo htmlspecialchars($info['Hijo']); ?></p>
+        <p>Colegio: <?php echo htmlspecialchars($info['Colegio']); ?></p>
+        <p>Curso: <?php echo htmlspecialchars($info['Curso']); ?></p>
+        <p>Preferencias Alimenticias: <?php echo htmlspecialchars($info['Preferencia']); ?></p>
+    <?php endforeach; ?>
 
     <?php
     if (isset($_GET['error'])) {
@@ -215,7 +231,13 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <td><?php echo htmlspecialchars($pedido['Fecha_pedido']); ?></td>
                 <td><?php echo htmlspecialchars($pedido['Estado']); ?></td>
                 <td>
-                    <?php if ($pedido['Estado'] == 'Procesando') : ?>
+                    <?php
+                    // Verificar si se debe mostrar el botón "Cancelar Pedido"
+                    $fecha_entrega = strtotime($pedido['Fecha_entrega']);
+                    $hoy = strtotime(date('d/M/y'));
+                    $hora_actual = date('H:i:s');
+
+                    if ($pedido['Estado'] == 'Procesando' && ($fecha_entrega > $hoy || ($fecha_entrega == $hoy && $hora_actual < '09:00:00'))) : ?>
                         <form method="post" action="cancelar_pedido.php">
                             <input type="hidden" name="pedido_id" value="<?php echo htmlspecialchars($pedido['Id']); ?>">
                             <button type="submit">Cancelar Pedido</button>
