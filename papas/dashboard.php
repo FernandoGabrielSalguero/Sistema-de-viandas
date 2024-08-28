@@ -7,7 +7,6 @@ error_reporting(E_ALL);
 // Establecer la zona horaria
 date_default_timezone_set('America/Argentina/Buenos_Aires');
 
-
 session_start();
 include '../includes/header_papas.php';
 include '../includes/db.php';
@@ -31,7 +30,7 @@ $filtro_hijo = isset($_GET['hijo']) ? $_GET['hijo'] : '';
 $filtro_menu = isset($_GET['menu']) ? $_GET['menu'] : '';
 
 // Construir la consulta con filtros
-$query_pedidos = "SELECT pc.Id, h.Nombre as Hijo, m.Nombre as Menú, DATE_FORMAT(m.Fecha_entrega, '%d/%b/%y') as Fecha_entrega, DATE_FORMAT(pc.Fecha_pedido, '%d/%b/%y %H:%i:%s') as Fecha_pedido, pc.Estado
+$query_pedidos = "SELECT pc.Id, h.Nombre as Hijo, m.Nombre as Menú, DATE_FORMAT(pc.Fecha_entrega, '%d/%b/%y') as Fecha_entrega, DATE_FORMAT(pc.Fecha_pedido, '%d/%b/%y %H:%i:%s') as Fecha_pedido, pc.Estado
                   FROM Pedidos_Comida pc
                   JOIN Hijos h ON pc.Hijo_Id = h.Id
                   JOIN Menú m ON pc.Menú_Id = m.Id
@@ -41,7 +40,7 @@ $query_pedidos = "SELECT pc.Id, h.Nombre as Hijo, m.Nombre as Menú, DATE_FORMAT
 $params = ['usuario_id' => $usuario_id];
 
 if ($filtro_fecha_entrega) {
-    $query_pedidos .= " AND m.Fecha_entrega = :fecha_entrega";
+    $query_pedidos .= " AND pc.Fecha_entrega = :fecha_entrega";
     $params['fecha_entrega'] = $filtro_fecha_entrega;
 }
 if ($filtro_estado) {
@@ -74,6 +73,18 @@ $hijos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $stmt = $pdo->prepare("SELECT Id, Nombre FROM Menú WHERE Estado = 'En venta'");
 $stmt->execute();
 $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Obtener información de los hijos junto con su colegio, curso y preferencias alimenticias
+$query_hijos_info = "SELECT h.Nombre as Hijo, c.Nombre as Colegio, cu.Nombre as Curso, pa.Nombre as Preferencia
+                     FROM Hijos h
+                     JOIN Colegio c ON h.Colegio_Id = c.Id
+                     JOIN Curso cu ON h.Curso_Id = cu.Id
+                     LEFT JOIN Preferencias_Alimenticias pa ON h.Preferencias_Alimenticias = pa.Id
+                     JOIN Usuarios_Hijos uh ON h.Id = uh.Hijo_Id
+                     WHERE uh.Usuario_Id = :usuario_id";
+$stmt = $pdo->prepare($query_hijos_info);
+$stmt->execute(['usuario_id' => $usuario_id]);
+$hijos_info = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
 <!DOCTYPE html>
@@ -130,6 +141,11 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
         th {
             background-color: #f2f2f2;
+        }
+        .disabled-button {
+            background-color: grey;
+            color: white;
+            cursor: not-allowed;
         }
     </style>
 </head>
@@ -206,11 +222,19 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <td><?php echo htmlspecialchars($pedido['Fecha_pedido']); ?></td>
                 <td><?php echo htmlspecialchars($pedido['Estado']); ?></td>
                 <td>
-                    <?php if ($pedido['Estado'] == 'Procesando') : ?>
+                    <?php
+                    // Verificar si se debe desactivar el botón
+                    $fecha_entrega = strtotime($pedido['Fecha_entrega']);
+                    $hoy = strtotime(date('d/M/y'));
+                    $hora_actual = date('H:i:s');
+                    
+                    if ($pedido['Estado'] == 'Procesando' && ($fecha_entrega > $hoy || ($fecha_entrega == $hoy && $hora_actual < '09:00:00'))) : ?>
                         <form method="post" action="cancelar_pedido.php">
                             <input type="hidden" name="pedido_id" value="<?php echo htmlspecialchars($pedido['Id']); ?>">
                             <button type="submit">Cancelar Pedido</button>
                         </form>
+                    <?php else : ?>
+                        <button class="disabled-button" disabled>Cancelar Pedido</button>
                     <?php endif; ?>
                 </td>
             </tr>
@@ -239,6 +263,26 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <?php endif; ?>
                 </td>
                 <td><?php echo htmlspecialchars($pedido['Fecha_pedido']); ?></td>
+            </tr>
+            <?php endforeach; ?>
+        </table>
+    </div>
+
+    <h2>Información de los Hijos</h2>
+    <div class="table-container">
+        <table>
+            <tr>
+                <th>Nombre del Hijo</th>
+                <th>Colegio</th>
+                <th>Curso</th>
+                <th>Preferencias Alimenticias</th>
+            </tr>
+            <?php foreach ($hijos_info as $info) : ?>
+            <tr>
+                <td><?php echo htmlspecialchars($info['Hijo']); ?></td>
+                <td><?php echo htmlspecialchars($info['Colegio']); ?></td>
+                <td><?php echo htmlspecialchars($info['Curso']); ?></td>
+                <td><?php echo htmlspecialchars($info['Preferencia'] ?: 'N/A'); ?></td>
             </tr>
             <?php endforeach; ?>
         </table>
