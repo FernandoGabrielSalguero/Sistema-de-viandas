@@ -21,7 +21,6 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'representante') {
 <head>
     <meta charset="UTF-8">
     <title>Panel de representante</title>
-    <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
     <nav>
