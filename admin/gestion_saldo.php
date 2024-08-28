@@ -78,7 +78,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
             $stmt->execute([$saldo, $usuario_id]);
 
             // Enviar correo de confirmación
-            $stmt = $pdo->prepare("SELECT Correo FROM Usuarios WHERE Id = ?");
+            $stmt = $pdo->prepare("SELECT Nombre, Saldo, Correo FROM Usuarios WHERE Id = ?");
             $stmt->execute([$usuario_id]);
             $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
             $correo = $usuario['Correo'];
@@ -89,21 +89,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
             if (!enviarCorreo($correo, $subject, $message)) {
                 $error = "No se pudo enviar el correo electrónico al usuario.";
             }
+            $mensaje_exito = "El saldo del usuario {$usuario['Nombre']} fue Aprobado con éxito. El saldo actual de este usuario es de: {$usuario['Saldo']} ARS.";
         } elseif ($nuevo_estado == 'Cancelado') {
-            // Si el nuevo estado es "Cancelado", no hacer nada con el saldo, solo actualizar el estado
+            $stmt = $pdo->prepare("SELECT Nombre, Saldo FROM Usuarios WHERE Id = ?");
+            $stmt->execute([$usuario_id]);
+            $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+            $mensaje_exito = "El saldo del usuario {$usuario['Nombre']} fue Cancelado con éxito. El saldo actual de este usuario es de: {$usuario['Saldo']} ARS.";
         }
 
         // Actualizar el estado del pedido de saldo en la base de datos
         $stmt = $pdo->prepare("UPDATE Pedidos_Saldo SET Estado = ? WHERE Id = ?");
         if ($stmt->execute([$nuevo_estado, $id])) {
-            $success = "Estado del saldo actualizado con éxito.";
+            echo "<script>
+                    alert('$mensaje_exito');
+                    window.location.href = window.location.href;
+                  </script>";
+            exit();
         } else {
             $error = "Hubo un error al actualizar el estado del saldo: " . implode(", ", $stmt->errorInfo());
         }
     }
 }
-
-
 
 ?>
 
@@ -120,9 +126,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
     <?php
     if (isset($error)) {
         echo "<p class='error'>$error</p>";
-    }
-    if (isset($success)) {
-        echo "<p class='success'>$success</p>";
     }
     ?>
     <table>
@@ -149,7 +152,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
                     <select name="estado">
                         <option value="Pendiente de aprobación" <?php echo ($pedido['Estado'] == 'Pendiente de aprobación') ? 'selected' : ''; ?>>Pendiente de aprobación</option>
                         <option value="Aprobado" <?php echo ($pedido['Estado'] == 'Aprobado') ? 'selected' : ''; ?>>Aprobado</option>
-                        <option value="Rechazado" <?php echo ($pedido['Estado'] == 'Rechazado') ? 'selected' : ''; ?>>Rechazado</option>
+                        <option value="Cancelado" <?php echo ($pedido['Estado'] == 'Cancelado') ? 'selected' : ''; ?>>Cancelado</option>
                     </select>
                     <button type="submit" name="cambiar_estado">Cambiar Estado</button>
                 </form>
