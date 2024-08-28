@@ -137,6 +137,16 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <h1>Que gusto verte de nuevo, <?php echo htmlspecialchars($usuario['Nombre']); ?></h1>
     <p class="saldo">Saldo disponible: <?php echo number_format($usuario['Saldo'], 2); ?> ARS</p>
 
+<!-- Aquí cargaremos el contenido de info_papa.php -->
+<div id="info-papa-container"></div>
+
+<script>
+    $(document).ready(function() {
+        // Cargar el contenido de info_papa.php en el contenedor
+        $('#info-papa-container').load('info_papa.php');
+    });
+</script>
+
     <?php
     if (isset($_GET['error'])) {
         echo "<p class='error'>" . htmlspecialchars($_GET['error']) . "</p>";
