@@ -74,7 +74,6 @@ $pedidos_viandas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <body>
     <h1>Bienvenido, Representante</h1>
 
-    <h2>Historial de Pedidos de Viandas</h2>
     <form method="get" action="dashboard.php" class="filters">
         <div class="filter-item">
             <label for="curso_id">Filtrar por Curso:</label>
