@@ -225,6 +225,8 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </form>
 
+
+    <p>Fecha y Hora actual del servidor: <?php echo date('d-m-Y H:i:s'); ?></p>
     <div class="table-container">
         <table>
             <tr>
@@ -262,6 +264,8 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <?php endforeach; ?>
         </table>
     </div>
+
+
 
     <h2>Historial de Pedidos de Saldo</h2>
     <div class="table-container">
