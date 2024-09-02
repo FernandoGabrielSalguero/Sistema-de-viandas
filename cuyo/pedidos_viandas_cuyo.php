@@ -160,6 +160,59 @@ $turnos_menus = [
             margin-bottom: 20px;
             font-size: 1.2em;
         }
+
+        /* Estilos para el modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+            border-radius: 10px;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .modal-buttons button {
+            padding: 10px 20px;
+            font-size: 1em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .modal-buttons .yes-button {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .modal-buttons .no-button {
+            background-color: #dc3545;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -172,7 +225,7 @@ $turnos_menus = [
             <p class="error-message"><?php echo htmlspecialchars($error); ?></p>
         <?php endif; ?>
 
-        <form method="post" action="pedidos_viandas_cuyo.php">
+        <form id="pedidoForm" method="post" action="pedidos_viandas_cuyo.php">
             <label for="fecha">Fecha:</label>
             <input type="date" id="fecha" name="fecha" required>
 
@@ -215,8 +268,36 @@ $turnos_menus = [
                 </tbody>
             </table>
 
-            <button type="submit">Guardar Pedidos</button>
+            <button type="button" onclick="showModal()">Guardar Pedidos</button>
         </form>
     </div>
+
+    <!-- Modal -->
+    <div id="confirmationModal" class="modal">
+        <div class="modal-content">
+            <h2>¿Estas seguro de realizar este pedido?</h2>
+            <div class="modal-buttons">
+                <button class="yes-button" onclick="submitForm()">SI</button>
+                <button class="no-button" onclick="closeModal()">NO</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mostrar el modal
+        function showModal() {
+            document.getElementById('confirmationModal').style.display = 'block';
+        }
+
+        // Cerrar el modal
+        function closeModal() {
+            document.getElementById('confirmationModal').style.display = 'none';
+        }
+
+        // Enviar el formulario
+        function submitForm() {
+            document.getElementById('pedidoForm').submit();
+        }
+    </script>
 </body>
 </html>
