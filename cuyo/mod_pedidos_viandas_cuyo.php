@@ -22,7 +22,7 @@ $mensaje = '';
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $fecha_seleccionada = $_POST['fecha'];
     $hora_actual = date('H:i');
-    $hora_limite = '12:00';
+    $hora_limite = '11:00';
     $fecha_hoy = date('Y-m-d');
     $es_mismo_dia = ($fecha_seleccionada == $fecha_hoy);
 
@@ -310,7 +310,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             const modalText = document.getElementById('modalText');
 
             actualizarBtn.addEventListener('click', function(event) {
-                const fechaSeleccionada = new Date(fechaInput.value + 'T12:00:00');
+                const fechaSeleccionada = new Date(fechaInput.value + 'T11:00:00');
                 const ahora = new Date();
 
                 if (ahora >= fechaSeleccionada) {
