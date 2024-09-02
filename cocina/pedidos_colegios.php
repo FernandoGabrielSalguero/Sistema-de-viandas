@@ -20,10 +20,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['filtrar_fecha'])) {
 
 // Obtener la cantidad total de viandas compradas, agrupadas por nombre de menú y día de entrega
 $query_menus = "
-    SELECT m.Nombre AS MenuNombre, DATE_FORMAT(pc.Fecha_entrega, '%d/%m/%y') AS FechaEntrega, COUNT(DISTINCT pc.Id) AS Cantidad
+    SELECT DISTINCT m.Nombre AS MenuNombre, DATE_FORMAT(pc.Fecha_entrega, '%d/%m/%y') AS FechaEntrega, COUNT(DISTINCT pc.Id) AS Cantidad
     FROM Pedidos_Comida pc
     JOIN Menú m ON pc.Menú_Id = m.Id
-    WHERE pc.Estado = 'Procesando'";  // Filtro base por Estado
+    WHERE pc.Estado = 'Procesando'";
 
 // Inicializar arreglo de parámetros
 $params = [];
@@ -53,13 +53,13 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Obtener la cantidad total de viandas compradas, divididas por colegio y cursos
 $query_colegios = "
-    SELECT c.Nombre AS ColegioNombre, cu.Nombre AS CursoNombre, m.Nombre AS MenuNombre, COUNT(DISTINCT pc.Id) AS Cantidad, DATE_FORMAT(pc.Fecha_entrega, '%d/%m/%y') AS FechaEntrega
+    SELECT DISTINCT c.Nombre AS ColegioNombre, cu.Nombre AS CursoNombre, m.Nombre AS MenuNombre, COUNT(DISTINCT pc.Id) AS Cantidad, DATE_FORMAT(pc.Fecha_entrega, '%d/%m/%y') AS FechaEntrega
     FROM Pedidos_Comida pc
     JOIN Hijos h ON pc.Hijo_Id = h.Id
     JOIN Colegios c ON h.Colegio_Id = c.Id
     JOIN Cursos cu ON h.Curso_Id = cu.Id
     JOIN Menú m ON pc.Menú_Id = m.Id
-    WHERE pc.Estado = 'Procesando'";  // Filtro base por Estado
+    WHERE pc.Estado = 'Procesando'";
 
 // Inicializar arreglo de parámetros
 $params = [];
@@ -83,7 +83,7 @@ $colegios = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Obtener los alumnos con preferencias alimenticias
 $query_preferencias = "
-    SELECT m.Nombre AS MenuNombre, DATE_FORMAT(pc.Fecha_entrega, '%d/%m/%y') AS FechaEntrega, 
+    SELECT DISTINCT m.Nombre AS MenuNombre, DATE_FORMAT(pc.Fecha_entrega, '%d/%m/%y') AS FechaEntrega, 
            c.Nombre AS ColegioNombre, cu.Nombre AS CursoNombre, 
            h.Nombre AS AlumnoNombre, p.Nombre AS PreferenciaNombre
     FROM Pedidos_Comida pc
@@ -194,8 +194,6 @@ $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <h2>Totalidad de Viandas por Colegio y Nivel</h2>
     <?php
 
-    // Asegúrate de que $niveles_data esté inicializado como un array vacío si no se ha llenado.
-
     // Definir niveles y cursos
     $niveles = [
         'Nivel Inicial' => ['Nivel Inicial Sala 3A', 'Nivel Inicial Sala 3B', 'Nivel Inicial Sala 4A', 'Nivel Inicial Sala 4B', 'Nivel Inicial Sala 5A', 'Nivel Inicial Sala 5B'],
@@ -259,9 +257,6 @@ $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
     else : ?>
         <p>No hay datos disponibles para mostrar.</p>
     <?php endif; ?>
-
-
-
 
     <h2>Preferencias Alimenticias</h2>
     <table border="1">
