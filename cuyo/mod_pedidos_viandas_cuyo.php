@@ -22,12 +22,12 @@ $mensaje = '';
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $fecha_seleccionada = $_POST['fecha'];
     $hora_actual = date('H:i');
-    $hora_limite = '10:00';
+    $hora_limite = '12:00';
     $fecha_hoy = date('Y-m-d');
     $es_mismo_dia = ($fecha_seleccionada == $fecha_hoy);
 
     if ($es_mismo_dia && $hora_actual >= $hora_limite) {
-        $mensaje = "No se pueden actualizar los pedidos después de las 10:00 AM del día seleccionado.";
+        $mensaje = "No se pueden actualizar los pedidos después de las 11:00 AM del día seleccionado.";
     } else {
         // Obtener los pedidos del día seleccionado
         $stmt = $pdo->prepare("SELECT d.id, d.planta, d.menu, d.turno, d.cantidad 
@@ -310,12 +310,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             const modalText = document.getElementById('modalText');
 
             actualizarBtn.addEventListener('click', function(event) {
-                const fechaSeleccionada = new Date(fechaInput.value + 'T10:00:00');
+                const fechaSeleccionada = new Date(fechaInput.value + 'T12:00:00');
                 const ahora = new Date();
 
                 if (ahora >= fechaSeleccionada) {
                     event.preventDefault(); // Prevenir el envío del formulario
-                    modalText.innerText = `Este pedido se podía actualizar hasta el ${fechaSeleccionada.toLocaleDateString('es-ES')} a las 10hs.`;
+                    modalText.innerText = `Este pedido se podía actualizar hasta el ${fechaSeleccionada.toLocaleDateString('es-ES')} a las 11hs.`;
                     modal.style.display = 'block';
                 }
             });
