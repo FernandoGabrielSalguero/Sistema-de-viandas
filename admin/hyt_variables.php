@@ -5,7 +5,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 include '../includes/header_admin.php';
-include 'includes/db.php'; // Asegúrate de que esta ruta es correcta
+include '..includes/db.php';
 
 
 // Gestión de precios_hyt
