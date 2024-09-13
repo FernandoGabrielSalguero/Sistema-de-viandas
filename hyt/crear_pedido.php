@@ -4,6 +4,10 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'hyt_agencia') {
     header("Location: ../login.php");
     exit();
 }
+// Habilitar la muestra de errores
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 include '../includes/db.php';
 include '../includes/header_hyt_agencia.php';
