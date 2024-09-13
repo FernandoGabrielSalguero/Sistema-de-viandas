@@ -51,7 +51,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 exit();
             case 'hyt_agencia':
                 echo "<script>console.log('hyt/dashboard_hyt_agencia.php');</script>";
-                header("Location: dashboard_hyt_agencia.php");
+                header("Location: hyt/dashboard_hyt_agencia.php");
                 exit();
             default:
                 echo "<script>console.log('Rol no válido: " . $user['Rol'] . "');</script>";
