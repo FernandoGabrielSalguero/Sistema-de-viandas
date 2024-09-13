@@ -1,20 +1,15 @@
 <?php
-session_start();
-if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'administrador') {
-    header("Location: ../index.php");
-    exit();
-}
 // Habilitar la muestra de errores
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 include '../includes/header_admin.php';
-include '../includes/db.php';
+include '../includes/db.php'; // Asegúrate de que el archivo db.php contiene la conexión PDO
 
 // Verificar que la conexión a la base de datos esté establecida correctamente
-if (!$conn) {
-    die("Error de conexión a la base de datos: " . mysqli_connect_error());
+if (!$pdo) {
+    die("Error de conexión a la base de datos");
 } else {
     echo "Conexión establecida correctamente";
 }
@@ -24,12 +19,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['guardar_precio'])) {
     $nombre = $_POST['nombre'];
     $precio = $_POST['precio'];
 
-    // Insertar en la tabla precios_hyt
-    $query = "INSERT INTO precios_hyt (nombre, precio) VALUES ('$nombre', '$precio')";
-    if (mysqli_query($conn, $query)) {
+    // Insertar en la tabla precios_hyt usando PDO
+    $query = "INSERT INTO precios_hyt (nombre, precio) VALUES (:nombre, :precio)";
+    $stmt = $pdo->prepare($query);
+    if ($stmt->execute(['nombre' => $nombre, 'precio' => $precio])) {
         echo "Precio guardado correctamente";
     } else {
-        echo "Error al guardar el precio: " . mysqli_error($conn);
+        echo "Error al guardar el precio";
     }
 }
 
@@ -37,12 +33,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['guardar_precio'])) {
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['guardar_destino'])) {
     $nombre_destino = $_POST['nombre_destino'];
 
-    // Insertar en la tabla destinos_hyt
-    $query = "INSERT INTO destinos_hyt (nombre) VALUES ('$nombre_destino')";
-    if (mysqli_query($conn, $query)) {
+    // Insertar en la tabla destinos_hyt usando PDO
+    $query = "INSERT INTO destinos_hyt (nombre) VALUES (:nombre)";
+    $stmt = $pdo->prepare($query);
+    if ($stmt->execute(['nombre' => $nombre_destino])) {
         echo "Destino guardado correctamente";
     } else {
-        echo "Error al guardar el destino: " . mysqli_error($conn);
+        echo "Error al guardar el destino";
     }
 }
 ?>
@@ -91,17 +88,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['guardar_destino'])) {
         <th>Precio</th>
     </tr>
     <?php
-    // Obtener los precios actuales
-    $result = mysqli_query($conn, "SELECT * FROM precios_hyt");
-    if ($result) {
-        while ($row = mysqli_fetch_assoc($result)) {
-            echo "<tr>";
-            echo "<td>" . $row['nombre'] . "</td>";
-            echo "<td>" . $row['precio'] . "</td>";
-            echo "</tr>";
-        }
-    } else {
-        echo "Error al obtener los precios: " . mysqli_error($conn);
+    // Obtener los precios actuales usando PDO
+    $stmt = $pdo->query("SELECT * FROM precios_hyt");
+    $precios = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($precios as $row) {
+        echo "<tr>";
+        echo "<td>" . htmlspecialchars($row['nombre']) . "</td>";
+        echo "<td>" . htmlspecialchars($row['precio']) . "</td>";
+        echo "</tr>";
     }
     ?>
 </table>
@@ -112,16 +106,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['guardar_destino'])) {
         <th>Nombre</th>
     </tr>
     <?php
-    // Obtener los destinos actuales
-    $result = mysqli_query($conn, "SELECT * FROM destinos_hyt");
-    if ($result) {
-        while ($row = mysqli_fetch_assoc($result)) {
-            echo "<tr>";
-            echo "<td>" . $row['nombre'] . "</td>";
-            echo "</tr>";
-        }
-    } else {
-        echo "Error al obtener los destinos: " . mysqli_error($conn);
+    // Obtener los destinos actuales usando PDO
+    $stmt = $pdo->query("SELECT * FROM destinos_hyt");
+    $destinos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($destinos as $row) {
+        echo "<tr>";
+        echo "<td>" . htmlspecialchars($row['nombre']) . "</td>";
+        echo "</tr>";
     }
     ?>
 </table>
