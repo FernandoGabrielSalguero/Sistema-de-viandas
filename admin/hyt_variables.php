@@ -48,7 +48,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['guardar_destino'])) {
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Gestión de Precios y Destinos - hyt_variables.php</title>
+    <title>Gestión de Precios y Destinos</title>
+    <link rel="stylesheet" href="../css/hyt_variables.css">
 </head>
 <body>
 
