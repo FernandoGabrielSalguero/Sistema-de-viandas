@@ -4,6 +4,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'hyt_agencia') {
     header("Location: ../login.php");
     exit();
 }
+
 // Habilitar la muestra de errores
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -41,17 +42,33 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['realizar_pedido'])) {
     // Insertar el pedido en la tabla pedidos_hyt
     $stmt_pedido = $pdo->prepare("INSERT INTO pedidos_hyt (nombre_agencia, fecha_pedido, estado, interno, hora_salida, destino_id, hyt_admin_id, observaciones) 
                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-    if ($stmt_pedido->execute([$agencia_id, $fecha_pedido, $estado, $interno, $hora_salida, $destino_id, $hyt_admin_id, $observaciones])) {
-        $pedido_id = $pdo->lastInsertId(); // Obtener el ID del pedido recién creado
 
+    // Ejecución de la consulta y manejo de errores
+    if (!$stmt_pedido->execute([$agencia_id, $fecha_pedido, $estado, $interno, $hora_salida, $destino_id, $hyt_admin_id, $observaciones])) {
+        // Obtener detalles del error
+        $errorInfo = $stmt_pedido->errorInfo();
+        echo "Error al realizar el pedido: " . $errorInfo[2];
+        exit(); // Detener ejecución si falla la inserción en pedidos_hyt
+    } else {
+        // Obtener el ID del pedido recién creado
+        $pedido_id = $pdo->lastInsertId(); 
+        
         // Insertar el detalle del pedido en la tabla detalle_pedidos_hyt
         $stmt_detalle = $pdo->prepare("INSERT INTO detalle_pedidos_hyt (pedido_id, nombre, precio, cantidad) VALUES (?, ?, ?, ?)");
+        
         foreach ($_POST['productos'] as $producto_id => $cantidad) {
             if ($cantidad > 0) {
+                // Obtener los detalles del producto (nombre y precio)
                 $stmt_producto = $pdo->prepare("SELECT nombre, precio FROM precios_hyt WHERE id = ?");
                 $stmt_producto->execute([$producto_id]);
                 $producto = $stmt_producto->fetch(PDO::FETCH_ASSOC);
-                $stmt_detalle->execute([$pedido_id, $producto['nombre'], $producto['precio'], $cantidad]);
+                
+                // Inserción de detalles y manejo de errores
+                if (!$stmt_detalle->execute([$pedido_id, $producto['nombre'], $producto['precio'], $cantidad])) {
+                    $errorInfo = $stmt_detalle->errorInfo();
+                    echo "Error al insertar el detalle del pedido: " . $errorInfo[2];
+                    exit(); // Detener ejecución si falla la inserción en detalle_pedidos_hyt
+                }
             }
         }
 
@@ -67,20 +84,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['realizar_pedido'])) {
             }
         }
         $to = "correo@cliente.com"; // Reemplazar por el correo del cliente
-        mail($to, $subject, $message); // Función mail para enviar el correo
-
-        $success = "Pedido realizado correctamente y se ha enviado un correo.";
-    } else {
-        $error = "Error al realizar el pedido.";
+        if (!mail($to, $subject, $message)) {
+            echo "Error al enviar el correo.";
+        } else {
+            echo "Pedido realizado correctamente y correo enviado.";
+        }
     }
 }
-
-
 ?>
 
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <title>Realizar Pedido</title>
@@ -135,7 +149,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['realizar_pedido'])) {
         }
     </script>
 </head>
-
 <body>
 
     <h1>Realizar un nuevo pedido</h1>
@@ -163,7 +176,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['realizar_pedido'])) {
         <input type="time" id="hora_salida" name="hora_salida" required>
 
         <label for="observaciones">Observaciones:</label>
-        <textarea id="observaciones" name="observaciones" rows="4" cols="50" placeholder="¿Alguna observacion para este pedido?"></textarea>
+        <textarea id="observaciones" name="observaciones" rows="4" cols="50" placeholder="Escriba cualquier observación sobre el pedido"></textarea>
 
         <h2>Detalle del pedido</h2>
 
@@ -186,5 +199,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['realizar_pedido'])) {
     </div>
 
 </body>
-
 </html>
