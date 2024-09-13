@@ -17,25 +17,15 @@ include '../includes/load_env.php';
 // Cargar variables del archivo .env
 loadEnv(__DIR__ . '/../.env');
 
-// Función para enviar correo electrónico usando SMTP (basada en tu ejemplo)
+// Función para enviar correo electrónico usando SMTP
 function enviarCorreo($to, $subject, $message) {
     $headers = "From: " . getenv('SMTP_USERNAME') . "\r\n" .
                "Reply-To: " . getenv('SMTP_USERNAME') . "\r\n" .
                "X-Mailer: PHP/" . phpversion();
 
-    // Configuración del transporte SMTP
-    $params = [
-        'host' => getenv('SMTP_HOST'),
-        'port' => getenv('SMTP_PORT'),
-        'auth' => true,
-        'username' => getenv('SMTP_USERNAME'),
-        'password' => getenv('SMTP_PASSWORD'),
-    ];
-
-    // Usar la función mail() de PHP
-    ini_set('SMTP', $params['host']);
-    ini_set('smtp_port', $params['port']);
-    ini_set('sendmail_from', $params['username']);
+    ini_set('SMTP', getenv('SMTP_HOST'));
+    ini_set('smtp_port', getenv('SMTP_PORT'));
+    ini_set('sendmail_from', getenv('SMTP_USERNAME'));
 
     return mail($to, $subject, $message, $headers);
 }
@@ -45,15 +35,14 @@ $agencia_id = $_SESSION['usuario_id'];
 $stmt_agencia = $pdo->prepare("SELECT Usuario, Correo FROM Usuarios WHERE Id = ?");
 $stmt_agencia->execute([$agencia_id]);
 $agencia_data = $stmt_agencia->fetch(PDO::FETCH_ASSOC);
-$nombre_agencia = $agencia_data['Usuario'];  // Nombre del usuario como nombre_agencia
-$correo_agencia = $agencia_data['Correo'];   // Correo del usuario
+$nombre_agencia = $agencia_data['Usuario'];  
+$correo_agencia = $agencia_data['Correo'];  
 
-// Obtener los destinos disponibles para el menú desplegable
+// Obtener destinos y productos
 $stmt_destinos = $pdo->prepare("SELECT id, nombre FROM destinos_hyt");
 $stmt_destinos->execute();
 $destinos = $stmt_destinos->fetchAll(PDO::FETCH_ASSOC);
 
-// Obtener los productos en venta de la tabla precios_hyt
 $stmt_precios = $pdo->prepare("SELECT id, nombre, precio FROM precios_hyt WHERE en_venta = 1");
 $stmt_precios->execute();
 $productos = $stmt_precios->fetchAll(PDO::FETCH_ASSOC);
@@ -69,25 +58,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['realizar_pedido'])) {
     $destino_id = $_POST['destino'];
     $hora_salida = $_POST['hora_salida'];
     $interno = $_POST['interno'];
-    $observaciones = $_POST['observaciones'];  // Añadir observaciones
-    $fecha_pedido = date('Y-m-d');  // Fecha actual
-    $estado = 'vigente'; // El pedido comienza como "vigente"
+    $observaciones = $_POST['observaciones'];
+    $fecha_pedido = date('Y-m-d');
+    $estado = 'vigente';
 
-    // Insertar el pedido en la tabla pedidos_hyt
+    // Verificar los datos enviados desde el formulario
+    echo "<pre>";
+    print_r($_POST);
+    echo "</pre>";
+
+    // Insertar en pedidos_hyt
     $stmt_pedido = $pdo->prepare("INSERT INTO pedidos_hyt (nombre_agencia, correo_electronico_agencia, fecha_pedido, estado, interno, hora_salida, destino_id, hyt_admin_id, observaciones) 
                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    
+
     if (!$stmt_pedido->execute([$nombre_agencia, $correo_agencia, $fecha_pedido, $estado, $interno, $hora_salida, $destino_id, $hyt_admin_id, $observaciones])) {
-        // Obtener detalles del error
         $errorInfo = $stmt_pedido->errorInfo();
         echo "Error al realizar el pedido: " . $errorInfo[2];
-        exit(); // Detener ejecución si falla la inserción en pedidos_hyt
+        exit();
     } else {
-        $pedido_id = $pdo->lastInsertId(); // Obtener el ID del pedido recién creado
+        $pedido_id = $pdo->lastInsertId(); 
 
-        // Insertar el detalle del pedido en la tabla detalle_pedidos_hyt
+        // Insertar detalle del pedido
         $stmt_detalle = $pdo->prepare("INSERT INTO detalle_pedidos_hyt (pedido_id, nombre, precio, cantidad) VALUES (?, ?, ?, ?)");
-        
         foreach ($_POST['productos'] as $producto_id => $cantidad) {
             if ($cantidad > 0) {
                 $stmt_producto = $pdo->prepare("SELECT nombre, precio FROM precios_hyt WHERE id = ?");
@@ -101,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['realizar_pedido'])) {
             }
         }
 
-        // Enviar el correo con el detalle del pedido
+        // Enviar correo
         $subject = "Detalle del Pedido Realizado";
         $message = "Se ha realizado un pedido con los siguientes detalles:\n\n";
         foreach ($_POST['productos'] as $producto_id => $cantidad) {
@@ -113,11 +105,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['realizar_pedido'])) {
             }
         }
 
-        // Usar el correo del cliente cargado dinámicamente
         if (!enviarCorreo($correo_agencia, $subject, $message)) {
             echo "Error al enviar el correo.";
         } else {
-            echo "Pedido realizado correctamente y correo enviado a $correo_agencia.";
+            echo "Pedido realizado correctamente y correo enviado.";
         }
     }
 }
@@ -130,7 +121,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['realizar_pedido'])) {
     <title>Realizar Pedido</title>
     <link rel="stylesheet" href="../css/hyt_variables.css">
     <style>
-        /* Estilos del modal */
         #modalConfirmacion {
             position: fixed;
             left: 0;
