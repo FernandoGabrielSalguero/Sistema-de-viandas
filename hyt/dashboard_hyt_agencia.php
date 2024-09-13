@@ -8,18 +8,22 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'hyt_agencia') {
 include '../includes/header_hyt_agencia.php';
 include '../includes/db.php';
 
+// Obtener la fecha y hora actual
+$currentDate = date('Y-m-d');
+$currentTime = date('H:i');
+
 // Obtener los pedidos del usuario hyt_agencia actual
 $agencia_id = $_SESSION['usuario_id'];
 
-$query = "SELECT p.id, p.fecha_pedido, p.estado, SUM(dp.almuerzo_caliente + dp.cena_caliente) as total_viandas
+$query = "SELECT p.id, p.fecha_pedido, p.estado, p.interno, p.hora_salida, p.observaciones, p.destino_id, d.nombre as destino_nombre
           FROM pedidos_hyt p
-          LEFT JOIN detalle_pedidos_hyt dp ON p.id = dp.pedido_id
-          WHERE p.agencia_id = ? 
-          GROUP BY p.id, p.fecha_pedido, p.estado";
+          LEFT JOIN destinos_hyt d ON p.destino_id = d.id
+          WHERE p.nombre_agencia = ?";
 
 $stmt = $pdo->prepare($query);
 $stmt->execute([$agencia_id]);
 $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 ?>
 
 <!DOCTYPE html>
@@ -28,30 +32,101 @@ $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <title>Dashboard HYT Agencia</title>
     <link rel="stylesheet" href="../css/hyt_variables.css">
+    <style>
+        .pedido-card {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            background-color: #fff;
+        }
+
+        .pedido-card h3 {
+            margin: 0;
+            font-size: 1.5em;
+            color: #007bff;
+        }
+
+        .pedido-card table {
+            width: 100%;
+            margin: 10px 0;
+            border-collapse: collapse;
+        }
+
+        .pedido-card table, .pedido-card th, .pedido-card td {
+            border: 1px solid #ddd;
+        }
+
+        .pedido-card th, .pedido-card td {
+            padding: 8px;
+            text-align: center;
+        }
+
+        .pedido-card .estado {
+            margin-top: 10px;
+        }
+
+        .pedido-card .button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .pedido-card .button[disabled] {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
 </head>
 <body>
     <h1>Tus Pedidos de Viandas</h1>
 
-    <table>
-        <thead>
-            <tr>
-                <th>ID Pedido</th>
-                <th>Fecha de Pedido</th>
-                <th>Estado</th>
-                <th>Total Viandas</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($pedidos as $pedido): ?>
-            <tr>
-                <td><?php echo htmlspecialchars($pedido['id']); ?></td>
-                <td><?php echo htmlspecialchars($pedido['fecha_pedido']); ?></td>
-                <td><?php echo htmlspecialchars($pedido['estado']); ?></td>
-                <td><?php echo htmlspecialchars($pedido['total_viandas']); ?></td>
-            </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+    <?php foreach ($pedidos as $pedido): ?>
+        <div class="pedido-card">
+            <h3><?php echo htmlspecialchars($pedido['destino_nombre']); ?></h3>
+            <p><strong>N° de Pedido: </strong><?php echo htmlspecialchars($pedido['id']); ?></p>
+            <p><strong>Fecha de Pedido: </strong><?php echo htmlspecialchars($pedido['fecha_pedido']); ?></p>
+            <p><strong>Interno: </strong><?php echo htmlspecialchars($pedido['interno']); ?></p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Hora</th>
+                        <th>Descripción</th>
+                        <th>Cantidad</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    $detalleQuery = "SELECT nombre, cantidad FROM detalle_pedidos_hyt WHERE pedido_id = ?";
+                    $detalleStmt = $pdo->prepare($detalleQuery);
+                    $detalleStmt->execute([$pedido['id']]);
+                    $detalles = $detalleStmt->fetchAll(PDO::FETCH_ASSOC);
+
+                    foreach ($detalles as $detalle): ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($pedido['hora_salida']); ?></td>
+                            <td><?php echo htmlspecialchars($detalle['nombre']); ?></td>
+                            <td><?php echo htmlspecialchars($detalle['cantidad']); ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+
+            <p><strong>Observaciones:</strong> <?php echo htmlspecialchars($pedido['observaciones']); ?></p>
+
+            <?php
+            // Determinar si el botón de actualización debe estar habilitado o deshabilitado
+            $isDisabled = ($currentDate === $pedido['fecha_pedido'] && $currentTime < '10:00') ? '' : 'disabled';
+            ?>
+            <button class="button" <?php echo $isDisabled; ?>>Actualizar</button>
+        </div>
+    <?php endforeach; ?>
 
     <a href="crear_pedido.php" class="button">Crear nuevo pedido</a>
 </body>
