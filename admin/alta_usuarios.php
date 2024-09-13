@@ -174,8 +174,8 @@ $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <option value="administrador">Administrador</option>
             <option value="cuyo_placa">Cuyo Placa</option>
             <option value="transporte_ld">Transporte Larga Distancia</option>
-            <option value="hyt_admin">HYT Admin</option>
-            <option value="hyt_agencia">HYT Agencia</option> 
+            <option value="hyt_admin">H&T Admin</option>
+            <option value="hyt_agencia">H&T Agencia</option> 
         </select>
 
         <label for="saldo">Saldo</label>
