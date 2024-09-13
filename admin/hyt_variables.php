@@ -1,5 +1,5 @@
 <?php
-// Conexión a la base de datos
+include '../includes/header_admin.php';
 include '../includes/db.php';
 
 // Habilitar la muestra de errores
