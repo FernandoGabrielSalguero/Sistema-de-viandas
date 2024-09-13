@@ -34,13 +34,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['realizar_pedido'])) {
     $destino_id = $_POST['destino'];
     $hora_salida = $_POST['hora_salida'];
     $interno = $_POST['interno'];
+    $observaciones = $_POST['observaciones'];  // Añadir observaciones
     $fecha_pedido = date('Y-m-d');  // Fecha actual
     $estado = 'vigente'; // El pedido comienza como "vigente"
 
     // Insertar el pedido en la tabla pedidos_hyt
-    $stmt_pedido = $pdo->prepare("INSERT INTO pedidos_hyt (nombre_agencia, fecha_pedido, estado, interno, hora_salida, destino_id, hyt_admin_id) 
-                                  VALUES (?, ?, ?, ?, ?, ?, ?)");
-    if ($stmt_pedido->execute([$agencia_id, $fecha_pedido, $estado, $interno, $hora_salida, $destino_id, $hyt_admin_id])) {
+    $stmt_pedido = $pdo->prepare("INSERT INTO pedidos_hyt (nombre_agencia, fecha_pedido, estado, interno, hora_salida, destino_id, hyt_admin_id, observaciones) 
+                                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+    if ($stmt_pedido->execute([$agencia_id, $fecha_pedido, $estado, $interno, $hora_salida, $destino_id, $hyt_admin_id, $observaciones])) {
         $pedido_id = $pdo->lastInsertId(); // Obtener el ID del pedido recién creado
 
         // Insertar el detalle del pedido en la tabla detalle_pedidos_hyt
@@ -73,6 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['realizar_pedido'])) {
         $error = "Error al realizar el pedido.";
     }
 }
+
 
 ?>
 
@@ -159,6 +161,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['realizar_pedido'])) {
 
         <label for="hora_salida">Hora de salida:</label>
         <input type="time" id="hora_salida" name="hora_salida" required>
+
+        <label for="observaciones">Observaciones:</label>
+        <textarea id="observaciones" name="observaciones" rows="4" cols="50" placeholder="¿Alguna observacion para este pedido?"></textarea>
 
         <h2>Detalle del pedido</h2>
 
