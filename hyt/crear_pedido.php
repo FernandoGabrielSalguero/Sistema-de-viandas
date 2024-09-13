@@ -130,7 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['confirmar_pedido'])) {
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
+            display: none; /* Cambiado a none inicialmente */
             justify-content: center;
             align-items: center;
         }
@@ -225,7 +225,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['confirmar_pedido'])) {
             <input type="number" id="producto_<?php echo $producto['id']; ?>" class="producto" name="productos[<?php echo $producto['id']; ?>]" data-nombre="<?php echo $producto['nombre']; ?>" data-precio="<?php echo $producto['precio']; ?>" min="0" value="0">
         <?php endforeach; ?>
 
-        <button type="button" onclick="mostrarModal()">Realizar Pedido</button>
+        <button type="button" onclick="mostrarModal()">Revisar Pedido</button>
     </form>
 
     <!-- Modal de confirmación -->
@@ -234,7 +234,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['confirmar_pedido'])) {
             <h2>Confirmar Pedido</h2>
             <div id="detallePedido"></div>
             <button type="button" onclick="cerrarModal()">Cancelar</button>
-            <button type="button" onclick="confirmarPedido()">Aceptar</button>
+            <button type="button" onclick="confirmarPedido()">Confirmar</button>
         </div>
     </div>
 
