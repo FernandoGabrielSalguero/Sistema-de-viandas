@@ -12,7 +12,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 include '../includes/db.php';
-include 'header_admin.php';
+include '../header_admin.php';
 
 // Obtener todos los usuarios hyt_admin
 $stmt_admin = $pdo->prepare("SELECT Id, Nombre FROM Usuarios WHERE Rol = 'hyt_admin'");
