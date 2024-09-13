@@ -11,7 +11,7 @@
         <ul>
             <li><a href="dashboard_hyt_agencia.php">Dashboard</a></li>
             <li><a href="crear_pedido.php">Crear Pedido</a></li>
-            <li><a href="../logout.php">Cerrar sesión</a></li>
+            <li><a href="logout.php">Salir</a></li>
         </ul>
     </nav>
 </header>

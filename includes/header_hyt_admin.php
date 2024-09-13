@@ -12,7 +12,7 @@
             <li><a href="dashboard_hyt_admin.php">Dashboard</a></li>
             <li><a href="pedidos_hyt_admin.php">Pedidos</a></li>
             <li><a href="agencias_hyt.php">Agencias</a></li>
-            <li><a href="../logout.php">Cerrar sesión</a></li>
+            <li><a href="logout.php">Salir</a></li>
         </ul>
     </nav>
 </header>

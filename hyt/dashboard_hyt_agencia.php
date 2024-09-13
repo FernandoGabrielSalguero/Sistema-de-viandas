@@ -5,7 +5,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'hyt_agencia') {
     exit();
 }
 
-include 'header_hyt_agencia.php';
+include '../includes/header_hyt_agencia.php';
 include '../includes/db.php';
 
 // Obtener los pedidos del usuario hyt_agencia actual
