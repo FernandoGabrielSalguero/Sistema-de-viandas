@@ -54,7 +54,7 @@ $hyt_admin = $stmt_admin->fetch(PDO::FETCH_ASSOC);
 $hyt_admin_id = $hyt_admin['hyt_admin_id'];
 
 // Lógica para el formulario
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['confirmar_pedido'])) {
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['realizar_pedido'])) {
     $destino_id = $_POST['destino'];
     $hora_salida = $_POST['hora_salida'];
     $interno = $_POST['interno'];
@@ -71,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['confirmar_pedido'])) {
         echo "Error al realizar el pedido: " . $errorInfo[2];
         exit();
     } else {
-        $pedido_id = $pdo->lastInsertId(); // Obtener el ID del pedido recién creado
+        $pedido_id = $pdo->lastInsertId(); 
 
         // Insertar detalle del pedido
         $stmt_detalle = $pdo->prepare("INSERT INTO detalle_pedidos_hyt (pedido_id, nombre, precio, cantidad) VALUES (?, ?, ?, ?)");
@@ -88,16 +88,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['confirmar_pedido'])) {
             }
         }
 
-        // Preparar correo
-        $subject = "Pedido #$pedido_id Realizado";
+        // Enviar correo
+        $subject = "Detalle del Pedido Realizado";
         $message = "Se ha realizado un pedido con los siguientes detalles:\n\n";
-        $message .= "Nombre de la Agencia: $nombre_agencia\n";
-        $message .= "Correo Electrónico de la Agencia: $correo_agencia\n";
-        $message .= "Destino: " . $_POST['destino_nombre'] . "\n";
-        $message .= "Interno: $interno\n";
-        $message .= "Hora de salida: $hora_salida\n";
-        $message .= "Observaciones: $observaciones\n\n";
-        $message .= "Productos solicitados:\n";
         foreach ($_POST['productos'] as $producto_id => $cantidad) {
             if ($cantidad > 0) {
                 $stmt_producto = $pdo->prepare("SELECT nombre FROM precios_hyt WHERE id = ?");
@@ -122,67 +115,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['confirmar_pedido'])) {
     <meta charset="UTF-8">
     <title>Realizar Pedido</title>
     <link rel="stylesheet" href="../css/hyt_variables.css">
-    <style>
-        #modalConfirmacion {
-            position: fixed;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: none; /* Cambiado a none inicialmente */
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-            width: 60%;
-        }
-
-        button {
-            margin: 10px;
-        }
-
-        input[disabled] {
-            background-color: #e9ecef;
-        }
-
-        .hidden {
-            display: none;
-        }
-    </style>
-    <script>
-        function mostrarModal() {
-            var detallesPedido = '<p>Destino: ' + document.getElementById('destino').options[document.getElementById('destino').selectedIndex].text + '</p>';
-            detallesPedido += '<p>Interno: ' + document.getElementById('interno').value + '</p>';
-            detallesPedido += '<p>Hora de salida: ' + document.getElementById('hora_salida').value + '</p>';
-            detallesPedido += '<p>Observaciones: ' + document.getElementById('observaciones').value + '</p>';
-            detallesPedido += '<h2>Productos</h2>';
-            document.querySelectorAll('.producto').forEach(function(producto) {
-                var nombre = producto.dataset.nombre;
-                var cantidad = producto.value;
-                var precio = producto.dataset.precio;
-                if (cantidad > 0) {
-                    detallesPedido += `<p>${nombre}: ${cantidad} x ${precio} = ${(cantidad * precio).toFixed(2)}</p>`;
-                }
-            });
-            document.getElementById('detallePedido').innerHTML = detallesPedido;
-            document.getElementById('modalConfirmacion').style.display = 'flex';
-        }
-
-        function cerrarModal() {
-            document.getElementById('modalConfirmacion').style.display = 'none';
-        }
-
-        function confirmarPedido() {
-            document.getElementById('pedidoForm').submit();
-        }
-    </script>
 </head>
 <body>
 
@@ -196,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['confirmar_pedido'])) {
     }
     ?>
 
-    <form id="pedidoForm" method="POST" action="">
+    <form method="POST" action="">
         <label for="nombre_agencia">Nombre de la Agencia:</label>
         <input type="text" id="nombre_agencia" name="nombre_agencia" value="<?php echo $nombre_agencia; ?>" disabled>
 
@@ -217,26 +149,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['confirmar_pedido'])) {
         <input type="time" id="hora_salida" name="hora_salida" required>
 
         <label for="observaciones">Observaciones:</label>
-        <textarea id="observaciones" name="observaciones"></textarea>
+        <textarea id="observaciones" name="observaciones" rows="4" cols="50" placeholder="Escriba cualquier observación sobre el pedido"></textarea>
 
         <h2>Detalle del pedido</h2>
+
         <?php foreach ($productos as $producto): ?>
             <label for="producto_<?php echo $producto['id']; ?>"><?php echo $producto['nombre']; ?> (Precio: <?php echo $producto['precio']; ?>):</label>
-            <input type="number" id="producto_<?php echo $producto['id']; ?>" class="producto" name="productos[<?php echo $producto['id']; ?>]" data-nombre="<?php echo $producto['nombre']; ?>" data-precio="<?php echo $producto['precio']; ?>" min="0" value="0">
+            <input type="number" id="producto_<?php echo $producto['id']; ?>" name="productos[<?php echo $producto['id']; ?>]" min="0" value="0">
         <?php endforeach; ?>
 
-        <button type="button" onclick="mostrarModal()">Revisar Pedido</button>
+        <button type="submit" name="realizar_pedido">Realizar Pedido</button>
     </form>
-
-    <!-- Modal de confirmación -->
-    <div id="modalConfirmacion" style="display:none;">
-        <div class="modal-content">
-            <h2>Confirmar Pedido</h2>
-            <div id="detallePedido"></div>
-            <button type="button" onclick="cerrarModal()">Cancelar</button>
-            <button type="button" onclick="confirmarPedido()">Confirmar</button>
-        </div>
-    </div>
 
 </body>
 </html>
