@@ -148,6 +148,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
                 <a href="#" class="tagus">H & T</a>
                 <ul>
                     <li><a href="hyt_variables.php" class="tagus">Variables</a></li>
+                    <li><a href="asignar_agencias.php">Asignar Agencias a Admins</a></li>
                 </ul>
             </li>
 
