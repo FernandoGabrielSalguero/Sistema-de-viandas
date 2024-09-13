@@ -4,6 +4,10 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'hyt_agencia') {
     header("Location: ../login.php");
     exit();
 }
+// Habilitar la muestra de errores
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 include '../includes/header_hyt_agencia.php';
 include '../includes/db.php';
@@ -41,6 +45,8 @@ $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             text-align: center;
             background-color: #fff;
+            max-width: 400px;
+            margin: 20px auto;
         }
 
         .pedido-card h3 {
@@ -84,50 +90,56 @@ $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </style>
 </head>
 <body>
-    <h1>Tus Pedidos de Viandas</h1>
+    <h1 style="text-align: center;">Tus Pedidos de Viandas</h1>
 
-    <?php foreach ($pedidos as $pedido): ?>
-        <div class="pedido-card">
-            <h3><?php echo htmlspecialchars($pedido['destino_nombre']); ?></h3>
-            <p><strong>N° de Pedido: </strong><?php echo htmlspecialchars($pedido['id']); ?></p>
-            <p><strong>Fecha de Pedido: </strong><?php echo htmlspecialchars($pedido['fecha_pedido']); ?></p>
-            <p><strong>Interno: </strong><?php echo htmlspecialchars($pedido['interno']); ?></p>
+    <?php if (count($pedidos) > 0): ?>
+        <?php foreach ($pedidos as $pedido): ?>
+            <div class="pedido-card">
+                <h3><?php echo htmlspecialchars($pedido['destino_nombre']); ?></h3>
+                <p><strong>N° de Pedido: </strong><?php echo htmlspecialchars($pedido['id']); ?></p>
+                <p><strong>Fecha de Pedido: </strong><?php echo htmlspecialchars($pedido['fecha_pedido']); ?></p>
+                <p><strong>Interno: </strong><?php echo htmlspecialchars($pedido['interno']); ?></p>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Hora</th>
-                        <th>Descripción</th>
-                        <th>Cantidad</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    $detalleQuery = "SELECT nombre, cantidad FROM detalle_pedidos_hyt WHERE pedido_id = ?";
-                    $detalleStmt = $pdo->prepare($detalleQuery);
-                    $detalleStmt->execute([$pedido['id']]);
-                    $detalles = $detalleStmt->fetchAll(PDO::FETCH_ASSOC);
-
-                    foreach ($detalles as $detalle): ?>
+                <table>
+                    <thead>
                         <tr>
-                            <td><?php echo htmlspecialchars($pedido['hora_salida']); ?></td>
-                            <td><?php echo htmlspecialchars($detalle['nombre']); ?></td>
-                            <td><?php echo htmlspecialchars($detalle['cantidad']); ?></td>
+                            <th>Hora</th>
+                            <th>Descripción</th>
+                            <th>Cantidad</th>
                         </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $detalleQuery = "SELECT nombre, cantidad FROM detalle_pedidos_hyt WHERE pedido_id = ?";
+                        $detalleStmt = $pdo->prepare($detalleQuery);
+                        $detalleStmt->execute([$pedido['id']]);
+                        $detalles = $detalleStmt->fetchAll(PDO::FETCH_ASSOC);
 
-            <p><strong>Observaciones:</strong> <?php echo htmlspecialchars($pedido['observaciones']); ?></p>
+                        foreach ($detalles as $detalle): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($pedido['hora_salida']); ?></td>
+                                <td><?php echo htmlspecialchars($detalle['nombre']); ?></td>
+                                <td><?php echo htmlspecialchars($detalle['cantidad']); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
 
-            <?php
-            // Determinar si el botón de actualización debe estar habilitado o deshabilitado
-            $isDisabled = ($currentDate === $pedido['fecha_pedido'] && $currentTime < '10:00') ? '' : 'disabled';
-            ?>
-            <button class="button" <?php echo $isDisabled; ?>>Actualizar</button>
-        </div>
-    <?php endforeach; ?>
+                <p><strong>Observaciones:</strong> <?php echo htmlspecialchars($pedido['observaciones']); ?></p>
 
-    <a href="crear_pedido.php" class="button">Crear nuevo pedido</a>
+                <?php
+                // Determinar si el botón de actualización debe estar habilitado o deshabilitado
+                $isDisabled = ($currentDate === $pedido['fecha_pedido'] && $currentTime < '10:00') ? '' : 'disabled';
+                ?>
+                <button class="button" <?php echo $isDisabled; ?>>Actualizar</button>
+            </div>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <p style="text-align: center;">No hay pedidos disponibles.</p>
+    <?php endif; ?>
+
+    <div style="text-align: center; margin-top: 20px;">
+        <a href="crear_pedido.php" class="button">Crear nuevo pedido</a>
+    </div>
 </body>
 </html>
