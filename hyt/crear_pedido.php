@@ -62,11 +62,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['realizar_pedido'])) {
     $fecha_pedido = date('Y-m-d');
     $estado = 'vigente';
 
-    // Verificar los datos enviados desde el formulario
-    echo "<pre>";
-    print_r($_POST);
-    echo "</pre>";
-
     // Insertar en pedidos_hyt
     $stmt_pedido = $pdo->prepare("INSERT INTO pedidos_hyt (nombre_agencia, correo_electronico_agencia, fecha_pedido, estado, interno, hora_salida, destino_id, hyt_admin_id, observaciones) 
                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
@@ -120,58 +115,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['realizar_pedido'])) {
     <meta charset="UTF-8">
     <title>Realizar Pedido</title>
     <link rel="stylesheet" href="../css/hyt_variables.css">
-    <style>
-        #modalConfirmacion {
-            position: fixed;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        button {
-            margin: 10px;
-        }
-
-        input[disabled] {
-            background-color: #e9ecef;
-        }
-    </style>
-    <script>
-        function mostrarModal() {
-            var detallesPedido = '';
-            document.querySelectorAll('.producto').forEach(function(producto) {
-                var nombre = producto.dataset.nombre;
-                var cantidad = producto.value;
-                var precio = producto.dataset.precio;
-                if (cantidad > 0) {
-                    detallesPedido += `<p>${nombre}: ${cantidad} x ${precio} = ${(cantidad * precio).toFixed(2)}</p>`;
-                }
-            });
-            document.getElementById('detallePedido').innerHTML = detallesPedido;
-            document.getElementById('modalConfirmacion').style.display = 'block';
-        }
-
-        function cerrarModal() {
-            document.getElementById('modalConfirmacion').style.display = 'none';
-        }
-
-        function enviarPedido() {
-            document.getElementById('pedidoForm').submit();
-        }
-    </script>
 </head>
 <body>
 
@@ -185,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['realizar_pedido'])) {
     }
     ?>
 
-    <form id="pedidoForm" method="POST" action="">
+    <form method="POST" action="">
         <label for="nombre_agencia">Nombre de la Agencia:</label>
         <input type="text" id="nombre_agencia" name="nombre_agencia" value="<?php echo $nombre_agencia; ?>" disabled>
 
@@ -212,21 +155,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['realizar_pedido'])) {
 
         <?php foreach ($productos as $producto): ?>
             <label for="producto_<?php echo $producto['id']; ?>"><?php echo $producto['nombre']; ?> (Precio: <?php echo $producto['precio']; ?>):</label>
-            <input type="number" id="producto_<?php echo $producto['id']; ?>" class="producto" name="productos[<?php echo $producto['id']; ?>]" data-nombre="<?php echo $producto['nombre']; ?>" data-precio="<?php echo $producto['precio']; ?>" min="0" value="0">
+            <input type="number" id="producto_<?php echo $producto['id']; ?>" name="productos[<?php echo $producto['id']; ?>]" min="0" value="0">
         <?php endforeach; ?>
 
-        <button type="button" onclick="mostrarModal()">Realizar Pedido</button>
+        <button type="submit" name="realizar_pedido">Realizar Pedido</button>
     </form>
-
-    <!-- Modal de confirmación -->
-    <div id="modalConfirmacion" style="display:none;">
-        <div class="modal-content">
-            <h2>Confirmar Pedido</h2>
-            <div id="detallePedido"></div>
-            <button type="button" onclick="cerrarModal()">Cancelar</button>
-            <button type="button" onclick="enviarPedido()">Aceptar</button>
-        </div>
-    </div>
 
 </body>
 </html>
