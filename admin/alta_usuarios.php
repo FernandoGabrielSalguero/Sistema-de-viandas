@@ -173,7 +173,9 @@ $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <option value="representante">Representante</option>
             <option value="administrador">Administrador</option>
             <option value="cuyo_placa">Cuyo Placa</option>
-            <option value="transporte_ld">Transporte Larga Distancia</option> <!-- Agregados nuevos roles -->
+            <option value="transporte_ld">Transporte Larga Distancia</option>
+            <option value="hyt_admin">HYT Admin</option>
+            <option value="hyt_agencia">HYT Agencia</option> 
         </select>
 
         <label for="saldo">Saldo</label>
@@ -223,8 +225,6 @@ $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <option value="representante" <?php echo ($usuario['Rol'] == 'representante') ? 'selected' : ''; ?>>Representante</option>
                         <option value="administrador" <?php echo ($usuario['Rol'] == 'administrador') ? 'selected' : ''; ?>>Administrador</option>
                         <option value="cuyo_placa" <?php echo ($usuario['Rol'] == 'cuyo_placa') ? 'selected' : ''; ?>>Cuyo Placa</option>
-                        <option value="hyt_admin">HYT Admin</option>
-                        <option value="hyt_agencia">HYT Agencia</option> 
                     </select>
                 </td>
                 <td><input type="number" step="0.01" name="saldo" value="<?php echo htmlspecialchars($usuario['Saldo']); ?>" required></td>
