@@ -74,10 +74,37 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['realizar_pedido'])) {
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Realizar Pedido</title>
     <link rel="stylesheet" href="../css/hyt_variables.css">
+    <style>
+        /* Estilos del modal */
+        #modalConfirmacion {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            margin: 10px;
+        }
+    </style>
     <script>
         function mostrarModal() {
             var detallesPedido = '';
@@ -102,51 +129,53 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['realizar_pedido'])) {
         }
     </script>
 </head>
+
 <body>
 
-<h1>Realizar un nuevo pedido</h1>
-<?php
-if (isset($error)) {
-    echo "<p class='error'>$error</p>";
-}
-if (isset($success)) {
-    echo "<p class='success'>$success</p>";
-}
-?>
+    <h1>Realizar un nuevo pedido</h1>
+    <?php
+    if (isset($error)) {
+        echo "<p class='error'>$error</p>";
+    }
+    if (isset($success)) {
+        echo "<p class='success'>$success</p>";
+    }
+    ?>
 
-<form id="pedidoForm" method="POST" action="">
-    <label for="destino">Seleccionar destino:</label>
-    <select id="destino" name="destino" required>
-        <?php foreach ($destinos as $destino): ?>
-            <option value="<?php echo $destino['id']; ?>"><?php echo $destino['nombre']; ?></option>
+    <form id="pedidoForm" method="POST" action="">
+        <label for="destino">Seleccionar destino:</label>
+        <select id="destino" name="destino" required>
+            <?php foreach ($destinos as $destino): ?>
+                <option value="<?php echo $destino['id']; ?>"><?php echo $destino['nombre']; ?></option>
+            <?php endforeach; ?>
+        </select>
+
+        <label for="interno">Interno (Número de interno):</label>
+        <input type="number" id="interno" name="interno" required>
+
+        <label for="hora_salida">Hora de salida:</label>
+        <input type="time" id="hora_salida" name="hora_salida" required>
+
+        <h2>Detalle del pedido</h2>
+
+        <?php foreach ($productos as $producto): ?>
+            <label for="producto_<?php echo $producto['id']; ?>"><?php echo $producto['nombre']; ?> (Precio: <?php echo $producto['precio']; ?>):</label>
+            <input type="number" id="producto_<?php echo $producto['id']; ?>" class="producto" name="productos[<?php echo $producto['id']; ?>]" data-nombre="<?php echo $producto['nombre']; ?>" data-precio="<?php echo $producto['precio']; ?>" min="0" value="0">
         <?php endforeach; ?>
-    </select>
 
-    <label for="interno">Interno (Número de interno):</label>
-    <input type="number" id="interno" name="interno" required>
+        <button type="button" onclick="mostrarModal()">Realizar Pedido</button>
+    </form>
 
-    <label for="hora_salida">Hora de salida:</label>
-    <input type="time" id="hora_salida" name="hora_salida" required>
-
-    <h2>Detalle del pedido</h2>
-
-    <?php foreach ($productos as $producto): ?>
-        <label for="producto_<?php echo $producto['id']; ?>"><?php echo $producto['nombre']; ?> (Precio: <?php echo $producto['precio']; ?>):</label>
-        <input type="number" id="producto_<?php echo $producto['id']; ?>" class="producto" name="productos[<?php echo $producto['id']; ?>]" data-nombre="<?php echo $producto['nombre']; ?>" data-precio="<?php echo $producto['precio']; ?>" min="0" value="0">
-    <?php endforeach; ?>
-
-    <button type="button" onclick="mostrarModal()">Realizar Pedido</button>
-</form>
-
-<!-- Modal de confirmación -->
-<div id="modalConfirmacion" style="display:none;">
-    <div class="modal-content">
-        <h2>Confirmar Pedido</h2>
-        <div id="detallePedido"></div>
-        <button type="button" onclick="cerrarModal()">Cancelar</button>
-        <button type="button" onclick="enviarPedido()">Aceptar</button>
+    <!-- Modal de confirmación -->
+    <div id="modalConfirmacion" style="display:none;">
+        <div class="modal-content">
+            <h2>Confirmar Pedido</h2>
+            <div id="detallePedido"></div>
+            <button type="button" onclick="cerrarModal()">Cancelar</button>
+            <button type="button" onclick="enviarPedido()">Aceptar</button>
+        </div>
     </div>
-</div>
 
 </body>
+
 </html>
