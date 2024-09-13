@@ -8,11 +8,11 @@ include '../includes/header_admin.php';
 include '../includes/db.php'; // Asegúrate de que el archivo db.php contiene la conexión PDO
 
 // Verificar que la conexión a la base de datos esté establecida correctamente
-if (!$pdo) {
-    die("Error de conexión a la base de datos");
-} else {
-    echo "Conexión establecida correctamente";
-}
+// if (!$pdo) {
+//     die("Error de conexión a la base de datos");
+// } else {
+//     echo "Conexión establecida correctamente";
+// }
 
 // Gestión de precios_hyt
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['guardar_precio'])) {

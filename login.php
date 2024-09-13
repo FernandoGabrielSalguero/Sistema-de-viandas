@@ -41,10 +41,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 echo "<script>console.log('Redirigiendo a representante/dashboard.php');</script>";
                 header("Location: representante/dashboard.php");
                 exit();
-                case 'cuyo_placa':
-                    echo "<script>console.log('Redirigiendo a cuyo/dashboard_cuyo_placa.php');</script>";
-                    header("Location: cuyo/dashboard_cuyo_placa.php");
-                    exit();
+            case 'cuyo_placa':
+                echo "<script>console.log('Redirigiendo a cuyo/dashboard_cuyo_placa.php');</script>";
+                header("Location: cuyo/dashboard_cuyo_placa.php");
+                exit();
+            case 'hyt_admin':
+                echo "<script>console.log('Redirigiendo a admin/dashboard_hyt_admin.php');</script>";
+                header("Location: admin/dashboard_hyt_admin.php");
+                exit();
+            case 'hyt_agencia':
+                echo "<script>console.log('Redirigiendo a agencia/dashboard_hyt_agencia.php');</script>";
+                header("Location: agencia/dashboard_hyt_agencia.php");
+                exit();
             default:
                 echo "<script>console.log('Rol no válido: " . $user['Rol'] . "');</script>";
                 header("Location: login.php?error=Rol no válido");
