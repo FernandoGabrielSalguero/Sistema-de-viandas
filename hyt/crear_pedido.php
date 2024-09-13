@@ -73,6 +73,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['realizar_pedido'])) {
     $fecha_pedido = date('Y-m-d');  // Fecha actual
     $estado = 'vigente'; // El pedido comienza como "vigente"
 
+
+    echo "<h3>Datos enviados a la tabla pedidos_hyt:</h3>";
+    // Datos de debug
+    echo "nombre_agencia: " . $nombre_agencia . "<br>";
+    echo "fecha_pedido: " . $fecha_pedido . "<br>";
+    echo "estado: " . $estado . "<br>";
+    echo "interno: " . $interno . "<br>";
+    echo "hora_salida: " . $hora_salida . "<br>";
+    echo "destino_id: " . $destino_id . "<br>";
+    echo "hyt_admin_id: " . $hyt_admin_id . "<br>";
+    echo "observaciones: " . $observaciones . "<br><br>";
+
     // Insertar el pedido en la tabla pedidos_hyt
     $stmt_pedido = $pdo->prepare("INSERT INTO pedidos_hyt (nombre_agencia, fecha_pedido, estado, interno, hora_salida, destino_id, hyt_admin_id, observaciones) 
                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
@@ -88,16 +100,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['realizar_pedido'])) {
         // Insertar el detalle del pedido en la tabla detalle_pedidos_hyt
         $stmt_detalle = $pdo->prepare("INSERT INTO detalle_pedidos_hyt (pedido_id, nombre, precio, cantidad) VALUES (?, ?, ?, ?)");
         
+        echo "<h3>Datos enviados a la tabla detalle_pedidos_hyt:</h3>";
         foreach ($_POST['productos'] as $producto_id => $cantidad) {
             if ($cantidad > 0) {
                 $stmt_producto = $pdo->prepare("SELECT nombre, precio FROM precios_hyt WHERE id = ?");
                 $stmt_producto->execute([$producto_id]);
                 $producto = $stmt_producto->fetch(PDO::FETCH_ASSOC);
-                if (!$stmt_detalle->execute([$pedido_id, $producto['nombre'], $producto['precio'], $cantidad])) {
-                    $errorInfo = $stmt_detalle->errorInfo();
-                    echo "Error al insertar el detalle del pedido: " . $errorInfo[2];
-                    exit();
-                }
+        
+                echo "Producto: " . $producto['nombre'] . "<br>";
+                echo "Precio: " . $producto['precio'] . "<br>";
+                echo "Cantidad: " . $cantidad . "<br><br>";
+        
+                // Aquí es donde realmente se inserta el detalle del pedido
+                $stmt_detalle->execute([$pedido_id, $producto['nombre'], $producto['precio'], $cantidad]);
             }
         }
 
