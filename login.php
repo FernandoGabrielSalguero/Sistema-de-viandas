@@ -46,12 +46,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 header("Location: cuyo/dashboard_cuyo_placa.php");
                 exit();
             case 'hyt_admin':
-                echo "<script>console.log('Redirigiendo a admin/dashboard_hyt_admin.php');</script>";
+                echo "<script>console.log('Redirigiendo a hyt/dashboard_hyt_admin.php');</script>";
                 header("Location: hyt/dashboard_hyt_admin.php");
                 exit();
             case 'hyt_agencia':
-                echo "<script>console.log('Redirigiendo a agencia/dashboard_hyt_agencia.php');</script>";
-                header("Location: hyt/dashboard_hyt_agencia.php");
+                echo "<script>console.log('hyt/dashboard_hyt_agencia.php');</script>";
+                header("Location: dashboard_hyt_agencia.php");
                 exit();
             default:
                 echo "<script>console.log('Rol no válido: " . $user['Rol'] . "');</script>";

@@ -5,7 +5,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'hyt_admin') {
     exit();
 }
 
-include 'header_hyt_admin.php';
+include '../includes/header_hyt_admin.php';
 include '../includes/db.php';
 
 // Ejemplo de consulta para obtener los pedidos realizados por las agencias bajo la supervisión del hyt_admin
