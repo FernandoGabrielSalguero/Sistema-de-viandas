@@ -7,12 +7,6 @@ error_reporting(E_ALL);
 include '../includes/header_admin.php';
 include '../includes/db.php'; // Asegúrate de que esta ruta es correcta
 
-// Verificar que la conexión a la base de datos esté establecida correctamente
-if (!$conn) {
-    die("Error de conexión: " . mysqli_connect_error());
-} else {
-    echo "Conexión establecida correctamente";
-}
 
 // Gestión de precios_hyt
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['guardar_precio'])) {
