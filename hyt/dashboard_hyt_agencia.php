@@ -22,10 +22,10 @@ $agencia_id = $_SESSION['usuario_id'];
 $query = "SELECT p.id, p.fecha_pedido, p.estado, p.interno, p.hora_salida, p.observaciones, p.destino_id, d.nombre as destino_nombre
           FROM pedidos_hyt p
           LEFT JOIN destinos_hyt d ON p.destino_id = d.id
-          WHERE p.nombre_agencia = ?";
+          WHERE p.agencia_id = ?"; // Cambiado a agencia_id en lugar de nombre_agencia
 
 $stmt = $pdo->prepare($query);
-$stmt->execute([$agencia_id]);
+$stmt->execute([$agencia_id]); // Usando agencia_id para filtrar los pedidos
 $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
