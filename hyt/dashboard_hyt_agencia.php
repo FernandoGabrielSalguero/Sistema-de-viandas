@@ -17,15 +17,15 @@ $currentDate = date('Y-m-d');
 $currentTime = date('H:i');
 
 // Obtener los pedidos del usuario hyt_agencia actual
-$agencia_id = $_SESSION['usuario_id'];
+$nombre_agencia = $_SESSION['usuario']; // Asumiendo que el nombre de la agencia está almacenado como usuario en la sesión
 
 $query = "SELECT p.id, p.fecha_pedido, p.estado, p.interno, p.hora_salida, p.observaciones, p.destino_id, d.nombre as destino_nombre
           FROM pedidos_hyt p
           LEFT JOIN destinos_hyt d ON p.destino_id = d.id
-          WHERE p.agencia_id = ?"; // Cambiado a agencia_id en lugar de nombre_agencia
+          WHERE p.nombre_agencia = ?"; // Cambiado de agencia_id a nombre_agencia
 
 $stmt = $pdo->prepare($query);
-$stmt->execute([$agencia_id]); // Usando agencia_id para filtrar los pedidos
+$stmt->execute([$nombre_agencia]); // Usando nombre_agencia para filtrar los pedidos
 $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
