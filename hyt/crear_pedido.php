@@ -13,6 +13,14 @@ error_reporting(E_ALL);
 include '../includes/db.php';
 include '../includes/header_hyt_agencia.php';
 
+// Obtener el nombre y correo de la agencia (usuario actual)
+$agencia_id = $_SESSION['usuario_id'];
+$stmt_agencia = $pdo->prepare("SELECT Usuario, Correo FROM Usuarios WHERE Id = ?");
+$stmt_agencia->execute([$agencia_id]);
+$agencia_data = $stmt_agencia->fetch(PDO::FETCH_ASSOC);
+$nombre_agencia = $agencia_data['Usuario'];  // Nombre del usuario como nombre_agencia
+$correo_agencia = $agencia_data['Correo'];   // Correo del usuario
+
 // Obtener los destinos disponibles para el menú desplegable
 $stmt_destinos = $pdo->prepare("SELECT id, nombre FROM destinos_hyt");
 $stmt_destinos->execute();
@@ -24,7 +32,6 @@ $stmt_precios->execute();
 $productos = $stmt_precios->fetchAll(PDO::FETCH_ASSOC);
 
 // Obtener el hyt_admin asignado a esta agencia
-$agencia_id = $_SESSION['usuario_id'];
 $stmt_admin = $pdo->prepare("SELECT hyt_admin_id FROM hyt_admin_agencia WHERE hyt_agencia_id = ?");
 $stmt_admin->execute([$agencia_id]);
 $hyt_admin = $stmt_admin->fetch(PDO::FETCH_ASSOC);
@@ -42,32 +49,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['realizar_pedido'])) {
     // Insertar el pedido en la tabla pedidos_hyt
     $stmt_pedido = $pdo->prepare("INSERT INTO pedidos_hyt (nombre_agencia, fecha_pedido, estado, interno, hora_salida, destino_id, hyt_admin_id, observaciones) 
                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-
-    // Ejecución de la consulta y manejo de errores
-    if (!$stmt_pedido->execute([$agencia_id, $fecha_pedido, $estado, $interno, $hora_salida, $destino_id, $hyt_admin_id, $observaciones])) {
+    
+    // Ahora se pasa el nombre_agencia y el correo cargado dinámicamente
+    if (!$stmt_pedido->execute([$nombre_agencia, $fecha_pedido, $estado, $interno, $hora_salida, $destino_id, $hyt_admin_id, $observaciones])) {
         // Obtener detalles del error
         $errorInfo = $stmt_pedido->errorInfo();
         echo "Error al realizar el pedido: " . $errorInfo[2];
         exit(); // Detener ejecución si falla la inserción en pedidos_hyt
     } else {
-        // Obtener el ID del pedido recién creado
-        $pedido_id = $pdo->lastInsertId(); 
-        
+        $pedido_id = $pdo->lastInsertId(); // Obtener el ID del pedido recién creado
+
         // Insertar el detalle del pedido en la tabla detalle_pedidos_hyt
         $stmt_detalle = $pdo->prepare("INSERT INTO detalle_pedidos_hyt (pedido_id, nombre, precio, cantidad) VALUES (?, ?, ?, ?)");
         
         foreach ($_POST['productos'] as $producto_id => $cantidad) {
             if ($cantidad > 0) {
-                // Obtener los detalles del producto (nombre y precio)
                 $stmt_producto = $pdo->prepare("SELECT nombre, precio FROM precios_hyt WHERE id = ?");
                 $stmt_producto->execute([$producto_id]);
                 $producto = $stmt_producto->fetch(PDO::FETCH_ASSOC);
-                
-                // Inserción de detalles y manejo de errores
                 if (!$stmt_detalle->execute([$pedido_id, $producto['nombre'], $producto['precio'], $cantidad])) {
                     $errorInfo = $stmt_detalle->errorInfo();
                     echo "Error al insertar el detalle del pedido: " . $errorInfo[2];
-                    exit(); // Detener ejecución si falla la inserción en detalle_pedidos_hyt
+                    exit();
                 }
             }
         }
@@ -83,11 +86,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['realizar_pedido'])) {
                 $message .= "{$producto['nombre']}: $cantidad\n";
             }
         }
-        $to = "correo@cliente.com"; // Reemplazar por el correo del cliente
-        if (!mail($to, $subject, $message)) {
+        // Usamos el correo cargado dinámicamente
+        if (!mail($correo_agencia, $subject, $message)) {
             echo "Error al enviar el correo.";
         } else {
-            echo "Pedido realizado correctamente y correo enviado.";
+            echo "Pedido realizado correctamente y correo enviado a $correo_agencia.";
         }
     }
 }
