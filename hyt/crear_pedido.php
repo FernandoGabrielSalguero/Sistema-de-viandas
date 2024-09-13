@@ -12,6 +12,33 @@ error_reporting(E_ALL);
 
 include '../includes/db.php';
 include '../includes/header_hyt_agencia.php';
+include '../includes/load_env.php';
+
+// Cargar variables del archivo .env
+loadEnv(__DIR__ . '/../.env');
+
+// Función para enviar correo electrónico usando SMTP (basada en tu ejemplo)
+function enviarCorreo($to, $subject, $message) {
+    $headers = "From: " . getenv('SMTP_USERNAME') . "\r\n" .
+               "Reply-To: " . getenv('SMTP_USERNAME') . "\r\n" .
+               "X-Mailer: PHP/" . phpversion();
+
+    // Configuración del transporte SMTP
+    $params = [
+        'host' => getenv('SMTP_HOST'),
+        'port' => getenv('SMTP_PORT'),
+        'auth' => true,
+        'username' => getenv('SMTP_USERNAME'),
+        'password' => getenv('SMTP_PASSWORD'),
+    ];
+
+    // Usar la función mail() de PHP
+    ini_set('SMTP', $params['host']);
+    ini_set('smtp_port', $params['port']);
+    ini_set('sendmail_from', $params['username']);
+
+    return mail($to, $subject, $message, $headers);
+}
 
 // Obtener el nombre y correo de la agencia (usuario actual)
 $agencia_id = $_SESSION['usuario_id'];
@@ -50,7 +77,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['realizar_pedido'])) {
     $stmt_pedido = $pdo->prepare("INSERT INTO pedidos_hyt (nombre_agencia, fecha_pedido, estado, interno, hora_salida, destino_id, hyt_admin_id, observaciones) 
                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
     
-    // Ahora se pasa el nombre_agencia y el correo cargado dinámicamente
     if (!$stmt_pedido->execute([$nombre_agencia, $fecha_pedido, $estado, $interno, $hora_salida, $destino_id, $hyt_admin_id, $observaciones])) {
         // Obtener detalles del error
         $errorInfo = $stmt_pedido->errorInfo();
@@ -86,8 +112,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['realizar_pedido'])) {
                 $message .= "{$producto['nombre']}: $cantidad\n";
             }
         }
-        // Usamos el correo cargado dinámicamente
-        if (!mail($correo_agencia, $subject, $message)) {
+
+        // Usar el correo del cliente cargado dinámicamente
+        if (!enviarCorreo($correo_agencia, $subject, $message)) {
             echo "Error al enviar el correo.";
         } else {
             echo "Pedido realizado correctamente y correo enviado a $correo_agencia.";
