@@ -25,7 +25,53 @@ $stmt_admin->execute([$agencia_id]);
 $hyt_admin = $stmt_admin->fetch(PDO::FETCH_ASSOC);
 $hyt_admin_id = $hyt_admin['hyt_admin_id'];
 
+// Lógica para el formulario
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['realizar_pedido'])) {
+    $destino_id = $_POST['destino'];
+    $hora_salida = $_POST['hora_salida'];
+    $interno = $_POST['interno'];
+    $fecha_pedido = date('Y-m-d');  // Fecha actual
+    $estado = 'vigente'; // El pedido comienza como "vigente"
+
+    // Insertar el pedido en la tabla pedidos_hyt
+    $stmt_pedido = $pdo->prepare("INSERT INTO pedidos_hyt (nombre_agencia, fecha_pedido, estado, interno, hora_salida, destino_id, hyt_admin_id) 
+                                  VALUES (?, ?, ?, ?, ?, ?, ?)");
+    if ($stmt_pedido->execute([$agencia_id, $fecha_pedido, $estado, $interno, $hora_salida, $destino_id, $hyt_admin_id])) {
+        $pedido_id = $pdo->lastInsertId(); // Obtener el ID del pedido recién creado
+
+        // Insertar el detalle del pedido en la tabla detalle_pedidos_hyt
+        $stmt_detalle = $pdo->prepare("INSERT INTO detalle_pedidos_hyt (pedido_id, nombre, precio, cantidad) VALUES (?, ?, ?, ?)");
+        foreach ($_POST['productos'] as $producto_id => $cantidad) {
+            if ($cantidad > 0) {
+                $stmt_producto = $pdo->prepare("SELECT nombre, precio FROM precios_hyt WHERE id = ?");
+                $stmt_producto->execute([$producto_id]);
+                $producto = $stmt_producto->fetch(PDO::FETCH_ASSOC);
+                $stmt_detalle->execute([$pedido_id, $producto['nombre'], $producto['precio'], $cantidad]);
+            }
+        }
+
+        // Enviar el correo con el detalle del pedido
+        $subject = "Detalle del Pedido Realizado";
+        $message = "Se ha realizado un pedido con los siguientes detalles:\n\n";
+        foreach ($_POST['productos'] as $producto_id => $cantidad) {
+            if ($cantidad > 0) {
+                $stmt_producto = $pdo->prepare("SELECT nombre FROM precios_hyt WHERE id = ?");
+                $stmt_producto->execute([$producto_id]);
+                $producto = $stmt_producto->fetch(PDO::FETCH_ASSOC);
+                $message .= "{$producto['nombre']}: $cantidad\n";
+            }
+        }
+        $to = "correo@cliente.com"; // Reemplazar por el correo del cliente
+        mail($to, $subject, $message); // Función mail para enviar el correo
+
+        $success = "Pedido realizado correctamente y se ha enviado un correo.";
+    } else {
+        $error = "Error al realizar el pedido.";
+    }
+}
+
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -59,14 +105,25 @@ $hyt_admin_id = $hyt_admin['hyt_admin_id'];
 <body>
 
 <h1>Realizar un nuevo pedido</h1>
+<?php
+if (isset($error)) {
+    echo "<p class='error'>$error</p>";
+}
+if (isset($success)) {
+    echo "<p class='success'>$success</p>";
+}
+?>
 
-<form id="pedidoForm" method="POST" action="procesar_pedido.php">
+<form id="pedidoForm" method="POST" action="">
     <label for="destino">Seleccionar destino:</label>
     <select id="destino" name="destino" required>
         <?php foreach ($destinos as $destino): ?>
             <option value="<?php echo $destino['id']; ?>"><?php echo $destino['nombre']; ?></option>
         <?php endforeach; ?>
     </select>
+
+    <label for="interno">Interno (Número de interno):</label>
+    <input type="number" id="interno" name="interno" required>
 
     <label for="hora_salida">Hora de salida:</label>
     <input type="time" id="hora_salida" name="hora_salida" required>
