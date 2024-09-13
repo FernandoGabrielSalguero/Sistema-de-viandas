@@ -1,27 +1,42 @@
 <?php
-include '../includes/header_admin.php';
-include '../includes/db.php';
-
 // Habilitar la muestra de errores
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
+
+include '../includes/header_admin.php';
+include '../includes/db.php';
+
+// Verificar que la conexión a la base de datos esté establecida correctamente
+if (!$conn) {
+    die("Error de conexión: " . mysqli_connect_error());
+}
 
 // Gestión de precios_hyt
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['guardar_precio'])) {
     $nombre = $_POST['nombre'];
     $precio = $_POST['precio'];
 
+    // Insertar en la tabla precios_hyt
     $query = "INSERT INTO precios_hyt (nombre, precio) VALUES ('$nombre', '$precio')";
-    mysqli_query($conn, $query);
+    if (mysqli_query($conn, $query)) {
+        echo "Precio guardado correctamente";
+    } else {
+        echo "Error al guardar el precio: " . mysqli_error($conn);
+    }
 }
 
 // Gestión de destinos_hyt
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['guardar_destino'])) {
     $nombre_destino = $_POST['nombre_destino'];
 
+    // Insertar en la tabla destinos_hyt
     $query = "INSERT INTO destinos_hyt (nombre) VALUES ('$nombre_destino')";
-    mysqli_query($conn, $query);
+    if (mysqli_query($conn, $query)) {
+        echo "Destino guardado correctamente";
+    } else {
+        echo "Error al guardar el destino: " . mysqli_error($conn);
+    }
 }
 
 ?>
@@ -70,12 +85,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['guardar_destino'])) {
         <th>Precio</th>
     </tr>
     <?php
+    // Obtener los precios actuales
     $result = mysqli_query($conn, "SELECT * FROM precios_hyt");
-    while ($row = mysqli_fetch_assoc($result)) {
-        echo "<tr>";
-        echo "<td>" . $row['nombre'] . "</td>";
-        echo "<td>" . $row['precio'] . "</td>";
-        echo "</tr>";
+    if ($result) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            echo "<tr>";
+            echo "<td>" . $row['nombre'] . "</td>";
+            echo "<td>" . $row['precio'] . "</td>";
+            echo "</tr>";
+        }
+    } else {
+        echo "Error al obtener los precios: " . mysqli_error($conn);
     }
     ?>
 </table>
@@ -86,11 +106,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['guardar_destino'])) {
         <th>Nombre</th>
     </tr>
     <?php
+    // Obtener los destinos actuales
     $result = mysqli_query($conn, "SELECT * FROM destinos_hyt");
-    while ($row = mysqli_fetch_assoc($result)) {
-        echo "<tr>";
-        echo "<td>" . $row['nombre'] . "</td>";
-        echo "</tr>";
+    if ($result) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            echo "<tr>";
+            echo "<td>" . $row['nombre'] . "</td>";
+            echo "</tr>";
+        }
+    } else {
+        echo "Error al obtener los destinos: " . mysqli_error($conn);
     }
     ?>
 </table>
