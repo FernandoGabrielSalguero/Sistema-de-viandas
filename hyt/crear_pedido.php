@@ -6,7 +6,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'hyt_agencia') {
 }
 
 include '../includes/db.php';
-include 'header_hyt_agencia.php';
+include '../includes/header_hyt_agencia.php';
 
 // Obtener los destinos disponibles para el menú desplegable
 $stmt_destinos = $pdo->prepare("SELECT id, nombre FROM destinos_hyt");
