@@ -46,77 +46,70 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['guardar_destino'])) {
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Gestión de Precios y Destinos</title>
     <link rel="stylesheet" href="../css/hyt_variables.css">
 </head>
+
 <body>
 
-<h1>Gestión de Precios de Viandas</h1>
-<form method="POST" action="hyt_variables.php">
-    <label for="nombre">Tipo de vianda:</label>
-    <select name="nombre" required>
-        <option value="Desayuno dia siguiente">Desayuno día siguiente</option>
-        <option value="Almuerzo caliente">Almuerzo caliente</option>
-        <option value="Media tarde">Media tarde</option>
-        <option value="Refrigerio sandwich almuerzo">Refrigerio sandwich almuerzo</option>
-        <option value="Cena caliente">Cena caliente</option>
-        <option value="Refrigerio sandwich cena">Refrigerio sandwich cena</option>
-        <option value="Desayuno noche">Desayuno noche</option>
-        <option value="Sandwich noche">Sandwich noche</option>
-    </select>
+    <h1>Gestión de Precios de Viandas</h1>
+    <form method="POST" action="hyt_variables.php">
+        <label for="nombre">Nombre de la vianda:</label>
+        <input type="text" id="nombre" name="nombre" placeholder="Ej: Almuerzo vegetariano" required>
+        <label for="precio">Precio:</label>
+        <input type="number" step="0.01" name="precio" required>
 
-    <label for="precio">Precio:</label>
-    <input type="number" step="0.01" name="precio" required>
+        <button type="submit" name="guardar_precio">Guardar Precio</button>
+    </form>
 
-    <button type="submit" name="guardar_precio">Guardar Precio</button>
-</form>
+    <h1>Gestión de Destinos</h1>
+    <form method="POST" action="hyt_variables.php">
+        <label for="nombre_destino">Nombre del destino:</label>
+        <input type="text" name="nombre_destino" required>
 
-<h1>Gestión de Destinos</h1>
-<form method="POST" action="hyt_variables.php">
-    <label for="nombre_destino">Nombre del destino:</label>
-    <input type="text" name="nombre_destino" required>
+        <button type="submit" name="guardar_destino">Guardar Destino</button>
+    </form>
 
-    <button type="submit" name="guardar_destino">Guardar Destino</button>
-</form>
+    <!-- Sección para mostrar precios y destinos existentes -->
+    <h2>Precios actuales</h2>
+    <table border="1">
+        <tr>
+            <th>Nombre</th>
+            <th>Precio</th>
+        </tr>
+        <?php
+        // Obtener los precios actuales usando PDO
+        $stmt = $pdo->query("SELECT * FROM precios_hyt");
+        $precios = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($precios as $row) {
+            echo "<tr>";
+            echo "<td>" . htmlspecialchars($row['nombre']) . "</td>";
+            echo "<td>" . htmlspecialchars($row['precio']) . "</td>";
+            echo "</tr>";
+        }
+        ?>
+    </table>
 
-<!-- Sección para mostrar precios y destinos existentes -->
-<h2>Precios actuales</h2>
-<table border="1">
-    <tr>
-        <th>Nombre</th>
-        <th>Precio</th>
-    </tr>
-    <?php
-    // Obtener los precios actuales usando PDO
-    $stmt = $pdo->query("SELECT * FROM precios_hyt");
-    $precios = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    foreach ($precios as $row) {
-        echo "<tr>";
-        echo "<td>" . htmlspecialchars($row['nombre']) . "</td>";
-        echo "<td>" . htmlspecialchars($row['precio']) . "</td>";
-        echo "</tr>";
-    }
-    ?>
-</table>
-
-<h2>Destinos actuales</h2>
-<table border="1">
-    <tr>
-        <th>Nombre</th>
-    </tr>
-    <?php
-    // Obtener los destinos actuales usando PDO
-    $stmt = $pdo->query("SELECT * FROM destinos_hyt");
-    $destinos = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    foreach ($destinos as $row) {
-        echo "<tr>";
-        echo "<td>" . htmlspecialchars($row['nombre']) . "</td>";
-        echo "</tr>";
-    }
-    ?>
-</table>
+    <h2>Destinos actuales</h2>
+    <table border="1">
+        <tr>
+            <th>Nombre</th>
+        </tr>
+        <?php
+        // Obtener los destinos actuales usando PDO
+        $stmt = $pdo->query("SELECT * FROM destinos_hyt");
+        $destinos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($destinos as $row) {
+            echo "<tr>";
+            echo "<td>" . htmlspecialchars($row['nombre']) . "</td>";
+            echo "</tr>";
+        }
+        ?>
+    </table>
 
 </body>
+
 </html>
