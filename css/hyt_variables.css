@@ -232,7 +232,7 @@ input:checked+.slider:before {
 
 /* Estilo de cada botón de destino */
 .destino-button {
-    background-color: #28a745;
+    background-color: #00796B;
     color: white;
     padding: 10px 20px;
     border-radius: 5px;
