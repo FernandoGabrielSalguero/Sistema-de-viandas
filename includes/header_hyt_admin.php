@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>HYT Admin - Dashboard</title>
-    <link rel="stylesheet" href="../css/hyt_variables.css">
 </head>
 <body>
 <header>
