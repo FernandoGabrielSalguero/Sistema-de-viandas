@@ -74,7 +74,7 @@ if ($filter_fecha_salida) {
             padding: 20px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             background-color: #fff;
-            max-width: 300px;
+            max-width: 450px;
             flex: 1 1 calc(33.333% - 40px);
             box-sizing: border-box;
             margin-bottom: 20px;
