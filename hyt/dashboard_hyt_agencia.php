@@ -16,16 +16,21 @@ include '../includes/db.php';
 $currentDate = date('Y-m-d');
 $currentTime = date('H:i');
 
-// Obtener los pedidos del usuario hyt_agencia actual
-$nombre_agencia = $_SESSION['usuario']; // Asumiendo que el nombre de la agencia está almacenado como usuario en la sesión
+// Obtener los datos del usuario actual desde la tabla Usuarios
+$usuario_id = $_SESSION['usuario_id'];
+$stmt = $pdo->prepare("SELECT Nombre FROM Usuarios WHERE Id = ?");
+$stmt->execute([$usuario_id]);
+$usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+$nombre_agencia = $usuario['Nombre'];
 
-$query = "SELECT p.id, p.fecha_pedido, p.estado, p.interno, p.hora_salida, p.observaciones, p.destino_id, d.nombre as destino_nombre
+// Obtener los pedidos del usuario hyt_agencia actual desde la tabla pedidos_hyt
+$query = "SELECT p.id, p.nombre_agencia, p.fecha_pedido, p.fecha_modificacion, p.estado, p.interno, p.hora_salida, p.destino_id, p.observaciones, p.estado_saldo, d.nombre as destino_nombre
           FROM pedidos_hyt p
           LEFT JOIN destinos_hyt d ON p.destino_id = d.id
-          WHERE p.nombre_agencia = ?"; // Cambiado de agencia_id a nombre_agencia
+          WHERE p.nombre_agencia = ?";
 
 $stmt = $pdo->prepare($query);
-$stmt->execute([$nombre_agencia]); // Usando nombre_agencia para filtrar los pedidos
+$stmt->execute([$nombre_agencia]);
 $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
@@ -99,6 +104,7 @@ $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <p><strong>N° de Pedido: </strong><?php echo htmlspecialchars($pedido['id']); ?></p>
                 <p><strong>Fecha de Pedido: </strong><?php echo htmlspecialchars($pedido['fecha_pedido']); ?></p>
                 <p><strong>Interno: </strong><?php echo htmlspecialchars($pedido['interno']); ?></p>
+                <p><strong>Estado de Saldo: </strong><?php echo htmlspecialchars($pedido['estado_saldo']); ?></p>
 
                 <table>
                     <thead>
@@ -106,11 +112,12 @@ $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <th>Hora</th>
                             <th>Descripción</th>
                             <th>Cantidad</th>
+                            <th>Precio</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php
-                        $detalleQuery = "SELECT nombre, cantidad FROM detalle_pedidos_hyt WHERE pedido_id = ?";
+                        $detalleQuery = "SELECT nombre, cantidad, precio, observaciones FROM detalle_pedidos_hyt WHERE pedido_id = ?";
                         $detalleStmt = $pdo->prepare($detalleQuery);
                         $detalleStmt->execute([$pedido['id']]);
                         $detalles = $detalleStmt->fetchAll(PDO::FETCH_ASSOC);
@@ -120,6 +127,7 @@ $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <td><?php echo htmlspecialchars($pedido['hora_salida']); ?></td>
                                 <td><?php echo htmlspecialchars($detalle['nombre']); ?></td>
                                 <td><?php echo htmlspecialchars($detalle['cantidad']); ?></td>
+                                <td><?php echo htmlspecialchars($detalle['precio']); ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
