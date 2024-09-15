@@ -185,7 +185,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['modificar_pedido'])) {
                                 <?php if ($pedido['fecha_salida'] === $currentDate && $currentTime < '11:00'): ?>
                                     <button type="submit" class="button" name="modificar_pedido">Modificar</button>
                                 <?php else: ?>
-                                    <button class="button" disabled>Modificar</button>
+                                    <button class="button">Modificar</button>
                                 <?php endif; ?>
                             </td>
                         </form>
