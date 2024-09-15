@@ -17,8 +17,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'cocina') {
 
 // Consulta para obtener los pedidos
 $query = "SELECT p.id, p.fecha_pedido, p.fecha_salida, p.interno, p.observaciones, d.nombre AS destino_nombre, 
-                 GROUP_CONCAT(CONCAT(dp.nombre, ' (', dp.cantidad, ')') SEPARATOR ', ') AS detalles, 
-                 GROUP_CONCAT(CONCAT(dp.hora, ' ', dp.nombre) SEPARATOR ', ') AS descripciones 
+                 GROUP_CONCAT(CONCAT(dp.nombre, ' (', dp.cantidad, ')') SEPARATOR ', ') AS detalles 
           FROM pedidos_hyt p
           LEFT JOIN detalle_pedidos_hyt dp ON p.id = dp.pedido_id
           LEFT JOIN destinos_hyt d ON p.destino_id = d.id
@@ -82,20 +81,19 @@ $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <table>
                     <thead>
                         <tr>
-                            <th>Hora</th>
                             <th>Descripción</th>
                             <th>Cantidad</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php
-                        $detalles = explode(', ', $pedido['descripciones']);
+                        $detalles = explode(', ', $pedido['detalles']);
                         foreach ($detalles as $detalle):
-                            list($hora, $descripcion) = explode(' ', $detalle, 2);
+                            list($descripcion, $cantidad) = explode(' (', rtrim($detalle, ')'), 2);
                         ?>
                         <tr>
-                            <td><?php echo htmlspecialchars($hora); ?></td>
                             <td><?php echo htmlspecialchars($descripcion); ?></td>
+                            <td><?php echo htmlspecialchars($cantidad); ?></td>
                         </tr>
                         <?php endforeach; ?>
                     </tbody>
