@@ -80,7 +80,7 @@ $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <head>
     <meta charset="UTF-8">
     <title>Dashboard HYT Agencia</title>
-    <link rel="stylesheet" href="../css/hyt_variables.css">
+    <link rel="stylesheet" href="../css/style_hyt_agencia.css">
     <style>
         body {
             font-family: Arial, sans-serif;
