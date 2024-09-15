@@ -8,92 +8,82 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'hyt_admin') {
 include '../includes/header_hyt_admin.php';
 include '../includes/db.php';
 
-// Variables de filtros
-$filter_saldo = isset($_GET['filter_saldo']) ? $_GET['filter_saldo'] : '';
-$filter_agencia = isset($_GET['filter_agencia']) ? $_GET['filter_agencia'] : '';
-$filter_destino = isset($_GET['filter_destino']) ? $_GET['filter_destino'] : '';
-$filter_fecha_entrega = isset($_GET['filter_fecha_entrega']) ? $_GET['filter_fecha_entrega'] : '';
-
-// Base de la consulta
-$query = "
-    SELECT p.id, p.nombre_agencia, p.fecha_pedido, p.fecha_modificacion, p.interno, d.nombre as destino, p.fecha_salida,
-           GROUP_CONCAT(CONCAT(dp.nombre, ' (', dp.cantidad, ')') SEPARATOR '<br>') AS productos,
-           GROUP_CONCAT(dp.precio SEPARATOR '<br>') AS precios_unitarios,
-           SUM(dp.cantidad * dp.precio) AS total, p.estado_saldo
-    FROM pedidos_hyt p
-    LEFT JOIN detalle_pedidos_hyt dp ON p.id = dp.pedido_id
-    LEFT JOIN destinos_hyt d ON p.destino_id = d.id
-    WHERE p.hyt_admin_id = :admin_id
-";
-
-// Array para almacenar los parámetros de ejecución
-$filters = ['admin_id' => $_SESSION['usuario_id']];
-
-// Aplicar filtros si existen
-if ($filter_saldo !== '') {
-    $query .= " AND p.estado_saldo = :filter_saldo";
-    $filters['filter_saldo'] = $filter_saldo;
-}
-if ($filter_agencia !== '') {
-    $query .= " AND p.nombre_agencia = :filter_agencia";
-    $filters['filter_agencia'] = $filter_agencia;
-}
-if ($filter_destino !== '') {
-    $query .= " AND d.nombre = :filter_destino";
-    $filters['filter_destino'] = $filter_destino;
-}
-if ($filter_fecha_entrega !== '') {
-    $query .= " AND p.fecha_salida = :filter_fecha_entrega";
-    $filters['filter_fecha_entrega'] = $filter_fecha_entrega;
+// Función para formatear las fechas
+function formatearFecha($fecha) {
+    return date('d-m-Y', strtotime($fecha));
 }
 
-// Finalizar la consulta SQL
-$query .= "
-    GROUP BY p.id
-    ORDER BY p.id DESC
-    LIMIT 20 OFFSET 0";
+// Valores por defecto para filtros
+$filter_estado_saldo = $_GET['filter_estado_saldo'] ?? 'Todos';
+$filter_agencia = $_GET['filter_agencia'] ?? 'Todas las agencias';
+$filter_destino = $_GET['filter_destino'] ?? 'Todos los destinos';
+$filter_fecha_entrega = $_GET['filter_fecha_entrega'] ?? '';
+
+// Construir la consulta base
+$query = "SELECT p.id, p.nombre_agencia, p.fecha_pedido, p.fecha_modificacion, p.interno, d.nombre as destino_nombre, p.fecha_salida, p.estado_saldo, 
+          GROUP_CONCAT(CONCAT(dp.nombre, ' (', dp.cantidad, ')') SEPARATOR ', ') as productos, 
+          GROUP_CONCAT(CONCAT(ROUND(dp.precio, 2)) SEPARATOR ', ') as precios,
+          SUM(dp.cantidad * dp.precio) as total 
+          FROM pedidos_hyt p
+          LEFT JOIN detalle_pedidos_hyt dp ON p.id = dp.pedido_id
+          LEFT JOIN destinos_hyt d ON p.destino_id = d.id
+          WHERE p.hyt_admin_id = ?";
+
+// Agregar condiciones de filtros
+$conditions = [];
+$params = [$_SESSION['usuario_id']];
+
+if ($filter_estado_saldo != 'Todos') {
+    $conditions[] = "p.estado_saldo = ?";
+    $params[] = $filter_estado_saldo;
+}
+
+if ($filter_agencia != 'Todas las agencias') {
+    $conditions[] = "p.nombre_agencia = ?";
+    $params[] = $filter_agencia;
+}
+
+if ($filter_destino != 'Todos los destinos') {
+    $conditions[] = "d.nombre = ?";
+    $params[] = $filter_destino;
+}
+
+if (!empty($filter_fecha_entrega)) {
+    $conditions[] = "p.fecha_salida = ?";
+    $params[] = $filter_fecha_entrega;
+}
+
+// Si hay filtros, agréguelos a la consulta
+if (count($conditions) > 0) {
+    $query .= " AND " . implode(" AND ", $conditions);
+}
+
+// Continuar con el GROUP BY y ORDER BY
+$query .= " GROUP BY p.id ORDER BY p.id DESC LIMIT 20";
 
 // Preparar y ejecutar la consulta
 $stmt = $pdo->prepare($query);
-$stmt->execute($filters);  // Aquí se pasa el array con los valores de los filtros
-
-// Obtener los resultados
+$stmt->execute($params);
 $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Consulta para obtener los totales de Pagado y Adeudado
-$kpi_query = "
-    SELECT estado_saldo, SUM(dp.cantidad * dp.precio) as total
-    FROM pedidos_hyt p
-    LEFT JOIN detalle_pedidos_hyt dp ON p.id = dp.pedido_id
-    WHERE p.hyt_admin_id = :admin_id
-    GROUP BY p.estado_saldo
-";
-$kpi_stmt = $pdo->prepare($kpi_query);
-$kpi_stmt->execute(['admin_id' => $_SESSION['usuario_id']]);
-$kpi_totals = $kpi_stmt->fetchAll(PDO::FETCH_KEY_PAIR);
-
-$kpi_adeudado = isset($kpi_totals['Adeudado']) ? $kpi_totals['Adeudado'] : 0;
-$kpi_pagado = isset($kpi_totals['Pagado']) ? $kpi_totals['Pagado'] : 0;
-
-// Obtener todas las agencias y destinos
-$agencias_query = "SELECT DISTINCT nombre_agencia FROM pedidos_hyt WHERE hyt_admin_id = :admin_id";
-$agencias_stmt = $pdo->prepare($agencias_query);
-$agencias_stmt->execute(['admin_id' => $_SESSION['usuario_id']]);
-$agencias = $agencias_stmt->fetchAll(PDO::FETCH_COLUMN);
-
-$destinos_query = "SELECT DISTINCT d.nombre FROM destinos_hyt d JOIN pedidos_hyt p ON p.destino_id = d.id WHERE p.hyt_admin_id = :admin_id";
-$destinos_stmt = $pdo->prepare($destinos_query);
-$destinos_stmt->execute(['admin_id' => $_SESSION['usuario_id']]);
-$destinos = $destinos_stmt->fetchAll(PDO::FETCH_COLUMN);
-
+// Obtener totales
+$total_adeudado = 0;
+$total_pagado = 0;
+foreach ($pedidos as $pedido) {
+    if ($pedido['estado_saldo'] == 'Adeudado') {
+        $total_adeudado += $pedido['total'];
+    } else {
+        $total_pagado += $pedido['total'];
+    }
+}
 ?>
 
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard HYT Admin</title>
-    <link rel="stylesheet" href="../css/style_hyt_admin.css">
+    <title>Pedidos de las agencias supervisadas</title>
+    <link rel="stylesheet" href="../css/style_dashboard_hyt_admin.css">
 </head>
 <body>
     <h1>Pedidos de las agencias supervisadas</h1>
@@ -101,44 +91,57 @@ $destinos = $destinos_stmt->fetchAll(PDO::FETCH_COLUMN);
     <div class="kpi-container">
         <div class="kpi">
             <h2>Total Adeudado</h2>
-            <p><?php echo number_format($kpi_adeudado, 2, ',', '.'); ?> ARS</p>
+            <p><?php echo number_format($total_adeudado, 2, ',', '.'); ?> ARS</p>
         </div>
         <div class="kpi">
             <h2>Total Pagado</h2>
-            <p><?php echo number_format($kpi_pagado, 2, ',', '.'); ?> ARS</p>
+            <p><?php echo number_format($total_pagado, 2, ',', '.'); ?> ARS</p>
         </div>
     </div>
 
-    <!-- Filtros -->
     <div class="filter-container">
         <form method="GET" action="dashboard_hyt_admin.php">
-            <label for="filter_saldo">Filtrar por estado de saldo:</label>
-            <select id="filter_saldo" name="filter_saldo">
-                <option value="">Todos</option>
-                <option value="Adeudado" <?php if ($filter_saldo === 'Adeudado') echo 'selected'; ?>>Adeudado</option>
-                <option value="Pagado" <?php if ($filter_saldo === 'Pagado') echo 'selected'; ?>>Pagado</option>
+            <label for="filter_estado_saldo">Filtrar por estado de saldo:</label>
+            <select id="filter_estado_saldo" name="filter_estado_saldo">
+                <option value="Todos" <?php echo ($filter_estado_saldo == 'Todos') ? 'selected' : ''; ?>>Todos</option>
+                <option value="Pagado" <?php echo ($filter_estado_saldo == 'Pagado') ? 'selected' : ''; ?>>Pagado</option>
+                <option value="Adeudado" <?php echo ($filter_estado_saldo == 'Adeudado') ? 'selected' : ''; ?>>Adeudado</option>
             </select>
 
             <label for="filter_agencia">Filtrar por agencia:</label>
             <select id="filter_agencia" name="filter_agencia">
-                <option value="">Todas las agencias</option>
-                <?php foreach ($agencias as $agencia): ?>
-                    <option value="<?php echo htmlspecialchars($agencia); ?>" <?php if ($filter_agencia === $agencia) echo 'selected'; ?>><?php echo htmlspecialchars($agencia); ?></option>
-                <?php endforeach; ?>
+                <option value="Todas las agencias">Todas las agencias</option>
+                <?php
+                // Obtener todas las agencias para el filtro
+                $stmt_agencias = $pdo->query("SELECT DISTINCT nombre_agencia FROM pedidos_hyt");
+                $agencias = $stmt_agencias->fetchAll(PDO::FETCH_ASSOC);
+                foreach ($agencias as $agencia) {
+                    echo '<option value="' . $agencia['nombre_agencia'] . '"' . (($filter_agencia == $agencia['nombre_agencia']) ? ' selected' : '') . '>' . $agencia['nombre_agencia'] . '</option>';
+                }
+                ?>
             </select>
 
             <label for="filter_destino">Filtrar por destino:</label>
             <select id="filter_destino" name="filter_destino">
-                <option value="">Todos los destinos</option>
-                <?php foreach ($destinos as $destino): ?>
-                    <option value="<?php echo htmlspecialchars($destino); ?>" <?php if ($filter_destino === $destino) echo 'selected'; ?>><?php echo htmlspecialchars($destino); ?></option>
-                <?php endforeach; ?>
+                <option value="Todos los destinos">Todos los destinos</option>
+                <?php
+                // Obtener todos los destinos para el filtro
+                $stmt_destinos = $pdo->query("SELECT DISTINCT nombre FROM destinos_hyt");
+                $destinos = $stmt_destinos->fetchAll(PDO::FETCH_ASSOC);
+                foreach ($destinos as $destino) {
+                    echo '<option value="' . $destino['nombre'] . '"' . (($filter_destino == $destino['nombre']) ? ' selected' : '') . '>' . $destino['nombre'] . '</option>';
+                }
+                ?>
             </select>
 
             <label for="filter_fecha_entrega">Filtrar por fecha de entrega:</label>
-            <input type="date" id="filter_fecha_entrega" name="filter_fecha_entrega" value="<?php echo htmlspecialchars($filter_fecha_entrega); ?>">
+            <input type="date" id="filter_fecha_entrega" name="filter_fecha_entrega" value="<?php echo $filter_fecha_entrega; ?>">
 
             <button type="submit">Filtrar</button>
+        </form>
+
+        <form method="GET" action="dashboard_hyt_admin.php">
+            <button type="submit">Eliminar filtros</button>
         </form>
     </div>
 
@@ -160,19 +163,19 @@ $destinos = $destinos_stmt->fetchAll(PDO::FETCH_COLUMN);
         </thead>
         <tbody>
             <?php foreach ($pedidos as $pedido): ?>
-                <tr class="<?php echo strtolower($pedido['estado_saldo']); ?>">
-                    <td><?php echo htmlspecialchars($pedido['id']); ?></td>
-                    <td><?php echo htmlspecialchars($pedido['nombre_agencia']); ?></td>
-                    <td><?php echo htmlspecialchars($pedido['fecha_pedido']); ?></td>
-                    <td><?php echo htmlspecialchars($pedido['fecha_modificacion']); ?></td>
-                    <td><?php echo htmlspecialchars($pedido['interno']); ?></td>
-                    <td><?php echo htmlspecialchars($pedido['destino']); ?></td>
-                    <td><?php echo htmlspecialchars($pedido['fecha_salida']); ?></td>
-                    <td><?php echo htmlspecialchars($pedido['productos']); ?></td>
-                    <td><?php echo htmlspecialchars($pedido['precios_unitarios']); ?> ARS</td>
-                    <td><?php echo number_format($pedido['total'], 2, ',', '.'); ?> ARS</td>
-                    <td><?php echo htmlspecialchars($pedido['estado_saldo']); ?></td>
-                </tr>
+            <tr class="<?php echo ($pedido['estado_saldo'] == 'Adeudado') ? 'adeudado-row' : 'pagado-row'; ?>">
+                <td><?php echo htmlspecialchars($pedido['id']); ?></td>
+                <td><?php echo htmlspecialchars($pedido['nombre_agencia']); ?></td>
+                <td><?php echo formatearFecha($pedido['fecha_pedido']); ?></td>
+                <td><?php echo formatearFecha($pedido['fecha_modificacion']); ?></td>
+                <td><?php echo htmlspecialchars($pedido['interno']); ?></td>
+                <td><?php echo htmlspecialchars($pedido['destino_nombre']); ?></td>
+                <td><?php echo formatearFecha($pedido['fecha_salida']); ?></td>
+                <td><?php echo htmlspecialchars($pedido['productos']); ?></td>
+                <td><?php echo htmlspecialchars($pedido['precios']); ?> ARS</td>
+                <td><?php echo number_format($pedido['total'], 2, ',', '.'); ?> ARS</td>
+                <td><?php echo htmlspecialchars($pedido['estado_saldo']); ?></td>
+            </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
