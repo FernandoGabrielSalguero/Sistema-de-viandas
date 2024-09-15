@@ -114,7 +114,6 @@ $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <div class="pedido-card">
                     <h3><?php echo htmlspecialchars($pedido['destino_nombre']); ?></h3>
                     <p><strong>N° de Pedido: </strong><?php echo htmlspecialchars($pedido['id']); ?></p>
-                    <p><strong>Fecha de Pedido: </strong><?php echo date('d-m-Y', strtotime($pedido['fecha_pedido'])); ?></p>
                     <p><strong>Fecha de Salida: </strong><?php echo date('d-m-Y', strtotime($pedido['fecha_salida'])); ?></p>
                     <p><strong>Interno: </strong><?php echo htmlspecialchars($pedido['interno']); ?></p>
 
