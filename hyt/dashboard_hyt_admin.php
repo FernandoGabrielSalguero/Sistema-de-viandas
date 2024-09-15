@@ -21,8 +21,8 @@ $filter_fecha_entrega = $_GET['filter_fecha_entrega'] ?? '';
 
 // Construir la consulta base
 $query = "SELECT p.id, p.nombre_agencia, p.fecha_pedido, p.fecha_modificacion, p.interno, d.nombre as destino_nombre, p.fecha_salida, p.estado_saldo, 
-          GROUP_CONCAT(CONCAT(dp.nombre, ' (', dp.cantidad, ')') SEPARATOR ', ') as productos, 
-          GROUP_CONCAT(CONCAT(ROUND(dp.precio, 2)) SEPARATOR ', ') as precios,
+          GROUP_CONCAT(CONCAT(dp.nombre, ' (', dp.cantidad, ')') SEPARATOR '<br>') as productos, 
+          GROUP_CONCAT(CONCAT(ROUND(dp.precio, 2), ' ARS') SEPARATOR '<br>') as precios,
           SUM(dp.cantidad * dp.precio) as total 
           FROM pedidos_hyt p
           LEFT JOIN detalle_pedidos_hyt dp ON p.id = dp.pedido_id
@@ -171,8 +171,8 @@ foreach ($pedidos as $pedido) {
                 <td><?php echo htmlspecialchars($pedido['interno']); ?></td>
                 <td><?php echo htmlspecialchars($pedido['destino_nombre']); ?></td>
                 <td><?php echo formatearFecha($pedido['fecha_salida']); ?></td>
-                <td><?php echo htmlspecialchars($pedido['productos']); ?></td>
-                <td><?php echo htmlspecialchars($pedido['precios']); ?> ARS</td>
+                <td><?php echo nl2br($pedido['productos']); ?></td>
+                <td><?php echo nl2br($pedido['precios']); ?></td>
                 <td><?php echo number_format($pedido['total'], 2, ',', '.'); ?> ARS</td>
                 <td><?php echo htmlspecialchars($pedido['estado_saldo']); ?></td>
             </tr>
