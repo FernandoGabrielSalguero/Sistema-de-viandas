@@ -10,6 +10,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 include '../includes/db.php';
+include '../includes/header_hyt_agencia.php';
 
 // Establecer la zona horaria de Argentina
 date_default_timezone_set('America/Argentina/Buenos_Aires');
@@ -23,22 +24,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['modificar_pedido'])) {
     $pedido_id = $_POST['pedido_id'];
     $interno = $_POST['interno'];
     $hora_salida = $_POST['hora_salida'];
-    $destino_id = $_POST['destino'];
+    $destino_id = isset($_POST['destino']) ? $_POST['destino'] : null; // Asegurarse de que el valor exista
     $observaciones = $_POST['observaciones'];
     $fecha_salida = $_POST['fecha_salida'];
 
-    // Actualizar el pedido en la tabla pedidos_hyt
-    $stmt = $pdo->prepare("UPDATE pedidos_hyt SET interno = ?, hora_salida = ?, destino_id = ?, observaciones = ?, fecha_salida = ? WHERE id = ?");
-    if ($stmt->execute([$interno, $hora_salida, $destino_id, $observaciones, $fecha_salida, $pedido_id])) {
-        // Actualizar el detalle del pedido
-        foreach ($_POST['productos'] as $producto_id => $cantidad) {
-            $stmt_detalle = $pdo->prepare("UPDATE detalle_pedidos_hyt SET cantidad = ? WHERE pedido_id = ? AND id = ?");
-            $stmt_detalle->execute([$cantidad, $pedido_id, $producto_id]);
+    if ($destino_id) { // Verificar que el destino haya sido enviado
+        // Actualizar el pedido en la tabla pedidos_hyt
+        $stmt = $pdo->prepare("UPDATE pedidos_hyt SET interno = ?, hora_salida = ?, destino_id = ?, observaciones = ?, fecha_salida = ? WHERE id = ?");
+        if ($stmt->execute([$interno, $hora_salida, $destino_id, $observaciones, $fecha_salida, $pedido_id])) {
+            // Actualizar el detalle del pedido
+            foreach ($_POST['productos'] as $producto_id => $cantidad) {
+                $stmt_detalle = $pdo->prepare("UPDATE detalle_pedidos_hyt SET cantidad = ? WHERE pedido_id = ? AND id = ?");
+                $stmt_detalle->execute([$cantidad, $pedido_id, $producto_id]);
+            }
+            echo "Pedido actualizado con éxito";
+        } else {
+            $error = $stmt->errorInfo();
+            echo "Error al actualizar el pedido: " . $error[2];
         }
-        echo "Pedido actualizado con éxito";
     } else {
-        $error = $stmt->errorInfo();
-        echo "Error al actualizar el pedido: " . $error[2];
+        echo "Error: No se ha seleccionado un destino.";
     }
 }
 
@@ -55,7 +60,7 @@ $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Obtener todos los destinos para el selector
 $stmt_destinos = $pdo->query("SELECT id, nombre FROM destinos_hyt");
-$destinos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$destinos = $stmt_destinos->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
