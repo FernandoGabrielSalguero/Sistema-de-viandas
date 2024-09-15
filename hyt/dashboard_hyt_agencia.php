@@ -181,7 +181,7 @@ $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </style>
 </head>
 <body>
-    <h1 style="text-align: center;">Tus Pedidos de Viandas</h1>
+    <h1 style="text-align: center;">Tus Pedidos de Servicios</h1>
 
     <!-- Filtro de fecha de salida, internos y destinos -->
     <div class="filter-container">
