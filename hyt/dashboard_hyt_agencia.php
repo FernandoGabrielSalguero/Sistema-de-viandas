@@ -4,6 +4,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'hyt_agencia') {
     header("Location: ../login.php");
     exit();
 }
+
 // Habilitar la muestra de errores
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -23,16 +24,7 @@ $stmt->execute([$usuario_id]);
 $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 $nombre_agencia = $usuario['Nombre'];
 
-// Obtener los pedidos del usuario hyt_agencia actual desde la tabla pedidos_hyt
-$query = "SELECT p.id, p.nombre_agencia, p.fecha_pedido, p.fecha_modificacion, p.estado, p.interno, p.hora_salida, p.destino_id, p.observaciones, p.estado_saldo, d.nombre as destino_nombre
-          FROM pedidos_hyt p
-          LEFT JOIN destinos_hyt d ON p.destino_id = d.id
-          WHERE p.nombre_agencia = ?";
-
-$stmt = $pdo->prepare($query);
-$stmt->execute([$nombre_agencia]);
-$pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+// Filtro por fecha de salida
 $filter_fecha_salida = isset($_GET['filter_fecha_salida']) ? $_GET['filter_fecha_salida'] : null;
 
 $query = "SELECT p.id, p.nombre_agencia, p.fecha_pedido, p.fecha_salida, p.estado, p.interno, p.hora_salida, p.observaciones, p.estado_saldo, d.nombre as destino_nombre
@@ -49,7 +41,7 @@ if ($filter_fecha_salida) {
     $stmt->execute([$nombre_agencia]);
 }
 
-
+$pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -126,6 +118,16 @@ if ($filter_fecha_salida) {
             cursor: not-allowed;
         }
 
+        .estado-adeudado {
+            color: red;
+            font-weight: bold;
+        }
+
+        .total {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
         @media (max-width: 768px) {
             .pedido-card {
                 flex: 1 1 calc(50% - 40px);
@@ -162,7 +164,6 @@ if ($filter_fecha_salida) {
             border-radius: 4px;
             cursor: pointer;
         }
-
     </style>
 </head>
 <body>
@@ -183,10 +184,14 @@ if ($filter_fecha_salida) {
                 <div class="pedido-card">
                     <h3><?php echo htmlspecialchars($pedido['destino_nombre']); ?></h3>
                     <p><strong>N° de Pedido: </strong><?php echo htmlspecialchars($pedido['id']); ?></p>
-                    <p><strong>Fecha de Pedido: </strong><?php echo htmlspecialchars($pedido['fecha_pedido']); ?></p>
-                    <p><strong>Fecha de Salida: </strong><?php echo htmlspecialchars($pedido['fecha_salida']); ?></p>
+                    <p><strong>Fecha de Pedido: </strong><?php echo date('d-m-Y', strtotime($pedido['fecha_pedido'])); ?></p>
+                    <p><strong>Fecha de Salida: </strong><?php echo date('d-m-Y', strtotime($pedido['fecha_salida'])); ?></p>
                     <p><strong>Interno: </strong><?php echo htmlspecialchars($pedido['interno']); ?></p>
-                    <p><strong>Estado de Saldo: </strong><?php echo htmlspecialchars($pedido['estado_saldo']); ?></p>
+                    <p><strong>Estado de Saldo: </strong>
+                        <span class="<?php echo ($pedido['estado_saldo'] == 'Adeudado') ? 'estado-adeudado' : ''; ?>">
+                            <?php echo htmlspecialchars($pedido['estado_saldo']); ?>
+                        </span>
+                    </p>
 
                     <table>
                         <thead>
@@ -204,17 +209,22 @@ if ($filter_fecha_salida) {
                             $detalleStmt->execute([$pedido['id']]);
                             $detalles = $detalleStmt->fetchAll(PDO::FETCH_ASSOC);
 
-                            foreach ($detalles as $detalle): ?>
+                            $total = 0;
+                            foreach ($detalles as $detalle): 
+                                $subtotal = $detalle['cantidad'] * $detalle['precio'];
+                                $total += $subtotal;
+                            ?>
                                 <tr>
                                     <td><?php echo htmlspecialchars($pedido['hora_salida']); ?></td>
                                     <td><?php echo htmlspecialchars($detalle['nombre']); ?></td>
                                     <td><?php echo htmlspecialchars($detalle['cantidad']); ?></td>
-                                    <td><?php echo htmlspecialchars($detalle['precio']); ?></td>
+                                    <td><?php echo htmlspecialchars(number_format($detalle['precio'], 2)); ?></td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
                     </table>
 
+                    <p><strong>Total: </strong><?php echo number_format($total, 2); ?> ARS</p>
                     <p><strong>Observaciones:</strong> <?php echo htmlspecialchars($pedido['observaciones']); ?></p>
 
                     <?php
