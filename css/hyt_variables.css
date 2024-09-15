@@ -220,3 +220,56 @@ input:checked+.slider:before {
 .slider.round:before {
     border-radius: 50%;
 }
+
+
+/* Contenedor de los botones de destino */
+.destino-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Estilo de cada botón de destino */
+.destino-button {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    position: relative;
+    font-size: 16px;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Botón de eliminar ("X") */
+.delete-button {
+    background-color: transparent;
+    color: white;
+    border: none;
+    font-size: 16px;
+    margin-left: 10px;
+    cursor: pointer;
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background-color: red;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    line-height: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Hover effect for delete button */
+.delete-button:hover {
+    opacity: 0.8;
+}
+
+/* Formulario de eliminar destino escondido */
+.delete-destino-form {
+    display: inline;
+}
