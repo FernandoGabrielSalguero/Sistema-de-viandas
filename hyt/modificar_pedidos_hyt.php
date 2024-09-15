@@ -69,50 +69,6 @@ $destinos = $stmt_destinos->fetchAll(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <title>Modificar Pedidos HYT</title>
     <link rel="stylesheet" href="../css/style_hyt_agencia.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
-            padding: 20px;
-        }
-        .table-container {
-            width: 100%;
-            margin: 0 auto;
-            max-width: 1000px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        table th, table td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: center;
-        }
-        table th {
-            background-color: #f2f2f2;
-        }
-        .form-control {
-            width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
-        }
-        .button {
-            background-color: #28a745;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            cursor: pointer;
-        }
-        .button[disabled] {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
-        .button-container {
-            text-align: center;
-        }
-    </style>
 </head>
 <body>
     <h1>Modificar Pedidos HYT</h1>
