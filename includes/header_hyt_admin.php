@@ -7,14 +7,13 @@
 </head>
 <body>
 <header>
-    <nav>
-        <ul>
-            <li><a href="dashboard_hyt_admin.php">Dashboard</a></li>
-            <li><a href="pedidos_hyt_admin.php">Pedidos</a></li>
-            <li><a href="agencias_hyt.php">Agencias</a></li>
-            <li><a href="logout.php">Salir</a></li>
-        </ul>
-    </nav>
+    <div class="header">
+    <div class="nav">
+        <a href="dashboard_hyt_admin.php" class="active">Dashboard</a>
+        <a href="logout.php" class="logout">Salir</a>
+    </div>
+</div>
+
 </header>
 </body>
 </html>
