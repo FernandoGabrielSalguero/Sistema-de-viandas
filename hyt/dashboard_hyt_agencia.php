@@ -236,11 +236,6 @@ if ($filter_fecha_salida) {
 
                     <p><strong>Observaciones:</strong> <?php echo htmlspecialchars($pedido['observaciones']); ?></p>
 
-                    <?php
-                    // Habilitar el botón si la fecha es la misma que la fecha_salida y el tiempo es antes de las 11:00 am
-                    $isDisabled = ($currentDate === $pedido['fecha_salida'] && $currentTime < '11:00') ? '' : 'disabled';
-                    ?>
-                    <button class="button" <?php echo $isDisabled; ?>>Actualizar</button>
                 </div>
             <?php endforeach; ?>
         <?php else: ?>
