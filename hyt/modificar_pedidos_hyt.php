@@ -27,7 +27,7 @@ $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 $nombre_agencia = $usuario['Nombre'];
 
 // Obtener todos los pedidos del usuario hyt_agencia actual
-$query = "SELECT p.id, p.nombre_agencia, p.fecha_pedido, p.fecha_salida, p.estado, p.interno, p.destino_id, p.observaciones, d.nombre as destino_nombre
+$query = "SELECT p.id, p.nombre_agencia, p.fecha_pedido, p.fecha_salida, p.hora_salida, p.estado, p.interno, p.destino_id, p.observaciones, d.nombre as destino_nombre
           FROM pedidos_hyt p
           LEFT JOIN destinos_hyt d ON p.destino_id = d.id
           WHERE p.nombre_agencia = ?
@@ -36,6 +36,41 @@ $query = "SELECT p.id, p.nombre_agencia, p.fecha_pedido, p.fecha_salida, p.estad
 $stmt = $pdo->prepare($query);
 $stmt->execute([$nombre_agencia]);
 $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Obtener todos los destinos para el menú desplegable
+$stmt_destinos = $pdo->prepare("SELECT id, nombre FROM destinos_hyt");
+$stmt_destinos->execute();
+$destinos = $stmt_destinos->fetchAll(PDO::FETCH_ASSOC);
+
+// Lógica para actualizar el pedido
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['modificar_pedido'])) {
+    $pedido_id = $_POST['pedido_id'];
+    $interno = $_POST['interno'];
+    $destino_id = $_POST['destino'];
+    $fecha_salida = $_POST['fecha_salida'];
+    $hora_salida = $_POST['hora_salida'];
+    $observaciones = $_POST['observaciones'];
+
+    // Actualizar la tabla pedidos_hyt
+    $stmt_update = $pdo->prepare("UPDATE pedidos_hyt SET interno = ?, destino_id = ?, fecha_salida = ?, hora_salida = ?, observaciones = ? WHERE id = ?");
+    $stmt_update->execute([$interno, $destino_id, $fecha_salida, $hora_salida, $observaciones, $pedido_id]);
+
+    // Actualizar las cantidades de los menús
+    foreach ($_POST['productos'] as $producto_id => $cantidad) {
+        $stmt_update_detalle = $pdo->prepare("UPDATE detalle_pedidos_hyt SET cantidad = ? WHERE pedido_id = ? AND nombre = ?");
+        $stmt_update_detalle->execute([$cantidad, $pedido_id, $producto_id]);
+    }
+
+    // Enviar el correo después de modificar el pedido
+    $correo_agencia = $_SESSION['correo']; // Asumiendo que el correo está en la sesión
+    $subject = "Pedido Modificado";
+    $message = "Se ha modificado el pedido con ID $pedido_id. Los nuevos detalles son:\n\n";
+    $message .= "Interno: $interno\nDestino: $destino_id\nFecha de Salida: $fecha_salida\nHora de Salida: $hora_salida\nObservaciones: $observaciones";
+
+    mail($correo_agencia, $subject, $message);
+
+    echo "Pedido modificado correctamente y correo enviado.";
+}
 
 ?>
 
@@ -100,6 +135,7 @@ $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <th>ID Pedido</th>
                     <th>Fecha Pedido</th>
                     <th>Fecha Salida</th>
+                    <th>Hora Salida</th>
                     <th>Interno</th>
                     <th>Destino</th>
                     <th>Estado</th>
@@ -111,40 +147,48 @@ $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <tbody>
                 <?php foreach ($pedidos as $pedido): ?>
                     <tr>
-                        <td><?php echo htmlspecialchars($pedido['id']); ?></td>
-                        <td><?php echo date('d-m-Y', strtotime($pedido['fecha_pedido'])); ?></td>
-                        <td><?php echo date('d-m-Y', strtotime($pedido['fecha_salida'])); ?></td>
-                        <td><?php echo htmlspecialchars($pedido['interno']); ?></td>
-                        <td><?php echo htmlspecialchars($pedido['destino_nombre']); ?></td>
-                        <td><?php echo htmlspecialchars($pedido['estado']); ?></td>
-                        <td><?php echo htmlspecialchars($pedido['observaciones']); ?></td>
+                        <form method="POST" action="modificar_pedidos_hyt.php">
+                            <input type="hidden" name="pedido_id" value="<?php echo htmlspecialchars($pedido['id']); ?>">
+                            <td><?php echo htmlspecialchars($pedido['id']); ?></td>
+                            <td><?php echo date('d-m-Y', strtotime($pedido['fecha_pedido'])); ?></td>
+                            <td><input type="date" name="fecha_salida" value="<?php echo $pedido['fecha_salida']; ?>"></td>
+                            <td><input type="time" name="hora_salida" value="<?php echo $pedido['hora_salida']; ?>"></td>
+                            <td><input type="text" name="interno" value="<?php echo htmlspecialchars($pedido['interno']); ?>"></td>
+                            <td>
+                                <select name="destino">
+                                    <?php foreach ($destinos as $destino): ?>
+                                        <option value="<?php echo $destino['id']; ?>" <?php echo ($destino['id'] == $pedido['destino_id']) ? 'selected' : ''; ?>>
+                                            <?php echo htmlspecialchars($destino['nombre']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </td>
+                            <td><?php echo htmlspecialchars($pedido['estado']); ?></td>
+                            <td><textarea name="observaciones"><?php echo htmlspecialchars($pedido['observaciones']); ?></textarea></td>
 
-                        <!-- Obtener la cantidad de menús -->
-                        <td>
-                            <?php
-                            $detalleQuery = "SELECT nombre, cantidad FROM detalle_pedidos_hyt WHERE pedido_id = ?";
-                            $detalleStmt = $pdo->prepare($detalleQuery);
-                            $detalleStmt->execute([$pedido['id']]);
-                            $detalles = $detalleStmt->fetchAll(PDO::FETCH_ASSOC);
+                            <!-- Obtener la cantidad de menús -->
+                            <td>
+                                <?php
+                                $detalleQuery = "SELECT nombre, cantidad FROM detalle_pedidos_hyt WHERE pedido_id = ?";
+                                $detalleStmt = $pdo->prepare($detalleQuery);
+                                $detalleStmt->execute([$pedido['id']]);
+                                $detalles = $detalleStmt->fetchAll(PDO::FETCH_ASSOC);
 
-                            foreach ($detalles as $detalle):
-                                echo htmlspecialchars($detalle['nombre']) . ": " . htmlspecialchars($detalle['cantidad']) . "<br>";
-                            endforeach;
-                            ?>
-                        </td>
+                                foreach ($detalles as $detalle): ?>
+                                    <label><?php echo htmlspecialchars($detalle['nombre']); ?>:</label>
+                                    <input type="number" name="productos[<?php echo $detalle['nombre']; ?>]" value="<?php echo $detalle['cantidad']; ?>"><br>
+                                <?php endforeach; ?>
+                            </td>
 
-                        <td>
-                            <?php
-                            // Mostrar botón "Modificar" solo si la fecha de salida es hoy y antes de las 11:00 AM
-                            if ($pedido['fecha_salida'] === $currentDate && $currentTime < '11:00'): ?>
-                                <form action="modificar_pedido_form.php" method="GET">
-                                    <input type="hidden" name="pedido_id" value="<?php echo $pedido['id']; ?>">
-                                    <button type="submit" class="button">Modificar</button>
-                                </form>
-                            <?php else: ?>
-                                <button class="button" disabled>Modificar</button>
-                            <?php endif; ?>
-                        </td>
+                            <!-- Mostrar el botón solo si la hora y fecha son válidas -->
+                            <td>
+                                <?php if ($pedido['fecha_salida'] === $currentDate && $currentTime < '11:00'): ?>
+                                    <button type="submit" class="button" name="modificar_pedido">Modificar</button>
+                                <?php else: ?>
+                                    <button class="button" disabled>Modificar</button>
+                                <?php endif; ?>
+                            </td>
+                        </form>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
