@@ -11,6 +11,7 @@
         <ul>
             <li><a href="dashboard_hyt_agencia.php">Dashboard</a></li>
             <li><a href="crear_pedido.php" class="button">Crear nuevo pedido</a></li>
+            <li><a href="modificar_pedidos_hyt.php" class="button">Editar pedidos</a></li>
             <li><a href="logout.php">Salir</a></li>
         </ul>
     </nav>
