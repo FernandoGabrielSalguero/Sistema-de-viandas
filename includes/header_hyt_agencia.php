@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>HYT Agencia - Dashboard</title>
+    <link rel="stylesheet" href="../css/style_hyt_agencia.css">
 </head>
 <body>
 <header>
