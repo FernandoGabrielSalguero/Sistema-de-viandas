@@ -153,7 +153,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['realizar_pedido'])) {
         <input type="time" id="hora_salida" name="hora_salida" required>
 
         <label for="observaciones">Observaciones:</label>
-        <textarea id="observaciones" name="observaciones" rows="4" cols="50" placeholder="Escriba cualquier observación sobre el pedido"></textarea>
+        <textarea id="observaciones" name="observaciones" placeholder="Escriba cualquier observación sobre el pedido"></textarea>
 
         <h2>Detalle del pedido</h2>
 
@@ -167,3 +167,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['realizar_pedido'])) {
 
 </body>
 </html>
+
