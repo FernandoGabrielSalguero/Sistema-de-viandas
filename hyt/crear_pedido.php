@@ -64,10 +64,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['realizar_pedido'])) {
     $fecha_salida = $_POST['fecha_salida'];
 
     // Insertar en pedidos_hyt
-    $stmt_pedido = $pdo->prepare("INSERT INTO pedidos_hyt (nombre_agencia, fecha_pedido, estado, interno, hora_salida, destino_id, hyt_admin_id, observaciones, fecha_salida) 
-                              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt_pedido = $pdo->prepare("INSERT INTO pedidos_hyt (nombre_agencia, correo_electronico_agencia, fecha_pedido, estado, interno, hora_salida, destino_id, hyt_admin_id, observaciones, fecha_salida) 
+                              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
-    if (!$stmt_pedido->execute([$nombre_agencia, $correo_agencia, $fecha_pedido, $estado, $interno, $fecha_salida, $hora_salida, $destino_id, $hyt_admin_id, $observaciones])) {
+    if (!$stmt_pedido->execute([$nombre_agencia, $correo_agencia, $fecha_pedido, $estado, $interno, $hora_salida, $destino_id, $hyt_admin_id, $observaciones, $fecha_salida])) {
         $errorInfo = $stmt_pedido->errorInfo();
         echo "Error al realizar el pedido: " . $errorInfo[2];
         exit();
@@ -90,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['realizar_pedido'])) {
         }
 
         // Enviar correo
-        $subject = "Detalle del Pedido Realizado";
+        $subject = "Detalle del Pedido Realizado - ID Pedido: " . $pedido_id;
         $message = "Se ha realizado un pedido con los siguientes detalles:\n\n";
         foreach ($_POST['productos'] as $producto_id => $cantidad) {
             if ($cantidad > 0) {
