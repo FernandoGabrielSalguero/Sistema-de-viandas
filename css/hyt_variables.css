@@ -16,7 +16,7 @@ h2 {
     margin-bottom: 20px;
 }
 
-/* Header styles */
+/* Header styles
 header {
     display: flex;
     justify-content: space-between;
@@ -24,7 +24,7 @@ header {
     background-color: #fff;
     padding: 10px 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
+} */
 
 /* Buttons */
 button,
