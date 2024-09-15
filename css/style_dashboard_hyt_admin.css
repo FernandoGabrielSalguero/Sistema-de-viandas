@@ -4,6 +4,31 @@ body {
     padding: 20px;
 }
 
+.kpi-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.kpi {
+    background-color: #007bff;
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.kpi h2 {
+    margin: 0;
+    font-size: 1.2em;
+}
+
+.kpi p {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
 .filter-container {
     margin-bottom: 20px;
     text-align: center;
@@ -40,4 +65,3 @@ table th {
     max-width: 100%;
     margin: 0 auto;
 }
-

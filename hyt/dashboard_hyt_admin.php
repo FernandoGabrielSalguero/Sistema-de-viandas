@@ -11,8 +11,9 @@ include '../includes/db.php';
 // Obtener el ID del administrador logueado
 $admin_id = $_SESSION['usuario_id'];
 
-// Filtrar por estado de saldo si está definido
+// Filtrar por estado de saldo y agencia si están definidos
 $filter_estado_saldo = isset($_GET['filter_estado_saldo']) ? $_GET['filter_estado_saldo'] : null;
+$filter_agencia = isset($_GET['filter_agencia']) ? $_GET['filter_agencia'] : null;
 
 // Construir la consulta principal
 $query = "SELECT p.id, p.nombre_agencia, p.fecha_pedido, p.fecha_modificacion, p.estado_saldo,
@@ -25,22 +26,51 @@ $query = "SELECT p.id, p.nombre_agencia, p.fecha_pedido, p.fecha_modificacion, p
           WHERE p.hyt_admin_id = ?
           ";
 
-// Si se aplica un filtro por estado de saldo, agregarlo a la consulta
+// Aplicar los filtros si están presentes
+$params = [$admin_id];
 if ($filter_estado_saldo) {
     $query .= " AND p.estado_saldo = ?";
+    $params[] = $filter_estado_saldo;
+}
+if ($filter_agencia) {
+    $query .= " AND p.nombre_agencia = ?";
+    $params[] = $filter_agencia;
 }
 
 $query .= " GROUP BY p.id";
 
 // Preparar y ejecutar la consulta
 $stmt = $pdo->prepare($query);
-if ($filter_estado_saldo) {
-    $stmt->execute([$admin_id, $filter_estado_saldo]);
-} else {
-    $stmt->execute([$admin_id]);
-}
+$stmt->execute($params);
 $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// Obtener las agencias disponibles para el filtro
+$agencias_query = "SELECT DISTINCT nombre_agencia FROM pedidos_hyt WHERE hyt_admin_id = ?";
+$agencias_stmt = $pdo->prepare($agencias_query);
+$agencias_stmt->execute([$admin_id]);
+$agencias = $agencias_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Calcular totales para los KPI (Pagado y Adeudado)
+$kpi_query = "SELECT estado_saldo, SUM(d.cantidad * d.precio) AS total 
+              FROM pedidos_hyt p 
+              LEFT JOIN detalle_pedidos_hyt d ON p.id = d.pedido_id 
+              WHERE p.hyt_admin_id = ?
+              GROUP BY estado_saldo";
+$kpi_stmt = $pdo->prepare($kpi_query);
+$kpi_stmt->execute([$admin_id]);
+$kpi_totals = $kpi_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Inicializar las variables de los KPI
+$total_pagado = 0;
+$total_adeudado = 0;
+
+foreach ($kpi_totals as $kpi) {
+    if ($kpi['estado_saldo'] == 'Pagado') {
+        $total_pagado = $kpi['total'];
+    } elseif ($kpi['estado_saldo'] == 'Adeudado') {
+        $total_adeudado = $kpi['total'];
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -53,7 +83,19 @@ $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <body>
     <h1>Pedidos de las agencias supervisadas</h1>
 
-    <!-- Filtro por estado de saldo -->
+    <!-- KPI Totales -->
+    <div class="kpi-container">
+        <div class="kpi">
+            <h2>Total Adeudado</h2>
+            <p><?php echo number_format($total_adeudado, 2); ?> ARS</p>
+        </div>
+        <div class="kpi">
+            <h2>Total Pagado</h2>
+            <p><?php echo number_format($total_pagado, 2); ?> ARS</p>
+        </div>
+    </div>
+
+    <!-- Filtro por estado de saldo y agencia -->
     <div class="filter-container">
         <form method="GET" action="dashboard_hyt_admin.php">
             <label for="filter_estado_saldo">Filtrar por estado de saldo:</label>
@@ -62,6 +104,18 @@ $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <option value="Pagado" <?php echo ($filter_estado_saldo == 'Pagado') ? 'selected' : ''; ?>>Pagado</option>
                 <option value="Adeudado" <?php echo ($filter_estado_saldo == 'Adeudado') ? 'selected' : ''; ?>>Adeudado</option>
             </select>
+
+            <label for="filter_agencia">Filtrar por agencia:</label>
+            <select id="filter_agencia" name="filter_agencia">
+                <option value="">Todas las agencias</option>
+                <?php foreach ($agencias as $agencia): ?>
+                    <option value="<?php echo htmlspecialchars($agencia['nombre_agencia']); ?>" 
+                        <?php echo ($filter_agencia == $agencia['nombre_agencia']) ? 'selected' : ''; ?>>
+                        <?php echo htmlspecialchars($agencia['nombre_agencia']); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+
             <button type="submit">Filtrar</button>
         </form>
     </div>
