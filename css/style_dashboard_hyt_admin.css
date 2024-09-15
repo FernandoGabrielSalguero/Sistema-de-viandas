@@ -1,3 +1,41 @@
+.header {
+    background-color: #f8f9fa;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.header .nav {
+    display: flex;
+    justify-content: space-around;
+    gap: 20px;
+    width: 100%;
+}
+
+.header .nav a {
+    text-decoration: none;
+    padding: 10px 20px;
+    color: white;
+    background-color: #28a745;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.header .nav a.logout {
+    background-color: #dc3545;
+}
+
+.header .nav a:hover {
+    opacity: 0.9;
+}
+
+.header .nav a.active {
+    background-color: #007bff;
+}
+
 body {
     font-family: Arial, sans-serif;
     background-color: #f9f9f9;
