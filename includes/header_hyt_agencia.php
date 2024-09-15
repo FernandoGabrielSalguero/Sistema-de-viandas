@@ -7,14 +7,14 @@
 </head>
 <body>
 <header>
-    <nav>
-        <ul>
-            <li><a href="dashboard_hyt_agencia.php">Dashboard</a></li>
-            <li><a href="crear_pedido.php" class="button">Crear nuevo pedido</a></li>
-            <li><a href="modificar_pedidos_hyt.php" class="button">Editar pedidos</a></li>
-            <li><a href="logout.php">Salir</a></li>
-        </ul>
-    </nav>
+<div class="header">
+    <div class="nav">
+        <a href="dashboard_hyt_agencia.php" class="active">Dashboard</a>
+        <a href="crear_pedido.php">Crear nuevo pedido</a>
+        <a href="modificar_pedidos_hyt.php">Editar pedidos</a>
+        <a href="logout.php" class="logout">Salir</a>
+    </div>
+</div>
 </header>
 </body>
 </html>

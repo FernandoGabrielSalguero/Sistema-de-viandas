@@ -1,16 +1,17 @@
-/* Archivo: style_hyt_agencia.css */
-
-/* Estilos del encabezado */
+/* Estilo para el header */
 .header {
     background-color: #f8f9fa;
     padding: 10px 20px;
-    text-align: center;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
 }
 
 .header .nav {
     display: flex;
-    justify-content: center;
-    gap: 10px;
+    justify-content: space-around;
+    gap: 20px;
+    width: 100%;
 }
 
 .header .nav a {
@@ -21,6 +22,7 @@
     border-radius: 5px;
     font-size: 16px;
     font-weight: bold;
+    text-align: center;
 }
 
 .header .nav a.logout {
@@ -35,64 +37,96 @@
     background-color: #007bff;
 }
 
+/* Estilo general de la página */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f9f9f9;
+    font-family: 'Roboto', sans-serif;
+    background-color: #f4f5f7;
+    margin: 0;
     padding: 20px;
 }
+
+/* Estilos para el contenedor de las tablas */
 .table-container {
     width: 100%;
     margin: 0 auto;
-    max-width: 1000px;
+    max-width: 1200px;
 }
+
 table {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
 table th, table td {
-    border: 1px solid #ddd;
-    padding: 8px;
+    border: 1px solid #e0e0e0;
+    padding: 12px;
     text-align: center;
 }
+
 table th {
-    background-color: #f2f2f2;
+    background-color: #fafafa;
+    color: #333;
+    font-weight: bold;
+    text-transform: uppercase;
 }
-.form-control {
+
+table td {
+    background-color: #ffffff;
+    color: #666;
+}
+
+.table-container input, .table-container select {
     width: 100%;
-    padding: 8px;
-    box-sizing: border-box;
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
 }
+
+/* Estilo para botones */
 .button {
     background-color: #28a745;
     color: white;
     padding: 10px 15px;
     border: none;
     cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 5px;
+    transition: background-color 0.3s;
 }
+
 .button[disabled] {
     background-color: #ccc;
     cursor: not-allowed;
 }
+
+.button:hover {
+    background-color: #218838;
+}
+
 .button-container {
     text-align: center;
 }
 
+/* Estilo para las tarjetas */
 .container {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: space-between;
     gap: 20px;
 }
 
 .pedido-card {
-    border: 1px solid #ccc;
+    border: 1px solid #ddd;
     border-radius: 8px;
     padding: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     background-color: #fff;
-    max-width: 450px;
-    flex: 1 1 calc(33.333% - 40px);
+    max-width: 32%;
     box-sizing: border-box;
     margin-bottom: 20px;
     text-align: center;
@@ -110,17 +144,15 @@ table th {
     border-collapse: collapse;
 }
 
-.pedido-card table, .pedido-card th, .pedido-card td {
+.pedido-card table th, .pedido-card table td {
+    padding: 10px;
     border: 1px solid #ddd;
-}
-
-.pedido-card th, .pedido-card td {
-    padding: 8px;
     text-align: center;
 }
 
 .estado-saldo {
     font-weight: bold;
+    font-size: 1.2em;
 }
 
 .estado-saldo.adeudado {
@@ -133,7 +165,7 @@ table th {
 
 @media (max-width: 768px) {
     .pedido-card {
-        flex: 1 1 calc(50% - 40px);
+        flex: 1 1 calc(50% - 20px);
     }
 }
 
@@ -143,24 +175,24 @@ table th {
     }
 }
 
-/* Estilos del filtro */
+/* Filtros */
 .filter-container {
-    text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 20px;
-}
-
-.filter-container label {
-    font-weight: bold;
-    margin-right: 10px;
+    gap: 10px;
 }
 
 .filter-container select, .filter-container input[type="date"] {
-    padding: 5px;
+    padding: 10px;
     font-size: 1em;
+    border: 1px solid #ddd;
+    border-radius: 4px;
 }
 
 .filter-container button {
-    padding: 8px 12px;
+    padding: 10px 20px;
     background-color: #007bff;
     color: white;
     border: none;
