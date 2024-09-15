@@ -5,13 +5,15 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'hyt_agencia') {
     exit();
 }
 
-// Habilitar la muestra de errores
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 include '../includes/header_hyt_agencia.php';
 include '../includes/db.php';
+
+// Establecer la zona horaria de Argentina
+date_default_timezone_set('America/Argentina/Buenos_Aires');
 
 // Obtener la fecha y hora actual
 $currentDate = date('Y-m-d');
@@ -24,13 +26,17 @@ $stmt->execute([$usuario_id]);
 $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 $nombre_agencia = $usuario['Nombre'];
 
-// Filtro por fecha de salida
-$filter_fecha_salida = isset($_GET['filter_fecha_salida']) ? $_GET['filter_fecha_salida'] : null;
-
-$query = "SELECT p.id, p.nombre_agencia, p.fecha_pedido, p.fecha_salida, p.estado, p.interno, p.hora_salida, p.observaciones, p.estado_saldo, d.nombre as destino_nombre
+// Obtener los pedidos del usuario hyt_agencia actual
+$query = "SELECT p.id, p.nombre_agencia, p.fecha_pedido, p.fecha_modificacion, p.fecha_salida, p.estado, p.interno, p.hora_salida, p.destino_id, p.observaciones, p.estado_saldo, d.nombre as destino_nombre
           FROM pedidos_hyt p
           LEFT JOIN destinos_hyt d ON p.destino_id = d.id
           WHERE p.nombre_agencia = ?";
+
+$stmt = $pdo->prepare($query);
+$stmt->execute([$nombre_agencia]);
+$pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$filter_fecha_salida = isset($_GET['filter_fecha_salida']) ? $_GET['filter_fecha_salida'] : null;
 
 if ($filter_fecha_salida) {
     $query .= " AND p.fecha_salida = ?";
@@ -40,8 +46,6 @@ if ($filter_fecha_salida) {
     $stmt = $pdo->prepare($query);
     $stmt->execute([$nombre_agencia]);
 }
-
-$pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -118,14 +122,16 @@ $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
             cursor: not-allowed;
         }
 
-        .estado-adeudado {
-            color: red;
+        .estado-saldo {
             font-weight: bold;
         }
 
-        .total {
-            font-weight: bold;
-            margin-top: 10px;
+        .estado-saldo.adeudado {
+            color: red;
+        }
+
+        .estado-saldo.pagado {
+            color: green;
         }
 
         @media (max-width: 768px) {
@@ -164,6 +170,7 @@ $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
             border-radius: 4px;
             cursor: pointer;
         }
+
     </style>
 </head>
 <body>
@@ -188,7 +195,7 @@ $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <p><strong>Fecha de Salida: </strong><?php echo date('d-m-Y', strtotime($pedido['fecha_salida'])); ?></p>
                     <p><strong>Interno: </strong><?php echo htmlspecialchars($pedido['interno']); ?></p>
                     <p><strong>Estado de Saldo: </strong>
-                        <span class="<?php echo ($pedido['estado_saldo'] == 'Adeudado') ? 'estado-adeudado' : ''; ?>">
+                        <span class="estado-saldo <?php echo ($pedido['estado_saldo'] == 'Adeudado') ? 'adeudado' : 'pagado'; ?>">
                             <?php echo htmlspecialchars($pedido['estado_saldo']); ?>
                         </span>
                     </p>
@@ -210,7 +217,8 @@ $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             $detalles = $detalleStmt->fetchAll(PDO::FETCH_ASSOC);
 
                             $total = 0;
-                            foreach ($detalles as $detalle): 
+
+                            foreach ($detalles as $detalle):
                                 $subtotal = $detalle['cantidad'] * $detalle['precio'];
                                 $total += $subtotal;
                             ?>
@@ -224,12 +232,13 @@ $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         </tbody>
                     </table>
 
-                    <p><strong>Total: </strong><?php echo number_format($total, 2); ?> ARS</p>
+                    <p><strong>Total: <?php echo number_format($total, 2); ?> ARS</strong></p>
+
                     <p><strong>Observaciones:</strong> <?php echo htmlspecialchars($pedido['observaciones']); ?></p>
 
                     <?php
-                    // Determinar si el botón de actualización debe estar habilitado o deshabilitado
-                    $isDisabled = ($currentDate === $pedido['fecha_pedido'] && $currentTime < '10:00') ? '' : 'disabled';
+                    // Habilitar el botón si la fecha es la misma que la fecha_salida y el tiempo es antes de las 11:00 am
+                    $isDisabled = ($currentDate === $pedido['fecha_salida'] && $currentTime < '11:00') ? '' : 'disabled';
                     ?>
                     <button class="button" <?php echo $isDisabled; ?>>Actualizar</button>
                 </div>
