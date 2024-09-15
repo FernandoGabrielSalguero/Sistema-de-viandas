@@ -23,6 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['cambiar_estado_saldo']
 $query = "SELECT p.id, p.nombre_agencia, p.fecha_pedido, p.fecha_modificacion, p.estado_saldo, 
                  GROUP_CONCAT(d.nombre SEPARATOR ', ') AS productos, 
                  GROUP_CONCAT(d.cantidad SEPARATOR ', ') AS cantidades, 
+                 GROUP_CONCAT(d.precio SEPARATOR ', ') AS precios_unitarios, 
                  SUM(d.cantidad * d.precio) AS total
           FROM pedidos_hyt p
           LEFT JOIN detalle_pedidos_hyt d ON p.id = d.pedido_id
@@ -85,6 +86,7 @@ foreach ($totales as $total) {
             <th>Fecha Pedido</th>
             <th>Fecha Modificación</th>
             <th>Productos (Cantidades)</th>
+            <th>Precio Unitario</th>
             <th>Total</th>
             <th>Estado de Saldo</th>
         </tr>
@@ -102,6 +104,15 @@ foreach ($totales as $total) {
                     $cantidades = explode(", ", $pedido['cantidades']);
                     foreach ($productos as $index => $producto) {
                         echo htmlspecialchars($producto) . " (" . htmlspecialchars($cantidades[$index]) . ")<br>";
+                    }
+                    ?>
+                </td>
+                <td>
+                    <?php 
+                    // Mostrar el precio unitario por producto
+                    $precios_unitarios = explode(", ", $pedido['precios_unitarios']);
+                    foreach ($precios_unitarios as $precio_unitario) {
+                        echo htmlspecialchars(number_format($precio_unitario, 2)) . " ARS<br>";
                     }
                     ?>
                 </td>
