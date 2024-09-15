@@ -16,15 +16,40 @@ h2 {
     margin-bottom: 20px;
 }
 
-/* Header styles
-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #fff;
+ /* Estilos del encabezado */
+ .header {
+    background-color: #f8f9fa;
     padding: 10px 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-} */
+    text-align: center;
+}
+
+.header .nav {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.header .nav a {
+    text-decoration: none;
+    padding: 10px 20px;
+    color: white;
+    background-color: #28a745;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.header .nav a.logout {
+    background-color: #dc3545;
+}
+
+.header .nav a:hover {
+    opacity: 0.9;
+}
+
+.header .nav a.active {
+    background-color: #007bff;
+}
 
 /* Buttons */
 button,
