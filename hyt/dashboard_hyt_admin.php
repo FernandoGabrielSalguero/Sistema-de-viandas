@@ -4,10 +4,6 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'hyt_admin') {
     header("Location: ../login.php");
     exit();
 }
-// Habilitar la muestra de errores
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 
 include '../includes/header_hyt_admin.php';
 include '../includes/db.php';
@@ -18,7 +14,7 @@ $filter_agencia = isset($_GET['filter_agencia']) ? $_GET['filter_agencia'] : '';
 $filter_destino = isset($_GET['filter_destino']) ? $_GET['filter_destino'] : '';
 $filter_fecha_entrega = isset($_GET['filter_fecha_entrega']) ? $_GET['filter_fecha_entrega'] : '';
 
-// Consulta SQL para obtener los pedidos
+// Base de la consulta
 $query = "
     SELECT p.id, p.nombre_agencia, p.fecha_pedido, p.fecha_modificacion, p.interno, d.nombre as destino, p.fecha_salida,
            GROUP_CONCAT(CONCAT(dp.nombre, ' (', dp.cantidad, ')') SEPARATOR '<br>') AS productos,
@@ -30,8 +26,10 @@ $query = "
     WHERE p.hyt_admin_id = :admin_id
 ";
 
-// Aplicar filtros
-$filters = [];
+// Array para almacenar los parámetros de ejecución
+$filters = ['admin_id' => $_SESSION['usuario_id']];
+
+// Aplicar filtros si existen
 if ($filter_saldo !== '') {
     $query .= " AND p.estado_saldo = :filter_saldo";
     $filters['filter_saldo'] = $filter_saldo;
@@ -49,21 +47,20 @@ if ($filter_fecha_entrega !== '') {
     $filters['filter_fecha_entrega'] = $filter_fecha_entrega;
 }
 
-// Agrupar y ordenar resultados
+// Finalizar la consulta SQL
 $query .= "
     GROUP BY p.id
     ORDER BY p.id DESC
-    LIMIT 20 OFFSET :offset";
+    LIMIT 20 OFFSET 0";
 
-// Preparar la consulta
+// Preparar y ejecutar la consulta
 $stmt = $pdo->prepare($query);
-$filters['admin_id'] = $_SESSION['usuario_id'];
-$stmt->execute($filters);
+$stmt->execute($filters);  // Aquí se pasa el array con los valores de los filtros
 
 // Obtener los resultados
 $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Obtener KPI (Totales de Adeudado y Pagado)
+// Consulta para obtener los totales de Pagado y Adeudado
 $kpi_query = "
     SELECT estado_saldo, SUM(dp.cantidad * dp.precio) as total
     FROM pedidos_hyt p
