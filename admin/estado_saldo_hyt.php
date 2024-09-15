@@ -1,4 +1,7 @@
 <?php
+// Iniciar el buffer de salida para evitar el error de headers
+ob_start();
+
 // Conexión a la base de datos
 include '../includes/header_admin.php';
 include '../includes/db.php';
@@ -122,3 +125,7 @@ foreach ($totales as $total) {
 
 </body>
 </html>
+
+<?php
+// Finalizar el buffer de salida
+ob_end_flush();
