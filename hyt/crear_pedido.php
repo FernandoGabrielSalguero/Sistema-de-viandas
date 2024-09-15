@@ -61,12 +61,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['realizar_pedido'])) {
     $observaciones = $_POST['observaciones'];
     $fecha_pedido = date('Y-m-d');
     $estado = 'vigente';
+    $fecha_salida = $_POST['fecha_salida'];
 
     // Insertar en pedidos_hyt
-    $stmt_pedido = $pdo->prepare("INSERT INTO pedidos_hyt (nombre_agencia, correo_electronico_agencia, fecha_pedido, estado, interno, hora_salida, destino_id, hyt_admin_id, observaciones) 
-                                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt_pedido = $pdo->prepare("INSERT INTO pedidos_hyt (nombre_agencia, fecha_pedido, estado, interno, hora_salida, destino_id, hyt_admin_id, observaciones, fecha_salida) 
+                              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
-    if (!$stmt_pedido->execute([$nombre_agencia, $correo_agencia, $fecha_pedido, $estado, $interno, $hora_salida, $destino_id, $hyt_admin_id, $observaciones])) {
+    if (!$stmt_pedido->execute([$nombre_agencia, $correo_agencia, $fecha_pedido, $estado, $interno, $fecha_salida, $hora_salida, $destino_id, $hyt_admin_id, $observaciones])) {
         $errorInfo = $stmt_pedido->errorInfo();
         echo "Error al realizar el pedido: " . $errorInfo[2];
         exit();
@@ -144,6 +145,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['realizar_pedido'])) {
 
         <label for="interno">Interno (Número de interno):</label>
         <input type="number" id="interno" name="interno" required>
+
+        <label for="fecha_salida">Fecha de salida:</label>
+        <input type="date" id="fecha_salida" name="fecha_salida" required>
 
         <label for="hora_salida">Hora de salida:</label>
         <input type="time" id="hora_salida" name="hora_salida" required>
