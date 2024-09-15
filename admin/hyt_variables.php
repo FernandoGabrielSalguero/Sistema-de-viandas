@@ -3,6 +3,11 @@
 include '../includes/header_admin.php';
 include '../includes/db.php';
 
+// Habilitar la muestra de errores
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 // Gestión de precios_hyt
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['guardar_precio'])) {
     $nombre = $_POST['nombre'];
