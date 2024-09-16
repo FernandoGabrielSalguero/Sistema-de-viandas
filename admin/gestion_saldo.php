@@ -103,7 +103,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cambiar_estado'])) {
         $stmt = $pdo->prepare("UPDATE Pedidos_Saldo SET Estado = ? WHERE Id = ?");
         if ($stmt->execute([$nuevo_estado, $id])) {
             $_SESSION['modal_message'] = $mensaje_exito; // Guardamos el mensaje en la sesión
-            header('Location: ' . $_SERVER['REQUEST_URI']); // Redirigir para evitar reenvíos
+            echo '<script>window.location.href = window.location.href.split("?")[0];</script>';
             exit();
         } else {
             $error = "Hubo un error al actualizar el estado del saldo: " . implode(", ", $stmt->errorInfo());
