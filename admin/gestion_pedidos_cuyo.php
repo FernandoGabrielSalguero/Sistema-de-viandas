@@ -1,4 +1,6 @@
 <?php
+ob_start(); // Inicia el buffer de salida
+
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -42,8 +44,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 // Función para generar archivo CSV
 function generarCSV($tabla_pedidos) {
+    ob_end_clean(); // Limpia el buffer antes de generar el CSV
+
     header('Content-Type: text/csv');
     header('Content-Disposition: attachment; filename="pedidos_cuyo_placa.csv"');
+    
     $output = fopen('php://output', 'w');
     
     // Encabezados
@@ -71,7 +76,6 @@ if (isset($_POST['descargar_excel'])) {
     generarCSV($tabla_pedidos);
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
