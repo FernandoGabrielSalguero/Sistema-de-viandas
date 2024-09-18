@@ -66,12 +66,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['guardar_destino'])) {
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['eliminar_destino'])) {
     $destino_id = $_POST['destino_id'];
 
-    // Eliminar el destino de la tabla
-    $stmt = $pdo->prepare("DELETE FROM destinos_hyt WHERE id = ?");
-    if ($stmt->execute([$destino_id])) {
-        $success = "Destino eliminado correctamente.";
+    // Verificar si hay pedidos asociados a este destino
+    $stmt_check_pedidos = $pdo->prepare("SELECT COUNT(*) FROM pedidos_hyt WHERE destino_id = ?");
+    $stmt_check_pedidos->execute([$destino_id]);
+    $pedidos_count = $stmt_check_pedidos->fetchColumn();
+
+    if ($pedidos_count > 0) {
+        // No se puede eliminar porque hay pedidos asociados
+        $error = "No se puede eliminar el destino porque hay pedidos asociados.";
     } else {
-        $error = "Error al eliminar el destino.";
+        // Eliminar el destino de la tabla
+        $stmt = $pdo->prepare("DELETE FROM destinos_hyt WHERE id = ?");
+        if ($stmt->execute([$destino_id])) {
+            $success = "Destino eliminado correctamente.";
+        } else {
+            $error = "Error al eliminar el destino.";
+        }
     }
 }
 
