@@ -96,23 +96,23 @@ th {
 
 /* Ajuste del ancho por columna */
 th:nth-child(1), td:nth-child(1) {
-    width: 50px; /* ID */
+    width: 25px; /* ID */
 }
 
 th:nth-child(2), td:nth-child(2) {
-    width: 250px; /* Nombre del menú */
+    width: 500px; /* Nombre del menú */
 }
 
 th:nth-child(3), td:nth-child(3) {
-    width: 150px; /* Fecha de entrega */
+    width: 100px; /* Fecha de entrega */
 }
 
 th:nth-child(4), td:nth-child(4) {
-    width: 180px; /* Fecha y hora límite de compra */
+    width: 100px; /* Fecha y hora límite de compra */
 }
 
 th:nth-child(5), td:nth-child(5) {
-    width: 180px; /* Fecha y hora límite de cancelación */
+    width: 100px; /* Fecha y hora límite de cancelación */
 }
 
 th:nth-child(6), td:nth-child(6) {
@@ -120,7 +120,7 @@ th:nth-child(6), td:nth-child(6) {
 }
 
 th:nth-child(7), td:nth-child(7) {
-    width: 120px; /* Estado */
+    width: 100px; /* Estado */
 }
 
 th:nth-child(8), td:nth-child(8) {
