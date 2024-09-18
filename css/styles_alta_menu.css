@@ -10,16 +10,19 @@ h1, h2 {
     color: #4a4a4a;
 }
 
-/* Estilos del formulario */
+/* Estilos del formulario con dos columnas */
 form {
     background-color: #fff;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     margin-bottom: 40px;
-    max-width: 600px;
+    max-width: 900px; /* Aumentamos el ancho para acomodar las dos columnas */
     margin-left: auto;
     margin-right: auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; /* Espaciado entre los elementos del formulario */
 }
 
 form label {
@@ -33,16 +36,23 @@ form input[type="text"],
 form input[type="date"],
 form input[type="datetime-local"],
 form input[type="number"],
-
-
 form select {
     width: 100%;
     padding: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
+    box-sizing: border-box; /* Evitar que el padding afecte el tamaño del input */
 }
 
+/* Ajuste del contenedor para dividir el formulario en dos columnas */
+form > div {
+    flex: 1 1 calc(50% - 20px); /* Dos columnas con espacio entre ellas */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Botón en la parte inferior */
 form button {
     width: 100%;
     padding: 10px;
@@ -52,6 +62,7 @@ form button {
     border-radius: 4px;
     font-size: 16px;
     cursor: pointer;
+    margin-top: 20px; /* Mover hacia abajo */
 }
 
 form button:hover {
@@ -70,12 +81,14 @@ table {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     overflow: hidden;
+    table-layout: auto; /* Para que las columnas se adapten al contenido */
 }
 
 th, td {
     padding: 15px;
     text-align: center;
     height: auto;
+    white-space: nowrap; /* Mantener el texto en una sola línea */
 }
 
 th {
@@ -87,8 +100,17 @@ td {
     border-bottom: 1px solid #ddd;
 }
 
+td input[type="text"],
+td input[type="number"],
+td input[type="date"],
+td input[type="datetime-local"] {
+    width: auto; /* Hacer que el tamaño del input se ajuste al contenido */
+    padding: 8px;
+    font-size: 14px;
+}
+
 td select {
-    width: 100%;
+    width: auto; /* Hacer que el select se ajuste al contenido */
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -107,8 +129,6 @@ td button:hover {
     background-color: #6200ea;
 }
 
-
-
 /* Colores de estado */
 .estado-en-venta {
     background-color: #d4edda;
@@ -118,4 +138,31 @@ td button:hover {
 .estado-sin-stock {
     background-color: #f8d7da;
     color: #721c24;
+}
+
+/* Paginación */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.pagination a {
+    color: #007bff;
+    padding: 8px 16px;
+    text-decoration: none;
+    border: 1px solid #ddd;
+    margin: 0 4px;
+    border-radius: 4px;
+}
+
+.pagination a:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+.pagination a.active {
+    background-color: #007bff;
+    color: white;
+    border: 1px solid #007bff;
 }

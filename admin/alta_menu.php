@@ -30,6 +30,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['crear_menu'])) {
     }
 }
 
+// Obtener el total de menús para paginación
+$total_menus = $pdo->query("SELECT COUNT(*) FROM Menú")->fetchColumn();
+
+// Definir el número de menús por página
+$menus_por_pagina = 25;
+
+// Obtener la página actual
+$pagina_actual = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
+$inicio = ($pagina_actual - 1) * $menus_por_pagina;
+
+// Obtener menús con límite y orden descendente por ID
+$stmt = $pdo->prepare("SELECT * FROM Menú ORDER BY Id DESC LIMIT :inicio, :menus_por_pagina");
+$stmt->bindParam(':inicio', $inicio, PDO::PARAM_INT);
+$stmt->bindParam(':menus_por_pagina', $menus_por_pagina, PDO::PARAM_INT);
+$stmt->execute();
+$menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+
 // Procesar la actualización del menú
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['actualizar_menu'])) {
     $menu_id = $_POST['menu_id'];
@@ -63,12 +82,14 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Alta de Menú</title>
     <link rel="stylesheet" href="../css/styles_alta_menu.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
+
 <body>
     <h1>Alta de Menú</h1>
     <?php
@@ -82,25 +103,25 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <form method="post" action="alta_menu.php">
         <label for="nombre_menu">Nombre del Menú</label>
         <input type="text" id="nombre_menu" name="nombre_menu" required>
-        
+
         <label for="fecha_entrega">Fecha de Entrega</label>
         <input type="date" id="fecha_entrega" name="fecha_entrega" required>
-        
+
         <label for="fecha_hora_compra">Fecha y Hora Límite de Compra</label>
         <input type="datetime-local" id="fecha_hora_compra" name="fecha_hora_compra" required>
-        
+
         <label for="fecha_hora_cancelacion">Fecha y Hora Límite de Cancelación</label>
         <input type="datetime-local" id="fecha_hora_cancelacion" name="fecha_hora_cancelacion" required>
-        
+
         <label for="precio">Precio</label>
         <input type="number" id="precio" name="precio" step="0.01" required>
-        
+
         <label for="estado">Estado</label>
         <select id="estado" name="estado" required>
             <option value="En venta">En venta</option>
             <option value="Sin stock">Sin stock</option>
         </select>
-        
+
         <button type="submit" name="crear_menu">Crear Menú</button>
     </form>
 
@@ -118,28 +139,38 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <th>Acción</th>
             </tr>
             <?php foreach ($menus as $menu) : ?>
-            <tr class="estado-<?php echo strtolower(str_replace(' ', '-', $menu['Estado'])); ?>">
-                <form method="post" action="alta_menu.php">
-                    <td><?php echo htmlspecialchars($menu['Id']); ?></td>
-                    <td><input type="text" name="nombre_menu" value="<?php echo htmlspecialchars($menu['Nombre']); ?>" required></td>
-                    <td><input type="date" name="fecha_entrega" value="<?php echo htmlspecialchars($menu['Fecha_entrega']); ?>" required></td>
-                    <td><input type="datetime-local" name="fecha_hora_compra" value="<?php echo date('Y-m-d\TH:i', strtotime($menu['Fecha_hora_compra'])); ?>" required></td>
-                    <td><input type="datetime-local" name="fecha_hora_cancelacion" value="<?php echo date('Y-m-d\TH:i', strtotime($menu['Fecha_hora_cancelacion'])); ?>" required></td>
-                    <td><input type="number" name="precio" step="0.01" value="<?php echo htmlspecialchars($menu['Precio']); ?>" required></td>
-                    <td>
-                        <select name="estado" required>
-                            <option value="En venta" <?php echo ($menu['Estado'] == 'En venta') ? 'selected' : ''; ?>>En venta</option>
-                            <option value="Sin stock" <?php echo ($menu['Estado'] == 'Sin stock') ? 'selected' : ''; ?>>Sin stock</option>
-                        </select>
-                    </td>
-                    <td>
-                        <input type="hidden" name="menu_id" value="<?php echo htmlspecialchars($menu['Id']); ?>">
-                        <button type="submit" name="actualizar_menu">Actualizar</button>
-                    </td>
-                </form>
-            </tr>
+                <tr class="estado-<?php echo strtolower(str_replace(' ', '-', $menu['Estado'])); ?>">
+                    <form method="post" action="alta_menu.php">
+                        <td><?php echo htmlspecialchars($menu['Id']); ?></td>
+                        <td><input type="text" name="nombre_menu" value="<?php echo htmlspecialchars($menu['Nombre']); ?>" required></td>
+                        <td><input type="date" name="fecha_entrega" value="<?php echo htmlspecialchars($menu['Fecha_entrega']); ?>" required></td>
+                        <td><input type="datetime-local" name="fecha_hora_compra" value="<?php echo date('Y-m-d\TH:i', strtotime($menu['Fecha_hora_compra'])); ?>" required></td>
+                        <td><input type="datetime-local" name="fecha_hora_cancelacion" value="<?php echo date('Y-m-d\TH:i', strtotime($menu['Fecha_hora_cancelacion'])); ?>" required></td>
+                        <td><input type="number" name="precio" step="0.01" value="<?php echo htmlspecialchars($menu['Precio']); ?>" required></td>
+                        <td>
+                            <select name="estado" required>
+                                <option value="En venta" <?php echo ($menu['Estado'] == 'En venta') ? 'selected' : ''; ?>>En venta</option>
+                                <option value="Sin stock" <?php echo ($menu['Estado'] == 'Sin stock') ? 'selected' : ''; ?>>Sin stock</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input type="hidden" name="menu_id" value="<?php echo htmlspecialchars($menu['Id']); ?>">
+                            <button type="submit" name="actualizar_menu">Actualizar</button>
+                        </td>
+                    </form>
+                </tr>
             <?php endforeach; ?>
+            <div class="pagination">
+                <?php
+                $total_paginas = ceil($total_menus / $menus_por_pagina);
+                for ($i = 1; $i <= $total_paginas; $i++) {
+                    echo "<a href='?pagina=$i' class='" . ($i == $pagina_actual ? 'active' : '') . "'>$i</a>";
+                }
+                ?>
+            </div>
+
         </table>
     </div>
 </body>
+
 </html>
