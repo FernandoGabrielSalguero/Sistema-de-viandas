@@ -100,13 +100,15 @@ td {
     border-bottom: 1px solid #ddd;
 }
 
-td input[type="text"],
-td input[type="number"],
-td input[type="date"],
-td input[type="datetime-local"] {
-    width: auto; /* Hacer que el tamaño del input se ajuste al contenido */
+td input[type="text"] {
+    width: 100%; /* Para que ocupe todo el espacio disponible en la celda */
+    min-width: 150px; /* Tamaño mínimo para el input */
+    max-width: 300px; /* Tamaño máximo del input */
     padding: 8px;
     font-size: 14px;
+    box-sizing: border-box; /* Asegura que el padding no afecte el ancho */
+    overflow: auto; /* Para permitir el desplazamiento si el texto es demasiado largo */
+    white-space: nowrap; /* Para evitar el salto de línea */
 }
 
 td select {
