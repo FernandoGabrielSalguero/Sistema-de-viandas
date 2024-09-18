@@ -73,11 +73,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['actualizar_menu'])) {
     }
 }
 
-// Obtener todos los menús
-$stmt = $pdo->prepare("SELECT * FROM Menú");
-$stmt->execute();
-$menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
-?>
+// // Obtener todos los menús
+// $stmt = $pdo->prepare("SELECT * FROM Menú");
+// $stmt->execute();
+// $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// ?>
 
 
 <!DOCTYPE html>
@@ -100,45 +100,44 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
         echo "<p class='success'>$success</p>";
     }
     ?>
-<form method="post" action="alta_menu.php">
-    <div>
-        <label for="nombre_menu">Nombre del Menú</label>
-        <input type="text" id="nombre_menu" name="nombre_menu" required>
-    </div>
+    <form method="post" action="alta_menu.php">
+        <div>
+            <label for="nombre_menu">Nombre del Menú</label>
+            <input type="text" id="nombre_menu" name="nombre_menu" required>
+        </div>
 
-    <div>
-        <label for="fecha_entrega">Fecha de Entrega</label>
-        <input type="date" id="fecha_entrega" name="fecha_entrega" required>
-    </div>
+        <div>
+            <label for="fecha_entrega">Fecha de Entrega</label>
+            <input type="date" id="fecha_entrega" name="fecha_entrega" required>
+        </div>
 
-    <div>
-        <label for="fecha_hora_compra">Fecha y Hora Límite de Compra</label>
-        <input type="datetime-local" id="fecha_hora_compra" name="fecha_hora_compra" required>
-    </div>
+        <div>
+            <label for="fecha_hora_compra">Fecha y Hora Límite de Compra</label>
+            <input type="datetime-local" id="fecha_hora_compra" name="fecha_hora_compra" required>
+        </div>
 
-    <div>
-        <label for="fecha_hora_cancelacion">Fecha y Hora Límite de Cancelación</label>
-        <input type="datetime-local" id="fecha_hora_cancelacion" name="fecha_hora_cancelacion" required>
-    </div>
+        <div>
+            <label for="fecha_hora_cancelacion">Fecha y Hora Límite de Cancelación</label>
+            <input type="datetime-local" id="fecha_hora_cancelacion" name="fecha_hora_cancelacion" required>
+        </div>
 
-    <div>
-        <label for="precio">Precio</label>
-        <input type="number" id="precio" name="precio" step="0.01" required>
-    </div>
+        <div>
+            <label for="precio">Precio</label>
+            <input type="number" id="precio" name="precio" step="0.01" required>
+        </div>
 
-    <div>
-        <label for="estado">Estado</label>
-        <select id="estado" name="estado" required>
-            <option value="En venta">En venta</option>
-            <option value="Sin stock">Sin stock</option>
-        </select>
-    </div>
+        <div>
+            <label for="estado">Estado</label>
+            <select id="estado" name="estado" required>
+                <option value="En venta">En venta</option>
+                <option value="Sin stock">Sin stock</option>
+            </select>
+        </div>
 
-    <div style="width: 100%;">
-        <button type="submit" name="crear_menu">Crear Menú</button>
-    </div>
-</form>
-
+        <div style="width: 100%;">
+            <button type="submit" name="crear_menu">Crear Menú</button>
+        </div>
+    </form>
 
     <h2>Lista de Menús</h2>
     <div class="table-container">
@@ -175,17 +174,19 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </form>
                 </tr>
             <?php endforeach; ?>
-            <div class="pagination">
-                <?php
-                $total_paginas = ceil($total_menus / $menus_por_pagina);
-                for ($i = 1; $i <= $total_paginas; $i++) {
-                    echo "<a href='?pagina=$i' class='" . ($i == $pagina_actual ? 'active' : '') . "'>$i</a>";
-                }
-                ?>
-            </div>
-
         </table>
     </div>
+
+    <!-- Bloque de paginación debe estar fuera de la tabla -->
+    <div class="pagination">
+        <?php
+        $total_paginas = ceil($total_menus / $menus_por_pagina);
+        for ($i = 1; $i <= $total_paginas; $i++) {
+            echo "<a href='?pagina=$i' class='" . ($i == $pagina_actual ? 'active' : '') . "'>$i</a>";
+        }
+        ?>
+    </div>
+
 </body>
 
 </html>
