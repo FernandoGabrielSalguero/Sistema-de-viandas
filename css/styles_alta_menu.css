@@ -72,7 +72,7 @@ form button:hover {
     overflow-x: auto;
 }
 
-/* Control de anchos por columna */
+/* Estilos de la tabla limpia, sin tamaños fijos */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -87,44 +87,13 @@ th, td {
     text-align: center;
     height: auto;
     white-space: nowrap;
+    /* Ajuste automático de ancho de columna basado en contenido */
+    width: auto;
 }
 
 th {
     background-color: #d32f2f;
     color: #fff;
-}
-
-/* Ajuste del ancho por columna */
-th:nth-child(1), td:nth-child(1) {
-    width: 25px; /* ID */
-}
-
-th:nth-child(2), td:nth-child(2) {
-    width: 500px; /* Nombre del menú */
-}
-
-th:nth-child(3), td:nth-child(3) {
-    width: 100px; /* Fecha de entrega */
-}
-
-th:nth-child(4), td:nth-child(4) {
-    width: 100px; /* Fecha y hora límite de compra */
-}
-
-th:nth-child(5), td:nth-child(5) {
-    width: 100px; /* Fecha y hora límite de cancelación */
-}
-
-th:nth-child(6), td:nth-child(6) {
-    width: 100px; /* Precio */
-}
-
-th:nth-child(7), td:nth-child(7) {
-    width: 100px; /* Estado */
-}
-
-th:nth-child(8), td:nth-child(8) {
-    width: 100px; /* Botón de acción */
 }
 
 td {
@@ -143,7 +112,8 @@ td input[type="datetime-local"] {
 
 /* Aumentar el tamaño del input de texto para mostrar más contenido */
 td input[name="nombre_menu"] {
-    min-width: 250px; /* Aumentamos el ancho mínimo para ver más texto */
+    width: 100%;
+    min-width: 250px; /* Aumentamos el ancho mínimo */
 }
 
 /* Estilos del select */
