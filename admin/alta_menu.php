@@ -86,7 +86,7 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <head>
     <meta charset="UTF-8">
     <title>Alta de Menú</title>
-    <link rel="stylesheet" href="../css/styles_alta_menu.css">
+    <link rel="stylesheet" href="../css/styles_alta_menu.css?v=<?php echo time(); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
