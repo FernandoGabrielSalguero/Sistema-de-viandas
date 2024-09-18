@@ -100,30 +100,45 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
         echo "<p class='success'>$success</p>";
     }
     ?>
-    <form method="post" action="alta_menu.php">
+<form method="post" action="alta_menu.php">
+    <div>
         <label for="nombre_menu">Nombre del Menú</label>
         <input type="text" id="nombre_menu" name="nombre_menu" required>
+    </div>
 
+    <div>
         <label for="fecha_entrega">Fecha de Entrega</label>
         <input type="date" id="fecha_entrega" name="fecha_entrega" required>
+    </div>
 
+    <div>
         <label for="fecha_hora_compra">Fecha y Hora Límite de Compra</label>
         <input type="datetime-local" id="fecha_hora_compra" name="fecha_hora_compra" required>
+    </div>
 
+    <div>
         <label for="fecha_hora_cancelacion">Fecha y Hora Límite de Cancelación</label>
         <input type="datetime-local" id="fecha_hora_cancelacion" name="fecha_hora_cancelacion" required>
+    </div>
 
+    <div>
         <label for="precio">Precio</label>
         <input type="number" id="precio" name="precio" step="0.01" required>
+    </div>
 
+    <div>
         <label for="estado">Estado</label>
         <select id="estado" name="estado" required>
             <option value="En venta">En venta</option>
             <option value="Sin stock">Sin stock</option>
         </select>
+    </div>
 
+    <div style="width: 100%;">
         <button type="submit" name="crear_menu">Crear Menú</button>
-    </form>
+    </div>
+</form>
+
 
     <h2>Lista de Menús</h2>
     <div class="table-container">
