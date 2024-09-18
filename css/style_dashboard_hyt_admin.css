@@ -1,9 +1,11 @@
+/* General Angular Material-like styles for the header */
 .header {
     background-color: #f8f9fa;
     padding: 10px 20px;
     display: flex;
     justify-content: space-around;
     align-items: center;
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.1);
 }
 
 .header .nav {
@@ -18,10 +20,11 @@
     padding: 10px 20px;
     color: white;
     background-color: #28a745;
-    border-radius: 5px;
+    border-radius: 4px;
     font-size: 16px;
     font-weight: bold;
     text-align: center;
+    transition: background-color 0.3s ease-in-out;
 }
 
 .header .nav a.logout {
@@ -29,19 +32,23 @@
 }
 
 .header .nav a:hover {
-    opacity: 0.9;
+    background-color: #218838;
 }
 
 .header .nav a.active {
     background-color: #007bff;
 }
 
+/* Body styles with light background */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f9f9f9;
+    font-family: 'Roboto', sans-serif;
+    background-color: #f5f5f5;
+    margin: 0;
     padding: 20px;
+    color: #333;
 }
 
+/* KPI container for Angular Material feel */
 .kpi-container {
     display: flex;
     justify-content: center;
@@ -55,6 +62,9 @@ body {
     padding: 20px;
     border-radius: 8px;
     text-align: center;
+    flex-grow: 1;
+    max-width: 300px;
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.1);
 }
 
 .kpi h2 {
@@ -67,42 +77,104 @@ body {
     font-weight: bold;
 }
 
+/* Filter container styled like Angular Material form field */
 .filter-container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
-    text-align: center;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 20px;
+    align-items: center;
 }
 
 .filter-container label {
     font-weight: bold;
     margin-right: 10px;
+    font-size: 0.9em;
+    color: #555;
 }
 
-.filter-container select, .filter-container button, .filter-container input {
-    padding: 8px 12px;
+.filter-container select,
+.filter-container input,
+.filter-container button {
+    padding: 10px 15px;
     font-size: 16px;
-    margin-left: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    outline: none;
+    transition: all 0.3s ease;
 }
 
+.filter-container select:focus,
+.filter-container input:focus {
+    border-color: #007bff;
+}
+
+/* Group filters together with consistent layout */
+.filter-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Button for filtering */
+button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Table with Angular Material styles */
 table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 table th, table td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: center;
+    padding: 16px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    color: #333;
 }
 
 table th {
-    background-color: #f2f2f2;
+    background-color: #f8f9fa;
+    font-weight: bold;
+    color: #007bff;
 }
 
-tr.pagado {
+table tr:last-child td {
+    border-bottom: none;
+}
+
+tr.adeudado-row {
+    background-color: #f8d7da;
+}
+
+tr.pagado-row {
     background-color: #d4edda;
 }
 
-tr.adeudado {
-    background-color: #f8d7da;
+/* Responsive design */
+@media (max-width: 768px) {
+    .filter-container {
+        flex-direction: column;
+    }
 }

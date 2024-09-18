@@ -100,7 +100,8 @@ foreach ($pedidos as $pedido) {
     </div>
 
     <div class="filter-container">
-        <form method="GET" action="dashboard_hyt_admin.php">
+    <form method="GET" action="dashboard_hyt_admin.php">
+        <div class="filter-group">
             <label for="filter_estado_saldo">Filtrar por estado de saldo:</label>
             <select id="filter_estado_saldo" name="filter_estado_saldo">
                 <option value="Todos" <?php echo ($filter_estado_saldo == 'Todos') ? 'selected' : ''; ?>>Todos</option>
@@ -111,39 +112,33 @@ foreach ($pedidos as $pedido) {
             <label for="filter_agencia">Filtrar por agencia:</label>
             <select id="filter_agencia" name="filter_agencia">
                 <option value="Todas las agencias">Todas las agencias</option>
-                <?php
-                // Obtener todas las agencias para el filtro
-                $stmt_agencias = $pdo->query("SELECT DISTINCT nombre_agencia FROM pedidos_hyt");
-                $agencias = $stmt_agencias->fetchAll(PDO::FETCH_ASSOC);
-                foreach ($agencias as $agencia) {
-                    echo '<option value="' . $agencia['nombre_agencia'] . '"' . (($filter_agencia == $agencia['nombre_agencia']) ? ' selected' : '') . '>' . $agencia['nombre_agencia'] . '</option>';
-                }
-                ?>
+                <?php foreach ($agencias as $agencia): ?>
+                    <option value="<?php echo $agencia['nombre_agencia']; ?>" <?php echo ($filter_agencia == $agencia['nombre_agencia']) ? 'selected' : ''; ?>>
+                        <?php echo $agencia['nombre_agencia']; ?>
+                    </option>
+                <?php endforeach; ?>
             </select>
 
             <label for="filter_destino">Filtrar por destino:</label>
             <select id="filter_destino" name="filter_destino">
                 <option value="Todos los destinos">Todos los destinos</option>
-                <?php
-                // Obtener todos los destinos para el filtro
-                $stmt_destinos = $pdo->query("SELECT DISTINCT nombre FROM destinos_hyt");
-                $destinos = $stmt_destinos->fetchAll(PDO::FETCH_ASSOC);
-                foreach ($destinos as $destino) {
-                    echo '<option value="' . $destino['nombre'] . '"' . (($filter_destino == $destino['nombre']) ? ' selected' : '') . '>' . $destino['nombre'] . '</option>';
-                }
-                ?>
+                <?php foreach ($destinos as $destino): ?>
+                    <option value="<?php echo $destino['nombre']; ?>" <?php echo ($filter_destino == $destino['nombre']) ? 'selected' : ''; ?>>
+                        <?php echo $destino['nombre']; ?>
+                    </option>
+                <?php endforeach; ?>
             </select>
 
             <label for="filter_fecha_entrega">Filtrar por fecha de entrega:</label>
             <input type="date" id="filter_fecha_entrega" name="filter_fecha_entrega" value="<?php echo $filter_fecha_entrega; ?>">
-
+        </div>
+        <div class="filter-group">
             <button type="submit">Filtrar</button>
-        </form>
+            <button type="submit" formaction="dashboard_hyt_admin.php">Eliminar filtros</button>
+        </div>
+    </form>
+</div>
 
-        <form method="GET" action="dashboard_hyt_admin.php">
-            <button type="submit">Eliminar filtros</button>
-        </form>
-    </div>
 
     <table>
         <thead>
