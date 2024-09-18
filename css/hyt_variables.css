@@ -230,7 +230,7 @@ input:checked+.slider:before {
     margin-top: 20px;
 }
 
-/* Estilo de cada botón de destino */
+/* Botón de destino centrado */
 .destino-button {
     background-color: #00796B;
     color: white;
@@ -239,9 +239,12 @@ input:checked+.slider:before {
     position: relative;
     font-size: 16px;
     font-weight: bold;
-    display: inline-flex;
-    align-items: center;
+    display: flex;
+    justify-content: center; /* Centra horizontalmente */
+    align-items: center; /* Centra verticalmente */
+    min-height: 50px; /* Ajusta el alto mínimo si es necesario */
 }
+
 
 /* Botón de eliminar ("X") */
 .delete-button {
