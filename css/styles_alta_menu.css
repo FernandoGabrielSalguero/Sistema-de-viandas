@@ -17,12 +17,12 @@ form {
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     margin-bottom: 40px;
-    max-width: 900px; /* Aumentamos el ancho para acomodar las dos columnas */
+    max-width: 900px;
     margin-left: auto;
     margin-right: auto;
     display: flex;
     flex-wrap: wrap;
-    gap: 20px; /* Espaciado entre los elementos del formulario */
+    gap: 20px;
 }
 
 form label {
@@ -42,17 +42,15 @@ form select {
     margin-bottom: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    box-sizing: border-box; /* Evitar que el padding afecte el tamaño del input */
+    box-sizing: border-box;
 }
 
-/* Ajuste del contenedor para dividir el formulario en dos columnas */
 form > div {
-    flex: 1 1 calc(50% - 20px); /* Dos columnas con espacio entre ellas */
+    flex: 1 1 calc(50% - 20px);
     display: flex;
     flex-direction: column;
 }
 
-/* Botón en la parte inferior */
 form button {
     width: 100%;
     padding: 10px;
@@ -62,7 +60,7 @@ form button {
     border-radius: 4px;
     font-size: 16px;
     cursor: pointer;
-    margin-top: 20px; /* Mover hacia abajo */
+    margin-top: 20px;
 }
 
 form button:hover {
@@ -74,6 +72,7 @@ form button:hover {
     overflow-x: auto;
 }
 
+/* Control de anchos por columna */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -81,14 +80,13 @@ table {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     overflow: hidden;
-    table-layout: auto; /* Para que las columnas se adapten al contenido */
 }
 
 th, td {
     padding: 15px;
     text-align: center;
     height: auto;
-    white-space: nowrap; /* Mantener el texto en una sola línea */
+    white-space: nowrap;
 }
 
 th {
@@ -96,23 +94,61 @@ th {
     color: #fff;
 }
 
+/* Ajuste del ancho por columna */
+th:nth-child(1), td:nth-child(1) {
+    width: 50px; /* ID */
+}
+
+th:nth-child(2), td:nth-child(2) {
+    width: 250px; /* Nombre del menú */
+}
+
+th:nth-child(3), td:nth-child(3) {
+    width: 150px; /* Fecha de entrega */
+}
+
+th:nth-child(4), td:nth-child(4) {
+    width: 180px; /* Fecha y hora límite de compra */
+}
+
+th:nth-child(5), td:nth-child(5) {
+    width: 180px; /* Fecha y hora límite de cancelación */
+}
+
+th:nth-child(6), td:nth-child(6) {
+    width: 100px; /* Precio */
+}
+
+th:nth-child(7), td:nth-child(7) {
+    width: 120px; /* Estado */
+}
+
+th:nth-child(8), td:nth-child(8) {
+    width: 100px; /* Botón de acción */
+}
+
 td {
     border-bottom: 1px solid #ddd;
 }
 
-td input[type="text"] {
-    width: 100%; /* Para que ocupe todo el espacio disponible en la celda */
-    min-width: 150px; /* Tamaño mínimo para el input */
-    max-width: 300px; /* Tamaño máximo del input */
+td input[type="text"],
+td input[type="number"],
+td input[type="date"],
+td input[type="datetime-local"] {
+    width: 100%;
     padding: 8px;
     font-size: 14px;
-    box-sizing: border-box; /* Asegura que el padding no afecte el ancho */
-    overflow: auto; /* Para permitir el desplazamiento si el texto es demasiado largo */
-    white-space: nowrap; /* Para evitar el salto de línea */
+    box-sizing: border-box;
 }
 
+/* Aumentar el tamaño del input de texto para mostrar más contenido */
+td input[name="nombre_menu"] {
+    min-width: 250px; /* Aumentamos el ancho mínimo para ver más texto */
+}
+
+/* Estilos del select */
 td select {
-    width: auto; /* Hacer que el select se ajuste al contenido */
+    width: 100%;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
