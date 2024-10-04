@@ -124,66 +124,69 @@ $pendientes = $notificaciones['pendientes'];
     <audio id="alert-sound" src="../css/Notificacion.mp3"></audio>
 
     <script>
-        // Actualizar las notificaciones cada 15 minutos y reproducir sonido
-        function actualizarNotificaciones() {
-            fetch('obtener_notificaciones.php')
-                .then(response => response.json())
-                .then(data => {
-                    const badge = document.getElementById('notificaciones-badge');
-                    const dropdown = document.getElementById('notificaciones-dropdown');
-                    const alertSound = document.getElementById('alert-sound');
+    // Actualizar las notificaciones cada 15 minutos y reproducir sonido
+    function actualizarNotificaciones() {
+        fetch('obtener_notificaciones.php')
+            .then(response => response.json())
+            .then(data => {
+                const badge = document.getElementById('notificaciones-badge');
+                const dropdown = document.getElementById('notificaciones-dropdown');
+                const alertSound = document.getElementById('alert-sound');
 
-                    badge.innerText = data.length;
+                // Actualizar el badge con el número de notificaciones pendientes
+                badge.innerText = data.length;
 
-                    // Actualizar el contenido del dropdown
-                    dropdown.innerHTML = '';
+                // Limpiar el contenido anterior del dropdown
+                dropdown.innerHTML = '';
 
-                    if (data.length === 0) {
-                        dropdown.innerHTML = '<p>No hay cambios por el momento, próxima actualización en 15 minutos.</p>';
-                    } else {
-                        // Reproducir sonido si hay nuevas notificaciones
-                        alertSound.play();
+                // Si no hay notificaciones, mostrar el mensaje de "No hay cambios"
+                if (data.length === 0) {
+                    dropdown.innerHTML = '<p>No hay cambios por el momento, próxima actualización en 15 minutos.</p>';
+                } else {
+                    // Reproducir sonido si hay nuevas notificaciones
+                    alertSound.play();
 
-                        data.forEach(notificacion => {
-                            const notificacionElement = document.createElement('div');
-                            notificacionElement.classList.add('notificacion');
+                    // Recorrer y mostrar las notificaciones pendientes
+                    data.forEach(notificacion => {
+                        const notificacionElement = document.createElement('div');
+                        notificacionElement.classList.add('notificacion');
 
-                            notificacionElement.innerHTML = `
-                                <p><strong>Tipo:</strong> ${notificacion.tipo}</p>
-                                <p><strong>Nombre:</strong> ${notificacion.Nombre}</p>
-                                <p><strong>Descripción:</strong> ${notificacion.descripcion}</p>
-                                <button onclick="marcarComoVisto(${notificacion.id})">Visto</button>
-                            `;
+                        notificacionElement.innerHTML = `
+                            <p><strong>Tipo:</strong> ${notificacion.tipo}</p>
+                            <p><strong>Nombre:</strong> ${notificacion.Nombre}</p>
+                            <p><strong>Descripción:</strong> ${notificacion.descripcion}</p>
+                            <button onclick="marcarComoVisto(${notificacion.id})">Visto</button>
+                        `;
 
-                            dropdown.appendChild(notificacionElement);
-                        });
-                    }
-                });
-        }
+                        dropdown.appendChild(notificacionElement);
+                    });
+                }
+            });
+    }
 
-        // Función para marcar como visto
-        function marcarComoVisto(id) {
-            fetch(`marcar_visto.php?id=${id}`)
-                .then(response => response.text())
-                .then(result => {
-                    if (result === 'ok') {
-                        actualizarNotificaciones();  // Volver a actualizar después de marcar como visto
-                    }
-                });
-        }
+    // Función para marcar una notificación como vista
+    function marcarComoVisto(id) {
+        fetch(`marcar_visto.php?id=${id}`)
+            .then(response => response.text())
+            .then(result => {
+                if (result === 'ok') {
+                    actualizarNotificaciones();  // Volver a actualizar después de marcar como visto
+                }
+            });
+    }
 
-        // Mostrar el dropdown al hacer clic en "Notificaciones"
-        document.getElementById('notificaciones-btn').addEventListener('click', function() {
-            const dropdown = document.getElementById('notificaciones-dropdown');
-            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-        });
+    // Mostrar el dropdown al hacer clic en "Notificaciones"
+    document.getElementById('notificaciones-btn').addEventListener('click', function() {
+        const dropdown = document.getElementById('notificaciones-dropdown');
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+    });
 
-        // Actualizar las notificaciones automáticamente cada 15 minutos (900000 ms)
-        setInterval(actualizarNotificaciones, 900000);
+    // Actualizar las notificaciones automáticamente cada 15 minutos (900000 ms)
+    setInterval(actualizarNotificaciones, 900000);
 
-        // Llamar a la función al cargar la página
-        actualizarNotificaciones();
-    </script>
+    // Llamar a la función al cargar la página
+    actualizarNotificaciones();
+</script>
 
 </body>
 </html>
