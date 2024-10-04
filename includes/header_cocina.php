@@ -25,6 +25,7 @@ $pendientes = $notificaciones['pendientes'];
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -101,6 +102,7 @@ $pendientes = $notificaciones['pendientes'];
         }
     </style>
 </head>
+
 <body>
 
     <nav>
@@ -109,7 +111,7 @@ $pendientes = $notificaciones['pendientes'];
             <li><a href="pedidos_cuyo.php">Cuyo Placas</a></li>
             <li><a href="pedidos_hyt_cocina.php">H&T</a></li>
             <li>
-                <a href="#" id="notificaciones-btn">Notificaciones 
+                <a href="#" id="notificaciones-btn">Notificaciones
                     <span class="badge" id="notificaciones-badge"><?php echo $pendientes; ?></span>
                 </a>
                 <div class="notificaciones-dropdown" id="notificaciones-dropdown">
@@ -124,69 +126,81 @@ $pendientes = $notificaciones['pendientes'];
     <audio id="alert-sound" src="../css/Notificacion.mp3"></audio>
 
     <script>
-    // Actualizar las notificaciones cada 15 minutos y reproducir sonido
-    function actualizarNotificaciones() {
-        fetch('obtener_notificaciones.php')
-            .then(response => response.json())
-            .then(data => {
-                const badge = document.getElementById('notificaciones-badge');
-                const dropdown = document.getElementById('notificaciones-dropdown');
-                const alertSound = document.getElementById('alert-sound');
+        // Función para actualizar las notificaciones
+        function actualizarNotificaciones() {
+            fetch('obtener_notificaciones.php')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error al cargar notificaciones.');
+                    }
+                    return response.json(); // Convertir la respuesta a JSON
+                })
+                .then(data => {
+                    console.log(data); // Depuración: Ver qué datos estamos recibiendo
+                    const badge = document.getElementById('notificaciones-badge');
+                    const dropdown = document.getElementById('notificaciones-dropdown');
+                    const alertSound = document.getElementById('alert-sound');
 
-                // Actualizar el badge con el número de notificaciones pendientes
-                badge.innerText = data.length;
+                    // Actualizar el badge con el número de notificaciones pendientes
+                    badge.innerText = data.length;
 
-                // Limpiar el contenido anterior del dropdown
-                dropdown.innerHTML = '';
+                    // Limpiar el contenido anterior del dropdown
+                    dropdown.innerHTML = '';
 
-                // Si no hay notificaciones, mostrar el mensaje de "No hay cambios"
-                if (data.length === 0) {
-                    dropdown.innerHTML = '<p>No hay cambios por el momento, próxima actualización en 15 minutos.</p>';
-                } else {
-                    // Reproducir sonido si hay nuevas notificaciones
-                    alertSound.play();
+                    // Si no hay notificaciones, mostrar el mensaje de "No hay cambios"
+                    if (data.length === 0) {
+                        dropdown.innerHTML = '<p>No hay cambios por el momento, próxima actualización en 15 minutos.</p>';
+                    } else {
+                        // Reproducir sonido si hay nuevas notificaciones
+                        alertSound.play();
 
-                    // Recorrer y mostrar las notificaciones pendientes
-                    data.forEach(notificacion => {
-                        const notificacionElement = document.createElement('div');
-                        notificacionElement.classList.add('notificacion');
+                        // Recorrer y mostrar las notificaciones pendientes
+                        data.forEach(notificacion => {
+                            const notificacionElement = document.createElement('div');
+                            notificacionElement.classList.add('notificacion');
 
-                        notificacionElement.innerHTML = `
+                            notificacionElement.innerHTML = `
                             <p><strong>Tipo:</strong> ${notificacion.tipo}</p>
                             <p><strong>Nombre:</strong> ${notificacion.Nombre}</p>
                             <p><strong>Descripción:</strong> ${notificacion.descripcion}</p>
                             <button onclick="marcarComoVisto(${notificacion.id})">Visto</button>
                         `;
 
-                        dropdown.appendChild(notificacionElement);
-                    });
-                }
-            });
-    }
+                            dropdown.appendChild(notificacionElement);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al cargar notificaciones:', error);
+                    document.getElementById('notificaciones-dropdown').innerHTML = '<p>Error al cargar las notificaciones.</p>';
+                });
+        }
 
-    // Función para marcar una notificación como vista
-    function marcarComoVisto(id) {
-        fetch(`marcar_visto.php?id=${id}`)
-            .then(response => response.text())
-            .then(result => {
-                if (result === 'ok') {
-                    actualizarNotificaciones();  // Volver a actualizar después de marcar como visto
-                }
-            });
-    }
+        // Función para marcar una notificación como vista
+        function marcarComoVisto(id) {
+            fetch(`marcar_visto.php?id=${id}`)
+                .then(response => response.text())
+                .then(result => {
+                    if (result === 'ok') {
+                        actualizarNotificaciones(); // Volver a actualizar después de marcar como visto
+                    }
+                });
+        }
 
-    // Mostrar el dropdown al hacer clic en "Notificaciones"
-    document.getElementById('notificaciones-btn').addEventListener('click', function() {
-        const dropdown = document.getElementById('notificaciones-dropdown');
-        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-    });
+        // Mostrar el dropdown al hacer clic en "Notificaciones"
+        document.getElementById('notificaciones-btn').addEventListener('click', function() {
+            const dropdown = document.getElementById('notificaciones-dropdown');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        });
 
-    // Actualizar las notificaciones automáticamente cada 15 minutos (900000 ms)
-    setInterval(actualizarNotificaciones, 900000);
+        // Actualizar las notificaciones automáticamente cada 15 minutos (900000 ms)
+        setInterval(actualizarNotificaciones, 900000);
 
-    // Llamar a la función al cargar la página
-    actualizarNotificaciones();
-</script>
+        // Llamar a la función al cargar la página
+        actualizarNotificaciones();
+    </script>
+
 
 </body>
+
 </html>
