@@ -144,15 +144,13 @@ $pendientes = $notificaciones['pendientes'] ?? 0;
             if (dropdown.style.display === 'none' || dropdown.style.display === '') {
                 dropdown.style.display = 'block';
 
-                // Hacer la petición AJAX para obtener las notificaciones
-                // En el archivo `header_cocina.php` (dentro del script)
-                fetch('../includes/obtener_notificaciones.php') // Cambia esta línea
+                fetch('../includes/obtener_notificaciones.php') 
                     .then(response => response.json())
                     .then(data => {
                         if (data.length === 0) {
                             dropdown.innerHTML = "<p>No hay cambios por el momento, próxima actualización en 15 minutos</p>";
                         } else {
-                            dropdown.innerHTML = ''; // Limpiar contenido
+                            dropdown.innerHTML = ''; 
                             data.forEach(notificacion => {
                                 let notificacionHTML = `
                     <div class="notificacion">

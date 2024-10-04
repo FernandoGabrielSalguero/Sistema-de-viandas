@@ -21,7 +21,7 @@ $notificacion_id = $data['id'] ?? null;
 
 if ($notificacion_id) {
     // Actualizar el estado de la notificación a 'vista'
-    $stmt = $pdo->prepare("UPDATE notificaciones_cocina SET estado = 'vista', visto_por = ? WHERE id = ?");
+    $stmt = $pdo->prepare("UPDATE notificaciones_cocina SET estado = 'visto', visto_por = ? WHERE id = ?");
     $stmt->execute([$_SESSION['usuario_id'], $notificacion_id]);
     
     if ($stmt->rowCount() > 0) {
