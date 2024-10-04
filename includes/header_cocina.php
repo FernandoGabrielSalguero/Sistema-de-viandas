@@ -231,7 +231,6 @@ $pendientes = $notificaciones['pendientes'] ?? 0;
         }
     });
 
-    // Actualización automática cada 15 minutos (900000 ms)
     setInterval(actualizarNotificaciones, 900000); // Cada 15 minutos
 </script>
 </body>
