@@ -137,15 +137,16 @@ $pendientes = $notificaciones['pendientes'] ?? 0;
     </nav>
 
     <script>
-        document.getElementById('notificaciones').addEventListener('click', function (event) {
+        document.getElementById('notificaciones').addEventListener('click', function(event) {
             event.preventDefault();
             var dropdown = document.getElementById('dropdown-notificaciones');
-            
+
             if (dropdown.style.display === 'none' || dropdown.style.display === '') {
                 dropdown.style.display = 'block';
 
                 // Hacer la petición AJAX para obtener las notificaciones
-                fetch('../includes/obtener_notificaciones.php')
+                // En el archivo `header_cocina.php` (dentro del script)
+                fetch('../includes/obtener_notificaciones.php') // Cambia esta línea
                     .then(response => response.json())
                     .then(data => {
                         if (data.length === 0) {
@@ -154,25 +155,27 @@ $pendientes = $notificaciones['pendientes'] ?? 0;
                             dropdown.innerHTML = ''; // Limpiar contenido
                             data.forEach(notificacion => {
                                 let notificacionHTML = `
-                                    <div class="notificacion">
-                                        <p><strong>Tipo:</strong> ${notificacion.tipo}</p>
-                                        <p><strong>Nombre:</strong> ${notificacion.Nombre}</p>
-                                        <p><strong>Descripción:</strong> ${notificacion.descripcion}</p>
-                                        <button class="visto" data-id="${notificacion.id}">Visto</button>
-                                    </div>`;
+                    <div class="notificacion">
+                        <p><strong>Tipo:</strong> ${notificacion.tipo}</p>
+                        <p><strong>Nombre:</strong> ${notificacion.Nombre}</p>
+                        <p><strong>Descripción:</strong> ${notificacion.descripcion}</p>
+                        <button class="visto" data-id="${notificacion.id}">Visto</button>
+                    </div>`;
                                 dropdown.innerHTML += notificacionHTML;
                             });
 
                             // Agregar manejadores a los botones "Visto"
                             document.querySelectorAll('.visto').forEach(boton => {
-                                boton.addEventListener('click', function () {
+                                boton.addEventListener('click', function() {
                                     var notificacionId = this.getAttribute('data-id');
                                     fetch('../includes/marcar_visto.php', {
                                         method: 'POST',
                                         headers: {
                                             'Content-Type': 'application/json'
                                         },
-                                        body: JSON.stringify({ id: notificacionId })
+                                        body: JSON.stringify({
+                                            id: notificacionId
+                                        })
                                     }).then(response => {
                                         if (response.ok) {
                                             this.closest('.notificacion').remove();
