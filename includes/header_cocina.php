@@ -1,3 +1,4 @@
+<?php
 // Habilitar la muestra de errores
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -15,11 +16,22 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'cocina') {
     exit();
 }
 
-// Consultar las notificaciones pendientes
-$consulta_notificaciones = $pdo->prepare("SELECT COUNT(*) as pendientes FROM notificaciones_cocina WHERE estado = 'pendiente'");
-$consulta_notificaciones->execute();
-$notificaciones = $consulta_notificaciones->fetch(PDO::FETCH_ASSOC);
-$pendientes = $notificaciones['pendientes'];
+// Inicializar la variable $pendientes por defecto
+$pendientes = 0;
+
+try {
+    // Consultar las notificaciones pendientes
+    $consulta_notificaciones = $pdo->prepare("SELECT COUNT(*) as pendientes FROM notificaciones_cocina WHERE estado = 'pendiente'");
+    $consulta_notificaciones->execute();
+    $notificaciones = $consulta_notificaciones->fetch(PDO::FETCH_ASSOC);
+    if ($notificaciones && isset($notificaciones['pendientes'])) {
+        $pendientes = $notificaciones['pendientes']; // Asignar el valor real si la consulta es exitosa
+    }
+} catch (PDOException $e) {
+    // Manejo de error: puedes registrar el error o mostrar un mensaje en el log
+    error_log("Error al consultar las notificaciones pendientes: " . $e->getMessage());
+}
+
 ?>
 
 <!DOCTYPE html>
