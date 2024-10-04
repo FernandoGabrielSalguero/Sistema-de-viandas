@@ -9,21 +9,34 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 include 'db.php';
+include 'functions.php';
 
 if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'cocina') {
     http_response_code(403); // Forbidden
-    exit();
+    exit("Acceso denegado");
 }
 
-// Consultar las notificaciones pendientes
-$consulta_notificaciones = $pdo->prepare("
-    SELECT n.id, n.tipo, n.descripcion, u.Nombre 
-    FROM notificaciones_cocina n 
-    JOIN Usuarios u ON n.usuario_id = u.Id 
-    WHERE n.estado = 'pendiente'
-");
-$consulta_notificaciones->execute();
-$notificaciones = $consulta_notificaciones->fetchAll(PDO::FETCH_ASSOC);
+try {
+    // Consultar las notificaciones pendientes
+    $consulta_notificaciones = $pdo->prepare("
+        SELECT nc.id, nc.tipo, nc.descripcion, u.Nombre 
+        FROM notificaciones_cocina nc
+        JOIN Usuarios u ON nc.usuario_id = u.Id
+        WHERE nc.estado = 'pendiente'
+    ");
+    $consulta_notificaciones->execute();
 
-header('Content-Type: application/json');
-echo json_encode($notificaciones);
+    $notificaciones = $consulta_notificaciones->fetchAll(PDO::FETCH_ASSOC);
+
+    if ($notificaciones === false) {
+        throw new Exception("Error al obtener las notificaciones");
+    }
+
+    // Retornar las notificaciones en formato JSON
+    echo json_encode($notificaciones);
+} catch (Exception $e) {
+    // Mostrar el error en caso de que algo falle
+    http_response_code(500);
+    echo json_encode(['error' => $e->getMessage()]);
+}
+?>
