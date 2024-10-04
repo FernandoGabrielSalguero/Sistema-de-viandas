@@ -43,6 +43,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $usuario_id = $_SESSION['usuario_id'];
                 $stmt = $pdo->prepare("UPDATE Usuarios SET Saldo = Saldo + ? WHERE Id = ?");
                 $stmt->execute([$precio, $usuario_id]);
+
+                // Guardar notificación para cocina
+                $descripcion = "Cancelación de pedido ID $pedido_id: Menú $menu_id";
+                $stmt_notificacion = $pdo->prepare("INSERT INTO notificaciones_cocina (usuario_id, tipo, descripcion) VALUES (?, 'cancelacion', ?)");
+                $stmt_notificacion->execute([$usuario_id, $descripcion]);
+
                 header("Location: dashboard.php?success=Pedido cancelado con éxito.");
             } else {
                 header("Location: dashboard.php?error=Error al cancelar el pedido.");

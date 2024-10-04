@@ -68,6 +68,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 // Realizar el pedido
                 $stmt = $pdo->prepare("INSERT INTO Pedidos_Comida (Hijo_Id, Menú_Id, Fecha_pedido, Estado, Fecha_entrega, Preferencias_Alimenticias) VALUES (?, ?, NOW(), 'Procesando', ?, ?)");
                 $stmt->execute([$hijo_id, $menu['Id'], $menu['Fecha_entrega'], $preferencias_alimenticias]);
+
+                // Guardar notificación para cocina
+                $descripcion = "Pedido para hijo con ID $hijo_id: Menú " . $menu['Id'];
+                $stmt_notificacion = $pdo->prepare("INSERT INTO notificaciones_cocina (usuario_id, tipo, descripcion) VALUES (?, 'pedido', ?)");
+                $stmt_notificacion->execute([$usuario_id, $descripcion]);
             }
 
             // Actualizar el saldo del usuario una sola vez
