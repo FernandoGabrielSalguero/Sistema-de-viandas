@@ -16,31 +16,19 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'cocina') {
     exit();
 }
 
-// Inicializar la variable $pendientes por defecto
-$pendientes = 0;
-
-try {
-    // Consultar las notificaciones pendientes
-    $consulta_notificaciones = $pdo->prepare("SELECT COUNT(*) as pendientes FROM notificaciones_cocina WHERE estado = 'pendiente'");
-    $consulta_notificaciones->execute();
-    $notificaciones = $consulta_notificaciones->fetch(PDO::FETCH_ASSOC);
-    if ($notificaciones && isset($notificaciones['pendientes'])) {
-        $pendientes = $notificaciones['pendientes']; // Asignar el valor real si la consulta es exitosa
-    }
-} catch (PDOException $e) {
-    // Manejo de error: puedes registrar el error o mostrar un mensaje en el log
-    error_log("Error al consultar las notificaciones pendientes: " . $e->getMessage());
-}
-
+// Consultar las notificaciones pendientes
+$consulta_notificaciones = $pdo->prepare("SELECT COUNT(*) as pendientes FROM notificaciones_cocina WHERE estado = 'pendiente'");
+$consulta_notificaciones->execute();
+$notificaciones = $consulta_notificaciones->fetch(PDO::FETCH_ASSOC);
+$pendientes = $notificaciones['pendientes'];
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Panel de Cocina</title>
     <style>
         nav ul {
             list-style: none;
@@ -69,126 +57,133 @@ try {
             font-weight: bold;
         }
 
-        /* Estilo del botón de notificaciones */
+        /* Estilos para el badge de notificaciones */
         .badge {
             background-color: red;
             color: white;
             padding: 5px 10px;
             border-radius: 50%;
-            font-size: 0.8em;
+            font-size: 14px;
             position: absolute;
-            top: 0;
-            right: 0;
-            transform: translate(50%, -50%);
+            top: -10px;
+            right: -10px;
         }
 
-        /* Estilos para el dropdown */
-        .dropdown {
+        /* Estilos del dropdown */
+        .notificaciones-dropdown {
             position: absolute;
             top: 100%;
             right: 0;
             background-color: white;
-            border: 1px solid #ddd;
+            border: 1px solid #ccc;
+            border-radius: 5px;
             width: 300px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
             display: none;
-            flex-direction: column;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .dropdown.active {
-            display: flex;
-        }
-
-        .dropdown-item {
             padding: 10px;
-            border-bottom: 1px solid #ddd;
+            z-index: 1000;
         }
 
-        .dropdown-item:last-child {
-            border-bottom: none;
+        .notificacion {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
         }
 
-        .dropdown-item .visto-btn {
-            background-color: #28a745;
-            color: white;
-            padding: 5px 10px;
-            border: none;
-            cursor: pointer;
-            border-radius: 4px;
+        .notificacion button {
             margin-top: 5px;
-        }
-
-        .dropdown-item p {
-            margin: 0;
-            font-size: 0.9em;
-        }
-
-        .no-notificaciones {
-            padding: 10px;
-            text-align: center;
-            font-size: 0.9em;
-            color: #555;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
         }
     </style>
 </head>
-
 <body>
+
     <nav>
         <ul>
             <li><a href="pedidos_colegios.php">Colegios</a></li>
             <li><a href="pedidos_cuyo.php">Cuyo Placas</a></li>
             <li><a href="pedidos_hyt_cocina.php">H&T</a></li>
             <li>
-                <a href="#" onclick="mostrarNotificaciones()">Notificaciones
-                    <span class="badge" id="notificaciones-count"><?php echo $pendientes; ?></span>
+                <a href="#" id="notificaciones-btn">Notificaciones 
+                    <span class="badge" id="notificaciones-badge"><?php echo $pendientes; ?></span>
                 </a>
-                <div class="dropdown" id="notificaciones-dropdown">
-                    <!-- Aquí se cargarán las notificaciones -->
-                    <div class="no-notificaciones">Cargando notificaciones...</div>
+                <div class="notificaciones-dropdown" id="notificaciones-dropdown">
+                    Cargando notificaciones...
                 </div>
             </li>
             <li><a href="logout.php">Salir</a></li>
         </ul>
     </nav>
 
+    <!-- Sonido de notificación -->
+    <audio id="alert-sound" src="../css/Notificacion.mp3"></audio>
+
     <script>
-        // Función para mostrar el desplegable de notificaciones
-        function mostrarNotificaciones() {
-            const dropdown = document.getElementById('notificaciones-dropdown');
-            dropdown.classList.toggle('active');
-
-            if (dropdown.classList.contains('active')) {
-                cargarNotificaciones(); // Cargar notificaciones si está activo
-            }
-        }
-
-        // Función para cargar las notificaciones
-        function cargarNotificaciones() {
-            const xhr = new XMLHttpRequest();
-            xhr.open('GET', 'obtener_notificaciones.php?action=list', true);
-            xhr.onload = function () {
-                if (this.status === 200) {
+        // Actualizar las notificaciones cada 15 minutos y reproducir sonido
+        function actualizarNotificaciones() {
+            fetch('obtener_notificaciones.php')
+                .then(response => response.json())
+                .then(data => {
+                    const badge = document.getElementById('notificaciones-badge');
                     const dropdown = document.getElementById('notificaciones-dropdown');
-                    dropdown.innerHTML = this.responseText;
-                }
-            }
-            xhr.send();
+                    const alertSound = document.getElementById('alert-sound');
+
+                    badge.innerText = data.length;
+
+                    // Actualizar el contenido del dropdown
+                    dropdown.innerHTML = '';
+
+                    if (data.length === 0) {
+                        dropdown.innerHTML = '<p>No hay cambios por el momento, próxima actualización en 15 minutos.</p>';
+                    } else {
+                        // Reproducir sonido si hay nuevas notificaciones
+                        alertSound.play();
+
+                        data.forEach(notificacion => {
+                            const notificacionElement = document.createElement('div');
+                            notificacionElement.classList.add('notificacion');
+
+                            notificacionElement.innerHTML = `
+                                <p><strong>Tipo:</strong> ${notificacion.tipo}</p>
+                                <p><strong>Nombre:</strong> ${notificacion.Nombre}</p>
+                                <p><strong>Descripción:</strong> ${notificacion.descripcion}</p>
+                                <button onclick="marcarComoVisto(${notificacion.id})">Visto</button>
+                            `;
+
+                            dropdown.appendChild(notificacionElement);
+                        });
+                    }
+                });
         }
 
-        // Función para marcar notificación como "vista"
+        // Función para marcar como visto
         function marcarComoVisto(id) {
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', 'obtener_notificaciones.php?action=mark_seen', true);
-            xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-            xhr.onload = function () {
-                if (this.status === 200) {
-                    cargarNotificaciones(); // Recargar notificaciones
-                    document.getElementById('notificaciones-count').innerText = this.responseText;
-                }
-            }
-            xhr.send('id=' + id);
+            fetch(`marcar_visto.php?id=${id}`)
+                .then(response => response.text())
+                .then(result => {
+                    if (result === 'ok') {
+                        actualizarNotificaciones();  // Volver a actualizar después de marcar como visto
+                    }
+                });
         }
-    </script>
-</body>
 
+        // Mostrar el dropdown al hacer clic en "Notificaciones"
+        document.getElementById('notificaciones-btn').addEventListener('click', function() {
+            const dropdown = document.getElementById('notificaciones-dropdown');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        });
+
+        // Actualizar las notificaciones automáticamente cada 15 minutos (900000 ms)
+        setInterval(actualizarNotificaciones, 900000);
+
+        // Llamar a la función al cargar la página
+        actualizarNotificaciones();
+    </script>
+
+</body>
 </html>
