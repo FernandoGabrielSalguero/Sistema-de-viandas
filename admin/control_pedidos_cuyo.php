@@ -9,7 +9,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 // Verificar si el usuario está autenticado y tiene el rol de administrador
-if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'admin') {
+if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'administrador') {
     header("Location: ../index.php");
     exit();
 }
