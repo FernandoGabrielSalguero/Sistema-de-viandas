@@ -85,6 +85,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Historial de pedidos de viandas - Admin</title>
@@ -92,50 +93,104 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         body {
             margin: 0;
             padding: 20px;
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f9;
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
         }
 
         h1 {
             text-align: center;
-            margin-bottom: 20px;
-            font-size: 2em;
             color: #343a40;
+            margin-bottom: 20px;
         }
 
-        form {
+        .card-container {
             display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
             justify-content: center;
-            margin-bottom: 20px;
         }
 
-        label {
-            font-weight: bold;
-            margin-right: 10px;
-            align-self: center;
-            color: #343a40;
+        .card {
+            background-color: #ffffff;
+            border-radius: 8px;
+            width: 280px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        input[type="date"] {
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h3 {
+            color: #007bff;
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .card .pedido-id {
+            font-size: 0.9em;
+            color: #6c757d;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .card table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .card th,
+        .card td {
+            border: 1px solid #dee2e6;
             padding: 8px;
-            margin-right: 10px;
-            border-radius: 5px;
-            border: 1px solid #ced4da;
-            font-size: 1em;
+            text-align: center;
+            font-size: 0.9em;
         }
 
-        button {
-            padding: 10px 20px;
-            font-size: 1em;
+        .card th {
+            background-color: #f1f3f5;
+            font-weight: bold;
+        }
+
+        .card td {
+            background-color: #ffffff;
+        }
+
+        .card .turno-title {
+            font-weight: bold;
+            color: #495057;
+            text-align: left;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .card input[type="number"] {
+            width: 50px;
+            padding: 5px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .card button {
+            margin-top: 10px;
+            padding: 8px 16px;
+            font-size: 0.9em;
             cursor: pointer;
             background-color: #007bff;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 4px;
             transition: background-color 0.3s ease;
         }
 
-        button:hover {
+        .card button:hover {
             background-color: #0056b3;
         }
 
@@ -158,10 +213,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         .totales-menu table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
         }
 
-        .totales-menu table, .totales-menu th, .totales-menu td {
+        .totales-menu th,
+        .totales-menu td {
             border: 1px solid #e9ecef;
             padding: 8px;
             text-align: center;
@@ -182,78 +237,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             padding-right: 15px;
             color: #28a745;
         }
-
-        .card-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
-        }
-
-        .card {
-            background-color: white;
-            border: none;
-            border-radius: 10px;
-            width: 320px;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-            position: relative;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-        }
-
-        .card h3 {
-            margin-top: 0;
-            font-size: 1.4em;
-            color: #007bff;
-            text-align: center;
-        }
-
-        .card table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        .card table, .card th, .card td {
-            border: 1px solid #e9ecef;
-            padding: 8px;
-            text-align: center;
-        }
-
-        .card th {
-            background-color: #f8f9fa;
-            font-weight: bold;
-        }
-
-        .card td {
-            background-color: #ffffff;
-        }
-
-        .card .turno-title {
-            text-align: left;
-            font-weight: bold;
-            margin-top: 15px;
-            color: #343a40;
-        }
-
-        .card .pedido-id {
-            font-size: 0.9em;
-            color: #6c757d;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        .error {
-            color: red;
-            text-align: center;
-            margin-bottom: 20px;
-        }
     </style>
 </head>
+
 <body>
     <h1>Historial de pedidos - Admin</h1>
 
@@ -280,10 +266,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </thead>
             <tbody>
                 <?php foreach ($totales_por_menu as $menu => $total): ?>
-                <tr>
-                    <td><?php echo htmlspecialchars($menu); ?></td>
-                    <td><?php echo htmlspecialchars($total); ?></td>
-                </tr>
+                    <tr>
+                        <td><?php echo htmlspecialchars($menu); ?></td>
+                        <td><?php echo htmlspecialchars($total); ?></td>
+                    </tr>
                 <?php endforeach; ?>
             </tbody>
             <tfoot>
@@ -317,7 +303,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                             <tr>
                                                 <td><?php echo htmlspecialchars($pedido['menu']); ?></td>
                                                 <td>
-                                                <form method="post" action="control_pedidos_cuyo.php">
+                                                    <form method="post" action="control_pedidos_cuyo.php">
                                                         <input type="hidden" name="detalle_id" value="<?php echo $pedido['detalle_id']; ?>">
                                                         <input type="number" name="cantidad" value="<?php echo $pedido['cantidad']; ?>" min="1">
                                                         <button type="submit" name="actualizar_cantidad">Actualizar</button>
@@ -337,4 +323,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <?php endif; ?>
     </div>
 </body>
+
 </html>
