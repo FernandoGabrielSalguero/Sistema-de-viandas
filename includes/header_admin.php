@@ -155,7 +155,17 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
 
 
             <li><a href="alta_menu.php" class="tagus">Alta Menú</a></li>
-            <li><a href="gestion_pedidos_cuyo.php" class="tagus">Cuyo Placas</a></li>
+
+            <li>
+                <a href="#" class="tagus">Cuyo Placas</a>
+                <ul>
+                    <li><a href="gestion_pedidos_cuyo.php" class="tagus">Reporte de Viandas</a></li>
+                    <li><a href="gestion_pedidos_cuyo.php" class="tagus">Control pedidos</a></li>
+                </ul>
+            </li>
+
+
+
             <li><a href="logout.php" class="warn">Salir</a></li>
         </ul>
     </nav>
