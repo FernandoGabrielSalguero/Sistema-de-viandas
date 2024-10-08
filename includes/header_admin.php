@@ -160,7 +160,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
                 <a href="#" class="tagus">Cuyo Placas</a>
                 <ul>
                     <li><a href="gestion_pedidos_cuyo.php" class="tagus">Reporte de Viandas</a></li>
-                    <li><a href="gestion_pedidos_cuyo.php" class="tagus">Control pedidos</a></li>
+                    <li><a href="control_pedidos_cuyo.php" class="tagus">Control pedidos</a></li>
                 </ul>
             </li>
 
