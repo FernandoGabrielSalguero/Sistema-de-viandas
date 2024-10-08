@@ -261,7 +261,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <p class="error"><?php echo $error; ?></p>
     <?php endif; ?>
 
-    <form method="post" action="dashboard_admin.php">
+    <form method="post" action="control_pedidos_cuyo.php">
         <label for="fecha_inicio">Desde:</label>
         <input type="date" id="fecha_inicio" name="fecha_inicio" required value="<?php echo htmlspecialchars($fecha_inicio); ?>">
         <label for="fecha_fin">Hasta:</label>
