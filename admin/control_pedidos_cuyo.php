@@ -90,158 +90,192 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <title>Historial de pedidos de viandas - Admin</title>
     <style>
-        body {
-            margin: 0;
-            padding: 20px;
-            font-family: 'Arial', sans-serif;
-            background-color: #f8f9fa;
-        }
+body {
+    margin: 0;
+    padding: 20px;
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f9fa;
+    text-align: center;
+}
 
-        h1 {
-            text-align: center;
-            color: #343a40;
-            margin-bottom: 20px;
-        }
+h1 {
+    text-align: center;
+    color: #343a40;
+    margin-bottom: 20px;
+}
 
-        .card-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
-        }
+form {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
 
-        .card {
-            background-color: #ffffff;
-            border-radius: 8px;
-            width: 280px;
-            padding: 20px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+input[type="date"] {
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 1em;
+    background-color: #ffffff;
+}
 
-        .card:hover {
-            transform: translateY(-5px);
-        }
+button[type="submit"] {
+    padding: 8px 16px;
+    font-size: 1em;
+    background-color: #007bff;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
 
-        .card h3 {
-            color: #007bff;
-            font-size: 1.5em;
-            margin-bottom: 10px;
-        }
+button[type="submit"]:hover {
+    background-color: #0056b3;
+}
 
-        .card .pedido-id {
-            font-size: 0.9em;
-            color: #6c757d;
-            text-align: center;
-            margin-bottom: 10px;
-        }
+.card-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
 
-        .card table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
+.card {
+    background-color: #ffffff;
+    border-radius: 10px;
+    width: 280px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
-        .card th,
-        .card td {
-            border: 1px solid #dee2e6;
-            padding: 8px;
-            text-align: center;
-            font-size: 0.9em;
-        }
+.card:hover {
+    transform: translateY(-5px);
+}
 
-        .card th {
-            background-color: #f1f3f5;
-            font-weight: bold;
-        }
+.card h3 {
+    color: #007bff;
+    font-size: 1.5em;
+    margin-bottom: 5px;
+}
 
-        .card td {
-            background-color: #ffffff;
-        }
+.card .pedido-id {
+    font-size: 0.9em;
+    color: #6c757d;
+    text-align: center;
+    margin-bottom: 15px;
+}
 
-        .card .turno-title {
-            font-weight: bold;
-            color: #495057;
-            text-align: left;
-            width: 100%;
-            margin-top: 15px;
-        }
+.card table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+}
 
-        .card input[type="number"] {
-            width: 50px;
-            padding: 5px;
-            border: 1px solid #ced4da;
-            border-radius: 4px;
-            font-size: 0.9em;
-        }
+.card th,
+.card td {
+    border: 1px solid #dee2e6;
+    padding: 10px;
+    text-align: center;
+    font-size: 0.9em;
+}
 
-        .card button {
-            margin-top: 10px;
-            padding: 8px 16px;
-            font-size: 0.9em;
-            cursor: pointer;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            transition: background-color 0.3s ease;
-        }
+.card th {
+    background-color: #f1f3f5;
+    font-weight: bold;
+}
 
-        .card button:hover {
-            background-color: #0056b3;
-        }
+.card td {
+    background-color: #ffffff;
+}
 
-        .totales-menu {
-            margin: 20px auto;
-            max-width: 600px;
-            background-color: #ffffff;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
+.card .turno-title {
+    font-weight: bold;
+    color: #495057;
+    text-align: left;
+    width: 100%;
+    margin-top: 15px;
+}
 
-        .totales-menu h3 {
-            font-size: 1.5em;
-            color: #343a40;
-            text-align: center;
-            margin-bottom: 15px;
-        }
+.card input[type="number"] {
+    width: 60px;
+    padding: 5px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.9em;
+    margin: 5px 0;
+}
 
-        .totales-menu table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+.card button {
+    margin-top: 15px;
+    padding: 10px 20px;
+    font-size: 0.9em;
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+    width: 100%;
+}
 
-        .totales-menu th,
-        .totales-menu td {
-            border: 1px solid #e9ecef;
-            padding: 8px;
-            text-align: center;
-        }
+.card button:hover {
+    background-color: #0056b3;
+}
 
-        .totales-menu th {
-            background-color: #f8f9fa;
-            font-weight: bold;
-        }
+.totales-menu {
+    margin: 20px auto;
+    max-width: 600px;
+    background-color: #ffffff;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
 
-        .totales-menu td {
-            background-color: #ffffff;
-        }
+.totales-menu h3 {
+    font-size: 1.5em;
+    color: #343a40;
+    margin-bottom: 15px;
+}
 
-        .totales-menu .total-final {
-            text-align: right;
-            font-weight: bold;
-            padding-right: 15px;
-            color: #28a745;
-        }
+.totales-menu table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.totales-menu th,
+.totales-menu td {
+    border: 1px solid #e9ecef;
+    padding: 8px;
+    text-align: center;
+}
+
+.totales-menu th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+}
+
+.totales-menu td {
+    background-color: #ffffff;
+}
+
+.totales-menu .total-final {
+    text-align: right;
+    font-weight: bold;
+    padding-right: 15px;
+    color: #28a745;
+}
+
     </style>
 </head>
 
 <body>
-    <h1>Historial de pedidos - Admin</h1>
+    <h1>Control de pedidos de Cuyo Placas</h1>
 
     <?php if (isset($error)) : ?>
         <p class="error"><?php echo $error; ?></p>
