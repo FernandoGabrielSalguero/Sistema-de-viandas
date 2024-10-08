@@ -315,42 +315,47 @@ button[type="submit"]:hover {
     </div>
 
     <div class="card-container">
-    <?php foreach ($plantas as $planta => $turnos) : ?>
-        <div class="card">
-            <h3><?php echo htmlspecialchars($planta); ?></h3>
-            <div class="pedido-id">N° remito digital: <?php echo implode(', ', $pedido_ids); ?></div>
-            <form method="post" action="control_pedidos_cuyo.php">
-                <table>
-                    <thead>
-                        <tr>
-                            <th colspan="2"><?php echo htmlspecialchars($fecha); ?></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach (['Mañana', 'Tarde', 'Noche'] as $turno) : ?>
-                            <?php if (!empty($turnos[$turno])) : ?>
+        <?php if (!empty($pedidos_agrupados)) : ?>
+            <?php foreach ($pedidos_agrupados as $fecha => $plantas) : ?>
+                <?php foreach ($plantas as $planta => $turnos) : ?>
+                    <div class="card">
+                        <h3><?php echo htmlspecialchars($planta); ?></h3>
+                        <div class="pedido-id">N° remito digital: <?php echo implode(', ', $pedido_ids); ?></div>
+                        <table>
+                            <thead>
                                 <tr>
-                                    <td colspan="2" class="turno-title"><?php echo $turno; ?></td>
+                                    <th colspan="2"><?php echo htmlspecialchars($fecha); ?></th>
                                 </tr>
-                                <?php foreach ($turnos[$turno] as $pedido) : ?>
-                                    <tr>
-                                        <td><?php echo htmlspecialchars($pedido['menu']); ?></td>
-                                        <td>
-                                            <input type="hidden" name="detalle_id[]" value="<?php echo $pedido['detalle_id']; ?>">
-                                            <input type="number" name="cantidad[]" value="<?php echo $pedido['cantidad']; ?>" min="1">
-                                        </td>
-                                    </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach (['Mañana', 'Tarde', 'Noche'] as $turno) : ?>
+                                    <?php if (!empty($turnos[$turno])) : ?>
+                                        <tr>
+                                            <td colspan="2" class="turno-title"><?php echo $turno; ?></td>
+                                        </tr>
+                                        <?php foreach ($turnos[$turno] as $pedido) : ?>
+                                            <tr>
+                                                <td><?php echo htmlspecialchars($pedido['menu']); ?></td>
+                                                <td>
+                                                    <form method="post" action="control_pedidos_cuyo.php">
+                                                        <input type="hidden" name="detalle_id" value="<?php echo $pedido['detalle_id']; ?>">
+                                                        <input type="number" name="cantidad" value="<?php echo $pedido['cantidad']; ?>" min="1">
+                                                        <button type="submit" name="actualizar_cantidad">Actualizar</button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
                                 <?php endforeach; ?>
-                            <?php endif; ?>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-                <button type="submit" name="actualizar_todo" class="update-button">Actualizar</button>
-            </form>
-        </div>
-    <?php endforeach; ?>
-</div>
-
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endforeach; ?>
+            <?php endforeach; ?>
+        <?php else : ?>
+            <p style="text-align: center;">No hay pedidos para mostrar en el rango de fechas seleccionado.</p>
+        <?php endif; ?>
+    </div>
 </body>
 
 </html>
