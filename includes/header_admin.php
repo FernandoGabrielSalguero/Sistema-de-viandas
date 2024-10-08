@@ -4,20 +4,18 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Iniciar sesión antes de cualquier salida
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-// Incluir los archivos necesarios
-include '../includes/db.php';
-include '../includes/header_admin.php';
+include 'db.php';
+include 'functions.php';
 
-// Verificar si el usuario está autenticado y tiene el rol correcto
-if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'admin') {
-    header("Location: ../index.php");
+if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
+    header("Location: ../login.php");
     exit();
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 
