@@ -169,7 +169,7 @@ foreach ($colegios as $colegio) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-    <h1>Dashboard Cocina</h1>
+    <h1>Pedidos Colegios</h1>
     
     <form method="post" action="pedidos_colegios.php" class="filter-container">
         <div class="filter-item">
