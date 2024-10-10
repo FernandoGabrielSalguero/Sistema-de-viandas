@@ -23,9 +23,10 @@ $query_menus = "
     SELECT m.Nombre AS MenuNombre, DATE_FORMAT(pc.Fecha_entrega, '%d/%m/%y') AS FechaEntrega, COUNT(*) AS Cantidad
     FROM Pedidos_Comida pc
     JOIN Menú m ON pc.Menú_Id = m.Id
+    WHERE pc.Estado = 'Procesando'
 ";
 if (!empty($fecha_filtro) || !empty($colegio_filtro)) {
-    $query_menus .= " WHERE ";
+    $query_menus .= " AND ";
     if (!empty($fecha_filtro)) {
         $query_menus .= "pc.Fecha_entrega = ? ";
     }
@@ -56,9 +57,10 @@ $query_colegios = "
     JOIN Colegios c ON h.Colegio_Id = c.Id
     JOIN Cursos cu ON h.Curso_Id = cu.Id
     JOIN Menú m ON pc.Menú_Id = m.Id
+    WHERE pc.Estado = 'Procesando'
 ";
 if (!empty($fecha_filtro) || !empty($colegio_filtro)) {
-    $query_colegios .= " WHERE ";
+    $query_colegios .= " AND ";
     if (!empty($fecha_filtro)) {
         $query_colegios .= "pc.Fecha_entrega = ? ";
     }
@@ -92,7 +94,8 @@ $query_preferencias = "
     JOIN Cursos cu ON h.Curso_Id = cu.Id
     JOIN Menú m ON pc.Menú_Id = m.Id
     JOIN Preferencias_Alimenticias p ON pc.Preferencias_alimenticias = p.Id
-    WHERE pc.Preferencias_alimenticias IS NOT NULL
+    WHERE pc.Estado = 'Procesando' 
+    AND pc.Preferencias_alimenticias IS NOT NULL
     AND p.Nombre != 'Sin preferencias'
 ";
 if (!empty($fecha_filtro)) {
