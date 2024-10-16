@@ -23,6 +23,7 @@ try {
     $stmt->execute([$_SESSION['usuario_id']]);
     $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
     $correoCliente = $usuario ? $usuario['Correo'] : "";
+    error_log("Correo del cliente obtenido: " . $correoCliente);
 } catch (Exception $e) {
     $error = "Error al obtener el correo del cliente: " . $e->getMessage();
 }
@@ -37,7 +38,11 @@ function enviarCorreo($to, $subject, $message) {
     ini_set('smtp_port', getenv('SMTP_PORT'));
     ini_set('sendmail_from', getenv('SMTP_USERNAME'));
 
-    return mail($to, $subject, $message, $headers);
+    $sent = mail($to, $subject, $message, $headers);
+    if (!$sent) {
+        error_log("Error al enviar correo a: $to");
+    }
+    return $sent;
 }
 
 // Verificar si el formulario ha sido enviado
@@ -76,8 +81,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $asunto = "Detalle del Pedido - Viandas Cuyo Placa";
         $mensaje = "Gracias por tu pedido. Aquí tienes el detalle:\n\n" . $detallePedido;
 
+        error_log("Intentando enviar correo a $correoCliente");
         if (!enviarCorreo($correoCliente, $asunto, $mensaje)) {
             $error = "No se pudo enviar el correo al cliente.";
+        } else {
+            error_log("Correo enviado correctamente a $correoCliente");
         }
 
     } catch (Exception $e) {
@@ -101,153 +109,7 @@ $turnos_menus = [
     <meta charset="UTF-8">
     <title>Pedidos Viandas Cuyo Placa</title>
     <style>
-        body {
-            margin: 0;
-            padding: 20px;
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f9;
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 2em;
-            color: #343a40;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 1000px;
-            margin: 0 auto;
-            background-color: #ffffff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        table {
-            width: 100%;
-            margin: 20px 0;
-            border-collapse: collapse;
-            background-color: #ffffff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        th, td {
-            border: 1px solid #e9ecef;
-            padding: 8px;
-            text-align: center;
-        }
-
-        th {
-            background-color: #f8f9fa;
-            font-weight: bold;
-        }
-
-        input[type="date"] {
-            padding: 8px;
-            margin-right: 10px;
-            border-radius: 5px;
-            border: 1px solid #ced4da;
-            font-size: 1em;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        input[type="number"] {
-            width: 60px;
-            padding: 5px;
-            border-radius: 5px;
-            border: 1px solid #ced4da;
-            text-align: center;
-            font-size: 1em;
-        }
-
-        button {
-            padding: 10px 20px;
-            font-size: 1em;
-            cursor: pointer;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-            display: block;
-            margin: 20px auto;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        .success-message {
-            color: green;
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 1.2em;
-        }
-
-        .error-message {
-            color: red;
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 1.2em;
-        }
-
-        /* Estilos para el modal */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.5);
-            padding-top: 60px;
-        }
-
-        .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 400px;
-            text-align: center;
-            border-radius: 10px;
-        }
-
-        .modal-content h2 {
-            margin-bottom: 20px;
-            font-size: 1.5em;
-        }
-
-        .modal-buttons {
-            display: flex;
-            justify-content: space-around;
-        }
-
-        .modal-buttons button {
-            padding: 10px 20px;
-            font-size: 1em;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .modal-buttons .yes-button {
-            background-color: #28a745;
-            color: white;
-        }
-
-        .modal-buttons .no-button {
-            background-color: #dc3545;
-            color: white;
-        }
+        /* Tus estilos aquí */
     </style>
 </head>
 <body>
