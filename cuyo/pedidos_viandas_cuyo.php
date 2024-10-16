@@ -16,20 +16,15 @@ function enviarCorreo($to, $subject, $message) {
                "Reply-To: " . getenv('SMTP_USERNAME') . "\r\n" .
                "X-Mailer: PHP/" . phpversion();
 
-    $params = [
-        'host' => getenv('SMTP_HOST'),
-        'port' => getenv('SMTP_PORT'),
-        'auth' => true,
-        'username' => getenv('SMTP_USERNAME'),
-        'password' => getenv('SMTP_PASSWORD'),
-    ];
-
-    ini_set('SMTP', $params['host']);
-    ini_set('smtp_port', $params['port']);
-    ini_set('sendmail_from', $params['username']);
-
-    return mail($to, $subject, $message, $headers);
+    // Registro de errores
+    $sent = mail($to, $subject, $message, $headers);
+    if (!$sent) {
+        error_log("Error al enviar correo a: $to");
+        return false;
+    }
+    return true;
 }
+
 
 if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'cuyo_placa') {
     header("Location: ../index.php");
