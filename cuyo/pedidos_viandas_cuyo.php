@@ -9,45 +9,25 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Autenticación SMTP mediante Sockets
+// Función para enviar correo electrónico
 function enviarCorreo($to, $subject, $message) {
-    $host = getenv('SMTP_HOST');
-    $port = getenv('SMTP_PORT');
-    $username = getenv('SMTP_USERNAME');
-    $password = getenv('SMTP_PASSWORD');
+    // Configuraciones avanzadas con sendmail_path
     $from = getenv('SMTP_USERNAME');
-    $fromName = "Ilmana Gastronomía";
+    $headers = "From: $from\r\n" .
+               "Reply-To: $from\r\n" .
+               "X-Mailer: PHP/" . phpversion();
 
-    $socket = fsockopen($host, $port, $errno, $errstr, 10);
-    if (!$socket) {
-        error_log("Error de conexión: $errno - $errstr");
+    // Ajustes sendmail_path para conexión básica, se define el comando directo si se permite sin autenticación SMTP completa
+    ini_set('sendmail_path', "/usr/sbin/sendmail -t -i");
+
+    // Enviar correo
+    if (mail($to, $subject, $message, $headers)) {
+        error_log("Correo enviado correctamente a: $to");
+        return true;
+    } else {
+        error_log("Error al enviar correo a: $to");
         return false;
     }
-
-    $commands = [
-        "EHLO $host\r\n",
-        "AUTH LOGIN\r\n",
-        base64_encode($username) . "\r\n",
-        base64_encode($password) . "\r\n",
-        "MAIL FROM: <$from>\r\n",
-        "RCPT TO: <$to>\r\n",
-        "DATA\r\n",
-        "Subject: $subject\r\nFrom: $fromName <$from>\r\nTo: <$to>\r\n\r\n$message\r\n.\r\n",
-        "QUIT\r\n"
-    ];
-
-    foreach ($commands as $command) {
-        fputs($socket, $command);
-        $response = fgets($socket, 512);
-        if (strpos($response, '550') !== false) {
-            error_log("Error en envío de correo: $response");
-            fclose($socket);
-            return false;
-        }
-    }
-
-    fclose($socket);
-    return true;
 }
 
 // Verificar autenticación de usuario
@@ -102,6 +82,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $error = "Hubo un problema al guardar el pedido: " . $e->getMessage();
     }
 }
+
+// Estructura HTML y JavaScript para el modal y formulario, sin cambios en esta parte...
+?>
+
 
 $plantas = ['Aglomerado', 'Revestimiento', 'Impregnacion', 'Muebles', 'Transporte (Revestimiento)'];
 $turnos_menus = [
