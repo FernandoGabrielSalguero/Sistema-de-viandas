@@ -3,38 +3,29 @@ session_start();
 include '../includes/header_cuyo_placa.php';
 include '../includes/db.php';
 
-// Habilitar la muestra de errores
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Verificar si el usuario está autenticado y tiene el rol correcto
 if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'cuyo_placa') {
     header("Location: ../index.php");
     exit();
 }
 
-// Función para enviar correo electrónico
 function enviarCorreo($to, $subject, $message) {
-    $from = 'no-reply@tu_dominio.com'; // Cambia esto al correo que desees como remitente
-    $headers = "From: $from\r\n" .
-               "Reply-To: $from\r\n" .
-               "X-Mailer: PHP/" . phpversion();
-    
-    // Intentar enviar el correo y capturar el resultado
-    if (mail($to, $subject, $message, $headers)) {
-        return true;
+    $headers = "From: contacto@ilmanagastronomia.com\r\n";
+    $success = mail($to, $subject, $message, $headers);
+
+    if ($success) {
+        echo "<p>Correo enviado correctamente a $to</p>";
     } else {
-        // Error en el envío del correo
-        throw new Exception("Error al enviar el correo a $to con el asunto '$subject'. Verifica la configuración del servidor de correo.");
+        echo "<p>Error al enviar el correo a $to</p>";
     }
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $fecha = $_POST['fecha'];
     $pedidos = $_POST['pedidos'];
-    $detallePedido = ""; // Variable para acumular el detalle del pedido para el correo
-
     $pdo->beginTransaction();
 
     try {
@@ -42,11 +33,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->execute([$_SESSION['usuario_id'], $fecha]);
         $pedido_id = $pdo->lastInsertId();
 
+        $detallePedido = "";
         foreach ($pedidos as $turno => $plantas) {
             foreach ($plantas as $planta => $menus) {
                 foreach ($menus as $menu => $cantidad) {
-                    $stmt = $pdo->prepare("INSERT INTO Detalle_Pedidos_Cuyo_Placa (pedido_id, planta, turno, menu, cantidad)
-                                           VALUES (?, ?, ?, ?, ?)");
+                    $stmt = $pdo->prepare("INSERT INTO Detalle_Pedidos_Cuyo_Placa (pedido_id, planta, turno, menu, cantidad) VALUES (?, ?, ?, ?, ?)");
                     $stmt->execute([$pedido_id, $planta, $turno, $menu, $cantidad]);
                     $detallePedido .= "Planta: $planta, Turno: $turno, Menú: $menu, Cantidad: $cantidad\n";
                 }
@@ -54,29 +45,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         $pdo->commit();
-        $success = true;
-
-        $correoCliente = 'cliente@dominio.com'; // Cambia esto al correo del cliente
+        echo "<p>Pedido guardado con éxito. Enviando correo...</p>";
+        
+        $correoCliente = 'email@ejemplo.com'; // Asegúrate de usar un correo válido
         $asunto = "Detalle del Pedido - Viandas Cuyo Placa";
         $mensaje = "Gracias por tu pedido. Aquí tienes el detalle:\n\n" . $detallePedido;
-        
-        try {
-            enviarCorreo($correoCliente, $asunto, $mensaje);
-        } catch (Exception $e) {
-            $error = $e->getMessage();
-        }
+
+        echo "<p>Correo a enviar a: $correoCliente</p>";
+        echo "<p>Asunto: $asunto</p>";
+        echo "<pre>$mensaje</pre>";
+
+        enviarCorreo($correoCliente, $asunto, $mensaje);
     } catch (Exception $e) {
         $pdo->rollBack();
-        $error = "Hubo un problema al guardar el pedido: " . $e->getMessage();
+        echo "<p>Error: " . $e->getMessage() . "</p>";
     }
 }
-
-$plantas = ['Aglomerado', 'Revestimiento', 'Impregnacion', 'Muebles', 'Transporte (Revestimiento)'];
-$turnos_menus = [
-    'Mañana' => ['Desayuno día siguiente', 'Almuerzo Caliente', 'Refrigerio sandwich almuerzo'],
-    'Tarde' => ['Media tarde', 'Cena caliente', 'Refrigerio sandwich cena'],
-    'Noche' => ['Desayuno noche', 'Sandwich noche']
-];
 ?>
 
 <!DOCTYPE html>
