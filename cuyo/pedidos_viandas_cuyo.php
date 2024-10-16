@@ -9,7 +9,15 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Función para enviar correo electrónico - misma que la de prueba
+// Definir las plantas y turnos aquí para asegurarnos de que estén disponibles antes del foreach en el HTML
+$plantas = ['Aglomerado', 'Revestimiento', 'Impregnacion', 'Muebles', 'Transporte (Revestimiento)'];
+$turnos_menus = [
+    'Mañana' => ['Desayuno día siguiente', 'Almuerzo Caliente', 'Refrigerio sandwich almuerzo'],
+    'Tarde' => ['Media tarde', 'Cena caliente', 'Refrigerio sandwich cena'],
+    'Noche' => ['Desayuno noche', 'Sandwich noche']
+];
+
+// Función para enviar correo electrónico
 function enviarCorreo($to, $subject, $message) {
     $from = getenv('SMTP_USERNAME');
     $headers = "From: $from\r\n" .
@@ -32,7 +40,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'cuyo_placa') {
     exit();
 }
 
-// Obtener el correo del cliente cuando carga la página
+// Obtener el correo del cliente
 $correoCliente = "";
 try {
     $stmt = $pdo->prepare("SELECT Correo FROM Usuarios WHERE Id = ?");
@@ -69,11 +77,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         
         $asunto = "Detalle del Pedido - Viandas Cuyo Placa";
         $mensaje = "Gracias por tu pedido. Aquí tienes el detalle:\n\n" . $detallePedido;
-        
-        // Comprobación de variables para envío de correo
-        error_log("Correo a enviar a: $correoCliente");
-        error_log("Asunto: $asunto");
-        error_log("Mensaje: $mensaje");
 
         if (!enviarCorreo($correoCliente, $asunto, $mensaje)) {
             $error = "No se pudo enviar el correo al cliente.";
@@ -83,10 +86,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $error = "Hubo un problema al guardar el pedido: " . $e->getMessage();
     }
 }
-
-// HTML y resto del código aquí, sin cambios...
 ?>
-
 
 <!DOCTYPE html>
 <html lang="es">
@@ -298,7 +298,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <button type="button" onclick="showModal()">Guardar Pedidos</button>
         </form>
     </div>
-
     <div id="confirmationModal" class="modal">
         <div class="modal-content">
             <h2>¿Estás seguro de realizar este pedido?</h2>
@@ -308,7 +307,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
         </div>
     </div>
-
     <script>
         function showModal() { document.getElementById('confirmationModal').style.display = 'block'; }
         function closeModal() { document.getElementById('confirmationModal').style.display = 'none'; }
