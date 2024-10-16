@@ -43,8 +43,16 @@ function enviarCorreo($to, $subject, $message) {
     ini_set('smtp_port', $params['port']);
     ini_set('sendmail_from', $params['username']);
 
-    return mail($to, $subject, $message, $headers);
+    // Intentar enviar el correo y registrar errores
+    if (!mail($to, $subject, $message, $headers)) {
+        // Obtener el último error y guardarlo en un archivo de registro
+        error_log("Error al enviar el correo a $to. Error: " . error_get_last()['message'], 3, "/tmp/email_errors.log");
+        return false;
+    }
+
+    return true;
 }
+
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $fecha = $_POST['fecha'];
