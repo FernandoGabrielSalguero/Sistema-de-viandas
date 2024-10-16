@@ -83,8 +83,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-// Estructura HTML y JavaScript para el modal y formulario, sin cambios en esta parte...
-?>
 
 
 $plantas = ['Aglomerado', 'Revestimiento', 'Impregnacion', 'Muebles', 'Transporte (Revestimiento)'];
