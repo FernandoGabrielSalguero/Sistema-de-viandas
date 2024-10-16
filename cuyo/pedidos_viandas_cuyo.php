@@ -9,7 +9,7 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Definir las plantas y turnos aquí para asegurarnos de que estén disponibles antes del foreach en el HTML
+// Definir las plantas y turnos antes de usarlas
 $plantas = ['Aglomerado', 'Revestimiento', 'Impregnacion', 'Muebles', 'Transporte (Revestimiento)'];
 $turnos_menus = [
     'Mañana' => ['Desayuno día siguiente', 'Almuerzo Caliente', 'Refrigerio sandwich almuerzo'],
@@ -62,8 +62,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->execute([$_SESSION['usuario_id'], $fecha]);
         $pedido_id = $pdo->lastInsertId();
 
-        foreach ($pedidos as $turno => $plantas) {
-            foreach ($plantas as $planta => $menus) {
+        foreach ($pedidos as $turno => $plantaPedidos) {
+            foreach ($plantaPedidos as $planta => $menus) {
                 foreach ($menus as $menu => $cantidad) {
                     $stmt = $pdo->prepare("INSERT INTO Detalle_Pedidos_Cuyo_Placa (pedido_id, planta, turno, menu, cantidad) VALUES (?, ?, ?, ?, ?)");
                     $stmt->execute([$pedido_id, $planta, $turno, $menu, $cantidad]);
@@ -100,14 +100,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             font-family: Arial, sans-serif;
             background-color: #f4f6f9;
         }
-
         h1 {
             text-align: center;
             margin-bottom: 20px;
             font-size: 2em;
             color: #343a40;
         }
-
         .container {
             width: 100%;
             max-width: 1000px;
@@ -117,7 +115,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-
         table {
             width: 100%;
             margin: 20px 0;
@@ -127,19 +124,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             border-radius: 10px;
             overflow: hidden;
         }
-
         th, td {
             border: 1px solid #e9ecef;
             padding: 8px;
             text-align: center;
         }
-
         th {
             background-color: #f8f9fa;
             font-weight: bold;
         }
-
-        input[type="date"] {
+        input[type="date"], input[type="number"] {
             padding: 8px;
             margin-right: 10px;
             border-radius: 5px;
@@ -148,16 +142,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             width: 100%;
             box-sizing: border-box;
         }
-
-        input[type="number"] {
-            width: 60px;
-            padding: 5px;
-            border-radius: 5px;
-            border: 1px solid #ced4da;
-            text-align: center;
-            font-size: 1em;
-        }
-
         button {
             padding: 10px 20px;
             font-size: 1em;
@@ -170,26 +154,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             display: block;
             margin: 20px auto;
         }
-
         button:hover {
             background-color: #0056b3;
         }
-
-        .success-message {
-            color: green;
+        .success-message, .error-message {
             text-align: center;
             margin-bottom: 20px;
             font-size: 1.2em;
         }
-
-        .error-message {
-            color: red;
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 1.2em;
-        }
-
-        /* Estilos para el modal */
+        .success-message { color: green; }
+        .error-message { color: red; }
         .modal {
             display: none;
             position: fixed;
@@ -202,7 +176,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             background-color: rgba(0, 0, 0, 0.5);
             padding-top: 60px;
         }
-
         .modal-content {
             background-color: #fefefe;
             margin: 5% auto;
@@ -213,17 +186,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             text-align: center;
             border-radius: 10px;
         }
-
-        .modal-content h2 {
-            margin-bottom: 20px;
-            font-size: 1.5em;
-        }
-
-        .modal-buttons {
-            display: flex;
-            justify-content: space-around;
-        }
-
         .modal-buttons button {
             padding: 10px 20px;
             font-size: 1em;
@@ -231,16 +193,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             border-radius: 5px;
             cursor: pointer;
         }
-
-        .modal-buttons .yes-button {
-            background-color: #28a745;
-            color: white;
-        }
-
-        .modal-buttons .no-button {
-            background-color: #dc3545;
-            color: white;
-        }
+        .yes-button { background-color: #28a745; color: white; }
+        .no-button { background-color: #dc3545; color: white; }
     </style>
 </head>
 <body>
@@ -252,7 +206,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <?php if (isset($success) && $success): ?>
             <p class="success-message">Pedidos guardados con éxito.</p>
         <?php elseif (isset($error)): ?>
-            <p class="error-message"><?php echo htmlspecialchars($error); ?></p>
+            <p class="error-message">
+                <?php 
+                    if (is_array($error)) {
+                        echo htmlspecialchars(json_encode($error));
+                    } else {
+                        echo htmlspecialchars($error); 
+                    }
+                ?>
+            </p>
         <?php endif; ?>
         <form id="pedidoForm" method="post" action="pedidos_viandas_cuyo.php">
             <label for="fecha">Fecha:</label>
@@ -280,15 +242,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <?php foreach ($plantas as $planta) : ?>
                         <tr>
                             <td><?php echo htmlspecialchars($planta); ?></td>
-                            <!-- Mañana -->
                             <td><input type="number" name="pedidos[Mañana][<?php echo $planta; ?>][Desayuno día siguiente]" min="0" value="0"></td>
                             <td><input type="number" name="pedidos[Mañana][<?php echo $planta; ?>][Almuerzo Caliente]" min="0" value="0"></td>
                             <td><input type="number" name="pedidos[Mañana][<?php echo $planta; ?>][Refrigerio sandwich almuerzo]" min="0" value="0"></td>
-                            <!-- Tarde -->
                             <td><input type="number" name="pedidos[Tarde][<?php echo $planta; ?>][Media tarde]" min="0" value="0"></td>
                             <td><input type="number" name="pedidos[Tarde][<?php echo $planta; ?>][Cena caliente]" min="0" value="0"></td>
                             <td><input type="number" name="pedidos[Tarde][<?php echo $planta; ?>][Refrigerio sandwich cena]" min="0" value="0"></td>
-                            <!-- Noche -->
                             <td><input type="number" name="pedidos[Noche][<?php echo $planta; ?>][Desayuno noche]" min="0" value="0"></td>
                             <td><input type="number" name="pedidos[Noche][<?php echo $planta; ?>][Sandwich noche]" min="0" value="0"></td>
                         </tr>
@@ -298,6 +257,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <button type="button" onclick="showModal()">Guardar Pedidos</button>
         </form>
     </div>
+
     <div id="confirmationModal" class="modal">
         <div class="modal-content">
             <h2>¿Estás seguro de realizar este pedido?</h2>
@@ -307,6 +267,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
         </div>
     </div>
+
     <script>
         function showModal() { document.getElementById('confirmationModal').style.display = 'block'; }
         function closeModal() { document.getElementById('confirmationModal').style.display = 'none'; }
