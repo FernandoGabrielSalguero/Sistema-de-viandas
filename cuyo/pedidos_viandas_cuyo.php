@@ -10,27 +10,37 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+// Verificar si el usuario está autenticado y tiene el rol correcto
+if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'cuyo_placa') {
+    header("Location: ../index.php");
+    exit();
+}
+
+// Obtener el correo del cliente cuando carga la página
+$correoCliente = "";
+try {
+    $stmt = $pdo->prepare("SELECT Correo FROM Usuarios WHERE Id = ?");
+    $stmt->execute([$_SESSION['usuario_id']]);
+    $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+    $correoCliente = $usuario ? $usuario['Correo'] : "";
+} catch (Exception $e) {
+    $error = "Error al obtener el correo del cliente: " . $e->getMessage();
+}
+
 // Función para enviar correo electrónico usando SMTP
 function enviarCorreo($to, $subject, $message) {
     $headers = "From: " . getenv('SMTP_USERNAME') . "\r\n" .
                "Reply-To: " . getenv('SMTP_USERNAME') . "\r\n" .
                "X-Mailer: PHP/" . phpversion();
 
-    // Registro de errores
-    $sent = mail($to, $subject, $message, $headers);
-    if (!$sent) {
-        error_log("Error al enviar correo a: $to");
-        return false;
-    }
-    return true;
+    ini_set('SMTP', getenv('SMTP_HOST'));
+    ini_set('smtp_port', getenv('SMTP_PORT'));
+    ini_set('sendmail_from', getenv('SMTP_USERNAME'));
+
+    return mail($to, $subject, $message, $headers);
 }
 
-
-if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'cuyo_placa') {
-    header("Location: ../index.php");
-    exit();
-}
-
+// Verificar si el formulario ha sido enviado
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $fecha = $_POST['fecha'];
     $pedidos = $_POST['pedidos'];
@@ -38,15 +48,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $pdo->beginTransaction();
 
     try {
+        // Insertar el nuevo pedido en la tabla Pedidos_Cuyo_Placa
         $stmt = $pdo->prepare("INSERT INTO Pedidos_Cuyo_Placa (usuario_id, fecha, created_at) VALUES (?, ?, NOW())");
         $stmt->execute([$_SESSION['usuario_id'], $fecha]);
 
+        // Obtener el ID del pedido recién insertado
         $pedido_id = $pdo->lastInsertId();
 
         $detallePedido = "";
         foreach ($pedidos as $turno => $plantas) {
             foreach ($plantas as $planta => $menus) {
                 foreach ($menus as $menu => $cantidad) {
+                    // Insertar cada detalle del pedido en la tabla Detalle_Pedidos_Cuyo_Placa
                     $stmt = $pdo->prepare("INSERT INTO Detalle_Pedidos_Cuyo_Placa (pedido_id, planta, turno, menu, cantidad) VALUES (?, ?, ?, ?, ?)");
                     $stmt->execute([$pedido_id, $planta, $turno, $menu, $cantidad]);
                     
@@ -55,18 +68,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
 
+        // Confirmar la transacción
         $pdo->commit();
-        $success = true;
+        $success = true; // Indicar que el pedido se guardó con éxito
 
-        $stmt = $pdo->prepare("SELECT Correo FROM Usuarios WHERE Id = ?");
-        $stmt->execute([$_SESSION['usuario_id']]);
-        $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
-        $correoCliente = $usuario['Correo'];
-
+        // Enviar el correo con el detalle del pedido
         $asunto = "Detalle del Pedido - Viandas Cuyo Placa";
         $mensaje = "Gracias por tu pedido. Aquí tienes el detalle:\n\n" . $detallePedido;
 
-        enviarCorreo($correoCliente, $asunto, $mensaje);
+        if (!enviarCorreo($correoCliente, $asunto, $mensaje)) {
+            $error = "No se pudo enviar el correo al cliente.";
+        }
 
     } catch (Exception $e) {
         $pdo->rollBack();
@@ -74,6 +86,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
+// Definir las plantas, turnos y menús
 $plantas = ['Aglomerado', 'Revestimiento', 'Impregnacion', 'Muebles', 'Transporte (Revestimiento)'];
 $turnos_menus = [
     'Mañana' => ['Desayuno día siguiente', 'Almuerzo Caliente', 'Refrigerio sandwich almuerzo'],
@@ -240,8 +253,8 @@ $turnos_menus = [
 <body>
     <div class="container">
         <h1>Pedidos de Viandas - Cuyo Placa</h1>
-        
-        <?php if (isset($correoCliente)): ?>
+
+        <?php if ($correoCliente): ?>
             <p>Vamos a enviar un correo con el detalle del pedido a la siguiente dirección: <?php echo htmlspecialchars($correoCliente); ?></p>
         <?php endif; ?>
 
@@ -275,24 +288,47 @@ $turnos_menus = [
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($plantas as $planta) : ?>
+                    <?php foreach ($plantas as $planta): ?>
                         <tr>
                             <td><?php echo htmlspecialchars($planta); ?></td>
-                            <td><input type="number" name="pedidos[Mañana][<?php echo $planta; ?>][Desayuno día siguiente]" min="0" value="0"></td>
-                            <td><input type="number" name="pedidos[Mañana][<?php echo $planta; ?>][Almuerzo Caliente]" min="0" value="0"></td>
-                            <td><input type="number" name="pedidos[Mañana][<?php echo $planta; ?>][Refrigerio sandwich almuerzo]" min="0" value="0"></td>
-                            <td><input type="number" name="pedidos[Tarde][<?php echo $planta; ?>][Media tarde]" min="0" value="0"></td>
-                            <td><input type="number" name="pedidos[Tarde][<?php echo $planta; ?>][Cena caliente]" min="0" value="0"></td>
-                            <td><input type="number" name="pedidos[Tarde][<?php echo $planta; ?>][Refrigerio sandwich cena]" min="0" value="0"></td>
-                            <td><input type="number" name="pedidos[Noche][<?php echo $planta; ?>][Desayuno noche]" min="0" value="0"></td>
-                            <td><input type="number" name="pedidos[Noche][<?php echo $planta; ?>][Sandwich noche]" min="0" value="0"></td>
+                            <!-- Inputs de cantidad por cada menú y turno -->
+                            <?php foreach ($turnos_menus as $turno => $menus): ?>
+                                <?php foreach ($menus as $menu): ?>
+                                    <td><input type="number" name="pedidos[<?php echo $turno; ?>][<?php echo $planta; ?>][<?php echo $menu; ?>]" min="0" value="0"></td>
+                                <?php endforeach; ?>
+                            <?php endforeach; ?>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
 
-            <button type="submit">Guardar Pedidos</button>
+            <button type="button" onclick="showModal()">Guardar Pedidos</button>
         </form>
     </div>
+
+    <!-- Modal -->
+    <div id="confirmationModal" class="modal">
+        <div class="modal-content">
+            <h2>¿Estás seguro de realizar este pedido?</h2>
+            <div class="modal-buttons">
+                <button class="yes-button" onclick="submitForm()">Sí</button>
+                <button class="no-button" onclick="closeModal()">No</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showModal() {
+            document.getElementById('confirmationModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('confirmationModal').style.display = 'none';
+        }
+
+        function submitForm() {
+            document.getElementById('pedidoForm').submit();
+        }
+    </script>
 </body>
 </html>
