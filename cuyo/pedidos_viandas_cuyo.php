@@ -2,23 +2,6 @@
 session_start();
 include '../includes/header_cuyo_placa.php';
 include '../includes/db.php';
-include '../includes/load_env.php';
-
-// Cargar variables del archivo .env
-loadEnv(__DIR__ . '/../.env');
-
-// Función para enviar correo electrónico usando SMTP
-function enviarCorreo($to, $subject, $message) {
-    $headers = "From: " . getenv('SMTP_USERNAME') . "\r\n" .
-               "Reply-To: " . getenv('SMTP_USERNAME') . "\r\n" .
-               "X-Mailer: PHP/" . phpversion();
-
-    ini_set('SMTP', getenv('SMTP_HOST'));
-    ini_set('smtp_port', getenv('SMTP_PORT'));
-    ini_set('sendmail_from', getenv('SMTP_USERNAME'));
-
-    return mail($to, $subject, $message, $headers);
-}
 
 // Habilitar la muestra de errores
 ini_set('display_errors', 1);
@@ -31,7 +14,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'cuyo_placa') {
     exit();
 }
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['enviarCorreo']) && $_POST['enviarCorreo'] == "1") {
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $fecha = $_POST['fecha'];
     $pedidos = $_POST['pedidos'];
 
@@ -46,8 +29,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['enviarCorreo']) && $_P
         // Obtener el ID del pedido recién insertado
         $pedido_id = $pdo->lastInsertId();
 
-        // Recopilar detalles del pedido para el correo electrónico
-        $detallesPedido = "";
         foreach ($pedidos as $turno => $plantas) {
             foreach ($plantas as $planta => $menus) {
                 foreach ($menus as $menu => $cantidad) {
@@ -55,9 +36,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['enviarCorreo']) && $_P
                     $stmt = $pdo->prepare("INSERT INTO Detalle_Pedidos_Cuyo_Placa (pedido_id, planta, turno, menu, cantidad)
                                            VALUES (?, ?, ?, ?, ?)");
                     $stmt->execute([$pedido_id, $planta, $turno, $menu, $cantidad]);
-
-                    // Añadir detalles al mensaje del correo
-                    $detallesPedido .= "$turno - $planta - $menu: $cantidad\n";
                 }
             }
         }
@@ -66,14 +44,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['enviarCorreo']) && $_P
         $pdo->commit();
         $success = true; // Indicar que el pedido se guardó con éxito
 
-        // Enviar el correo electrónico de confirmación
-        $to = $_SESSION['correo'];
-        $subject = "Confirmación de Pedido";
-        $message = "Su pedido ha sido confirmado:\n\n" . $detallesPedido;
-        
-        if (!enviarCorreo($to, $subject, $message)) {
-            $error = "Hubo un problema al enviar el correo de confirmación.";
-        }
     } catch (Exception $e) {
         // Revertir la transacción en caso de error
         $pdo->rollBack();
@@ -248,10 +218,9 @@ $turnos_menus = [
 <body>
     <div class="container">
         <h1>Pedidos de Viandas - Cuyo Placa</h1>
-        <h4>Enviaremos comprobante a la siguiente dirección: <?php echo $_SESSION['correo']; ?></h4>
 
         <?php if (isset($success) && $success) : ?>
-            <p class="success-message">Pedidos guardados con éxito. Se ha enviado un correo de confirmación.</p>
+            <p class="success-message">Pedidos guardados con éxito.</p>
         <?php elseif (isset($error)) : ?>
             <p class="error-message"><?php echo htmlspecialchars($error); ?></p>
         <?php endif; ?>
@@ -261,13 +230,44 @@ $turnos_menus = [
             <input type="date" id="fecha" name="fecha" required>
 
             <table>
-                <!-- Estructura de tabla de pedidos (plantas, turnos, etc.) -->
+                <thead>
+                    <tr>
+                        <th rowspan="2">Planta</th>
+                        <th colspan="3">Mañana</th>
+                        <th colspan="3">Tarde</th>
+                        <th colspan="2">Noche</th>
+                    </tr>
+                    <tr>
+                        <th>Desayuno día siguiente</th>
+                        <th>Almuerzo Caliente</th>
+                        <th>Refrigerio sandwich almuerzo</th>
+                        <th>Media tarde</th>
+                        <th>Cena caliente</th>
+                        <th>Refrigerio sandwich cena</th>
+                        <th>Desayuno noche</th>
+                        <th>Sandwich noche</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($plantas as $planta) : ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($planta); ?></td>
+                            <!-- Mañana -->
+                            <td><input type="number" name="pedidos[Mañana][<?php echo $planta; ?>][Desayuno día siguiente]" min="0" value="0"></td>
+                            <td><input type="number" name="pedidos[Mañana][<?php echo $planta; ?>][Almuerzo Caliente]" min="0" value="0"></td>
+                            <td><input type="number" name="pedidos[Mañana][<?php echo $planta; ?>][Refrigerio sandwich almuerzo]" min="0" value="0"></td>
+                            <!-- Tarde -->
+                            <td><input type="number" name="pedidos[Tarde][<?php echo $planta; ?>][Media tarde]" min="0" value="0"></td>
+                            <td><input type="number" name="pedidos[Tarde][<?php echo $planta; ?>][Cena caliente]" min="0" value="0"></td>
+                            <td><input type="number" name="pedidos[Tarde][<?php echo $planta; ?>][Refrigerio sandwich cena]" min="0" value="0"></td>
+                            <!-- Noche -->
+                            <td><input type="number" name="pedidos[Noche][<?php echo $planta; ?>][Desayuno noche]" min="0" value="0"></td>
+                            <td><input type="number" name="pedidos[Noche][<?php echo $planta; ?>][Sandwich noche]" min="0" value="0"></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
             </table>
 
-            <!-- Campo oculto para indicar el envío del correo -->
-            <input type="hidden" id="enviarCorreo" name="enviarCorreo" value="0">
-
-            <!-- Botón para guardar el pedido -->
             <button type="button" onclick="showModal()">Guardar Pedidos</button>
         </form>
     </div>
@@ -296,7 +296,6 @@ $turnos_menus = [
 
         // Enviar el formulario
         function submitForm() {
-            document.getElementById('enviarCorreo').value = "1";
             document.getElementById('pedidoForm').submit();
         }
     </script>
