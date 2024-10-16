@@ -9,6 +9,19 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+// Prueba de envío directo
+$to = 'tu_correo_ejemplo@gmail.com'; // Usa tu correo para la prueba
+$subject = 'Prueba de correo - Verificación directa';
+$message = 'Este es un correo de prueba para verificar la configuración SMTP.';
+
+if (mail($to, $subject, $message)) {
+    echo "<p style='color: green;'>Correo de prueba enviado con éxito a $to</p>";
+    error_log("Correo de prueba enviado con éxito a $to");
+} else {
+    echo "<p style='color: red;'>Error al enviar correo de prueba.</p>";
+    error_log("Error al enviar correo de prueba.");
+}
+
 // Función para enviar correo electrónico
 function enviarCorreo($to, $subject, $message) {
     // Configuraciones avanzadas con sendmail_path
