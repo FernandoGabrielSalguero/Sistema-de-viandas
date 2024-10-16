@@ -9,31 +9,14 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Prueba de envío directo
-$to = 'fernandosalguero685@gmail.com'; // Usa tu correo para la prueba
-$subject = 'Prueba de correo - Verificación directa';
-$message = 'Este es un correo de prueba para verificar la configuración SMTP.';
-
-if (mail($to, $subject, $message)) {
-    echo "<p style='color: green;'>Correo de prueba enviado con éxito a $to</p>";
-    error_log("Correo de prueba enviado con éxito a $to");
-} else {
-    echo "<p style='color: red;'>Error al enviar correo de prueba.</p>";
-    error_log("Error al enviar correo de prueba.");
-}
-
-// Función para enviar correo electrónico
+// Función para enviar correo electrónico - misma que la de prueba
 function enviarCorreo($to, $subject, $message) {
-    // Configuraciones avanzadas con sendmail_path
     $from = getenv('SMTP_USERNAME');
     $headers = "From: $from\r\n" .
                "Reply-To: $from\r\n" .
                "X-Mailer: PHP/" . phpversion();
-
-    // Ajustes sendmail_path para conexión básica, se define el comando directo si se permite sin autenticación SMTP completa
     ini_set('sendmail_path', "/usr/sbin/sendmail -t -i");
 
-    // Enviar correo
     if (mail($to, $subject, $message, $headers)) {
         error_log("Correo enviado correctamente a: $to");
         return true;
@@ -87,6 +70,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $asunto = "Detalle del Pedido - Viandas Cuyo Placa";
         $mensaje = "Gracias por tu pedido. Aquí tienes el detalle:\n\n" . $detallePedido;
         
+        // Comprobación de variables para envío de correo
+        error_log("Correo a enviar a: $correoCliente");
+        error_log("Asunto: $asunto");
+        error_log("Mensaje: $mensaje");
+
         if (!enviarCorreo($correoCliente, $asunto, $mensaje)) {
             $error = "No se pudo enviar el correo al cliente.";
         }
@@ -96,15 +84,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-
-
-$plantas = ['Aglomerado', 'Revestimiento', 'Impregnacion', 'Muebles', 'Transporte (Revestimiento)'];
-$turnos_menus = [
-    'Mañana' => ['Desayuno día siguiente', 'Almuerzo Caliente', 'Refrigerio sandwich almuerzo'],
-    'Tarde' => ['Media tarde', 'Cena caliente', 'Refrigerio sandwich cena'],
-    'Noche' => ['Desayuno noche', 'Sandwich noche']
-];
+// HTML y resto del código aquí, sin cambios...
 ?>
+
 
 <!DOCTYPE html>
 <html lang="es">
