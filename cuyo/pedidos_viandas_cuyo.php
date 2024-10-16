@@ -2,13 +2,35 @@
 session_start();
 include '../includes/header_cuyo_placa.php';
 include '../includes/db.php';
+include '../includes/load_env.php';
+loadEnv(__DIR__ . '/../.env');
 
 // Habilitar la muestra de errores
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Verificar si el usuario está autenticado y tiene el rol correcto
+// Función para enviar correo electrónico usando SMTP
+function enviarCorreo($to, $subject, $message) {
+    $headers = "From: " . getenv('SMTP_USERNAME') . "\r\n" .
+               "Reply-To: " . getenv('SMTP_USERNAME') . "\r\n" .
+               "X-Mailer: PHP/" . phpversion();
+
+    $params = [
+        'host' => getenv('SMTP_HOST'),
+        'port' => getenv('SMTP_PORT'),
+        'auth' => true,
+        'username' => getenv('SMTP_USERNAME'),
+        'password' => getenv('SMTP_PASSWORD'),
+    ];
+
+    ini_set('SMTP', $params['host']);
+    ini_set('smtp_port', $params['port']);
+    ini_set('sendmail_from', $params['username']);
+
+    return mail($to, $subject, $message, $headers);
+}
+
 if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'cuyo_placa') {
     header("Location: ../index.php");
     exit();
@@ -18,40 +40,45 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $fecha = $_POST['fecha'];
     $pedidos = $_POST['pedidos'];
 
-    // Iniciar transacción
     $pdo->beginTransaction();
 
     try {
-        // Insertar el nuevo pedido en la tabla Pedidos_Cuyo_Placa
         $stmt = $pdo->prepare("INSERT INTO Pedidos_Cuyo_Placa (usuario_id, fecha, created_at) VALUES (?, ?, NOW())");
         $stmt->execute([$_SESSION['usuario_id'], $fecha]);
 
-        // Obtener el ID del pedido recién insertado
         $pedido_id = $pdo->lastInsertId();
 
+        $detallePedido = "";
         foreach ($pedidos as $turno => $plantas) {
             foreach ($plantas as $planta => $menus) {
                 foreach ($menus as $menu => $cantidad) {
-                    // Insertar cada detalle del pedido en la tabla Detalle_Pedidos_Cuyo_Placa
-                    $stmt = $pdo->prepare("INSERT INTO Detalle_Pedidos_Cuyo_Placa (pedido_id, planta, turno, menu, cantidad)
-                                           VALUES (?, ?, ?, ?, ?)");
+                    $stmt = $pdo->prepare("INSERT INTO Detalle_Pedidos_Cuyo_Placa (pedido_id, planta, turno, menu, cantidad) VALUES (?, ?, ?, ?, ?)");
                     $stmt->execute([$pedido_id, $planta, $turno, $menu, $cantidad]);
+
+                    $detallePedido .= "Planta: $planta\nTurno: $turno\nMenú: $menu\nCantidad: $cantidad\n\n";
                 }
             }
         }
 
-        // Confirmar la transacción
         $pdo->commit();
-        $success = true; // Indicar que el pedido se guardó con éxito
+        $success = true;
+
+        $stmt = $pdo->prepare("SELECT Correo FROM Usuarios WHERE Id = ?");
+        $stmt->execute([$_SESSION['usuario_id']]);
+        $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+        $correoCliente = $usuario['Correo'];
+
+        $asunto = "Detalle del Pedido - Viandas Cuyo Placa";
+        $mensaje = "Gracias por tu pedido. Aquí tienes el detalle:\n\n" . $detallePedido;
+        
+        enviarCorreo($correoCliente, $asunto, $mensaje);
 
     } catch (Exception $e) {
-        // Revertir la transacción en caso de error
         $pdo->rollBack();
         $error = "Hubo un problema al guardar el pedido: " . $e->getMessage();
     }
 }
 
-// Definir las plantas, turnos y menús
 $plantas = ['Aglomerado', 'Revestimiento', 'Impregnacion', 'Muebles', 'Transporte (Revestimiento)'];
 $turnos_menus = [
     'Mañana' => ['Desayuno día siguiente', 'Almuerzo Caliente', 'Refrigerio sandwich almuerzo'],
@@ -218,10 +245,14 @@ $turnos_menus = [
 <body>
     <div class="container">
         <h1>Pedidos de Viandas - Cuyo Placa</h1>
+        
+        <?php if (isset($correoCliente)): ?>
+            <p>Vamos a enviar un correo con el detalle del pedido a la siguiente dirección: <?php echo htmlspecialchars($correoCliente); ?></p>
+        <?php endif; ?>
 
-        <?php if (isset($success) && $success) : ?>
+        <?php if (isset($success) && $success): ?>
             <p class="success-message">Pedidos guardados con éxito.</p>
-        <?php elseif (isset($error)) : ?>
+        <?php elseif (isset($error)): ?>
             <p class="error-message"><?php echo htmlspecialchars($error); ?></p>
         <?php endif; ?>
 
@@ -272,7 +303,6 @@ $turnos_menus = [
         </form>
     </div>
 
-    <!-- Modal -->
     <div id="confirmationModal" class="modal">
         <div class="modal-content">
             <h2>¿Estas seguro de realizar este pedido?</h2>
