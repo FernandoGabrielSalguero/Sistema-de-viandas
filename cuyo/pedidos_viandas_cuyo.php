@@ -4,6 +4,22 @@ include '../includes/header_cuyo_placa.php';
 include '../includes/db.php';
 include '../includes/load_env.php';
 
+// Cargar variables del archivo .env
+loadEnv(__DIR__ . '/../.env');
+
+// Función para enviar correo electrónico usando SMTP
+function enviarCorreo($to, $subject, $message) {
+    $headers = "From: " . getenv('SMTP_USERNAME') . "\r\n" .
+               "Reply-To: " . getenv('SMTP_USERNAME') . "\r\n" .
+               "X-Mailer: PHP/" . phpversion();
+
+    ini_set('SMTP', getenv('SMTP_HOST'));
+    ini_set('smtp_port', getenv('SMTP_PORT'));
+    ini_set('sendmail_from', getenv('SMTP_USERNAME'));
+
+    return mail($to, $subject, $message, $headers);
+}
+
 // Habilitar la muestra de errores
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -15,49 +31,9 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'cuyo_placa') {
     exit();
 }
 
-// Cargar variables del archivo .env
-loadEnv(__DIR__ . '/../.env');
-
-// Obtener el correo del usuario logueado
-$stmt = $pdo->prepare("SELECT Correo FROM Usuarios WHERE Id = ?");
-$stmt->execute([$_SESSION['usuario_id']]);
-$correo_usuario = $stmt->fetchColumn();
-
-// Función para enviar correo electrónico usando SMTP
-function enviarCorreo($to, $subject, $message) {
-    $headers = "From: " . getenv('SMTP_USERNAME') . "\r\n" .
-               "Reply-To: " . getenv('SMTP_USERNAME') . "\r\n" .
-               "X-Mailer: PHP/" . phpversion();
-
-    // Configuración del transporte SMTP
-    $params = [
-        'host' => getenv('SMTP_HOST'),
-        'port' => getenv('SMTP_PORT'),
-        'auth' => true,
-        'username' => getenv('SMTP_USERNAME'),
-        'password' => getenv('SMTP_PASSWORD'),
-    ];
-
-    // Usar la función mail() de PHP
-    ini_set('SMTP', $params['host']);
-    ini_set('smtp_port', $params['port']);
-    ini_set('sendmail_from', $params['username']);
-
-    // Intentar enviar el correo y registrar errores
-    if (!mail($to, $subject, $message, $headers)) {
-        // Obtener el último error y guardarlo en un archivo de registro
-        error_log("Error al enviar el correo a $to. Error: " . error_get_last()['message'], 3, "/tmp/email_errors.log");
-        return false;
-    }
-
-    return true;
-}
-
-
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['enviarCorreo']) && $_POST['enviarCorreo'] == "1") {
     $fecha = $_POST['fecha'];
     $pedidos = $_POST['pedidos'];
-    $detalle_pedido = "";
 
     // Iniciar transacción
     $pdo->beginTransaction();
@@ -70,6 +46,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Obtener el ID del pedido recién insertado
         $pedido_id = $pdo->lastInsertId();
 
+        // Recopilar detalles del pedido para el correo electrónico
+        $detallesPedido = "";
         foreach ($pedidos as $turno => $plantas) {
             foreach ($plantas as $planta => $menus) {
                 foreach ($menus as $menu => $cantidad) {
@@ -78,21 +56,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                            VALUES (?, ?, ?, ?, ?)");
                     $stmt->execute([$pedido_id, $planta, $turno, $menu, $cantidad]);
 
-                    // Agregar detalle del pedido para el correo
-                    $detalle_pedido .= "Planta: $planta, Turno: $turno, Menú: $menu, Cantidad: $cantidad\n";
+                    // Añadir detalles al mensaje del correo
+                    $detallesPedido .= "$turno - $planta - $menu: $cantidad\n";
                 }
             }
         }
 
         // Confirmar la transacción
         $pdo->commit();
-        $success = true;
+        $success = true; // Indicar que el pedido se guardó con éxito
 
-        // Enviar correo con el detalle del pedido
-        $subject = "Comprobante de Pedido de Viandas - Cuyo Placa";
-        $message = "Estimado Usuario,\n\nSe ha registrado el siguiente pedido de viandas para la fecha $fecha:\n\n$detalle_pedido\n\nSaludos,\nEquipo de Ilmana Gastronomía";
-        enviarCorreo($correo_usuario, $subject, $message);
-
+        // Enviar el correo electrónico de confirmación
+        $to = $_SESSION['correo'];
+        $subject = "Confirmación de Pedido";
+        $message = "Su pedido ha sido confirmado:\n\n" . $detallesPedido;
+        
+        if (!enviarCorreo($to, $subject, $message)) {
+            $error = "Hubo un problema al enviar el correo de confirmación.";
+        }
     } catch (Exception $e) {
         // Revertir la transacción en caso de error
         $pdo->rollBack();
@@ -121,18 +102,14 @@ $turnos_menus = [
             font-family: Arial, sans-serif;
             background-color: #f4f6f9;
         }
+
         h1 {
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
             font-size: 2em;
             color: #343a40;
         }
-        h4 {
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 1.2em;
-            color: #555;
-        }
+
         .container {
             width: 100%;
             max-width: 1000px;
@@ -142,28 +119,47 @@ $turnos_menus = [
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
+
         table {
             width: 100%;
             margin: 20px 0;
             border-collapse: collapse;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
         }
+
         th, td {
             border: 1px solid #e9ecef;
             padding: 8px;
             text-align: center;
         }
+
         th {
             background-color: #f8f9fa;
             font-weight: bold;
         }
-        input[type="date"], input[type="number"] {
+
+        input[type="date"] {
             padding: 8px;
+            margin-right: 10px;
             border-radius: 5px;
             border: 1px solid #ced4da;
             font-size: 1em;
             width: 100%;
             box-sizing: border-box;
         }
+
+        input[type="number"] {
+            width: 60px;
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+            text-align: center;
+            font-size: 1em;
+        }
+
         button {
             padding: 10px 20px;
             font-size: 1em;
@@ -176,20 +172,26 @@ $turnos_menus = [
             display: block;
             margin: 20px auto;
         }
+
         button:hover {
             background-color: #0056b3;
         }
-        .success-message, .error-message {
-            text-align: center;
-            font-size: 1.2em;
-            margin-bottom: 20px;
-        }
+
         .success-message {
             color: green;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.2em;
         }
+
         .error-message {
             color: red;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.2em;
         }
+
+        /* Estilos para el modal */
         .modal {
             display: none;
             position: fixed;
@@ -202,6 +204,7 @@ $turnos_menus = [
             background-color: rgba(0, 0, 0, 0.5);
             padding-top: 60px;
         }
+
         .modal-content {
             background-color: #fefefe;
             margin: 5% auto;
@@ -212,10 +215,17 @@ $turnos_menus = [
             text-align: center;
             border-radius: 10px;
         }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
         .modal-buttons {
             display: flex;
             justify-content: space-around;
         }
+
         .modal-buttons button {
             padding: 10px 20px;
             font-size: 1em;
@@ -223,10 +233,12 @@ $turnos_menus = [
             border-radius: 5px;
             cursor: pointer;
         }
+
         .modal-buttons .yes-button {
             background-color: #28a745;
             color: white;
         }
+
         .modal-buttons .no-button {
             background-color: #dc3545;
             color: white;
@@ -236,10 +248,10 @@ $turnos_menus = [
 <body>
     <div class="container">
         <h1>Pedidos de Viandas - Cuyo Placa</h1>
-        <h4>Enviaremos comprobante a la siguiente dirección: <?php echo htmlspecialchars($correo_usuario); ?></h4>
+        <h4>Enviaremos comprobante a la siguiente dirección: <?php echo $_SESSION['correo']; ?></h4>
 
         <?php if (isset($success) && $success) : ?>
-            <p class="success-message">Pedidos guardados con éxito. Se ha enviado un comprobante a su correo.</p>
+            <p class="success-message">Pedidos guardados con éxito. Se ha enviado un correo de confirmación.</p>
         <?php elseif (isset($error)) : ?>
             <p class="error-message"><?php echo htmlspecialchars($error); ?></p>
         <?php endif; ?>
@@ -247,46 +259,20 @@ $turnos_menus = [
         <form id="pedidoForm" method="post" action="pedidos_viandas_cuyo.php">
             <label for="fecha">Fecha:</label>
             <input type="date" id="fecha" name="fecha" required>
+
             <table>
-                <thead>
-                    <tr>
-                        <th rowspan="2">Planta</th>
-                        <th colspan="3">Mañana</th>
-                        <th colspan="3">Tarde</th>
-                        <th colspan="2">Noche</th>
-                    </tr>
-                    <tr>
-                        <th>Desayuno día siguiente</th>
-                        <th>Almuerzo Caliente</th>
-                        <th>Refrigerio sandwich almuerzo</th>
-                        <th>Media tarde</th>
-                        <th>Cena caliente</th>
-                        <th>Refrigerio sandwich cena</th>
-                        <th>Desayuno noche</th>
-                        <th>Sandwich noche</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($plantas as $planta) : ?>
-                        <tr>
-                            <td><?php echo htmlspecialchars($planta); ?></td>
-                            <td><input type="number" name="pedidos[Mañana][<?php echo $planta; ?>][Desayuno día siguiente]" min="0" value="0"></td>
-                            <td><input type="number" name="pedidos[Mañana][<?php echo $planta; ?>][Almuerzo Caliente]" min="0" value="0"></td>
-                            <td><input type="number" name="pedidos[Mañana][<?php echo $planta; ?>][Refrigerio sandwich almuerzo]" min="0" value="0"></td>
-                            <td><input type="number" name="pedidos[Tarde][<?php echo $planta; ?>][Media tarde]" min="0" value="0"></td>
-                            <td><input type="number" name="pedidos[Tarde][<?php echo $planta; ?>][Cena caliente]" min="0" value="0"></td>
-                            <td><input type="number" name="pedidos[Tarde][<?php echo $planta; ?>][Refrigerio sandwich cena]" min="0" value="0"></td>
-                            <td><input type="number" name="pedidos[Noche][<?php echo $planta; ?>][Desayuno noche]" min="0" value="0"></td>
-                            <td><input type="number" name="pedidos[Noche][<?php echo $planta; ?>][Sandwich noche]" min="0" value="0"></td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
+                <!-- Estructura de tabla de pedidos (plantas, turnos, etc.) -->
             </table>
 
+            <!-- Campo oculto para indicar el envío del correo -->
+            <input type="hidden" id="enviarCorreo" name="enviarCorreo" value="0">
+
+            <!-- Botón para guardar el pedido -->
             <button type="button" onclick="showModal()">Guardar Pedidos</button>
         </form>
     </div>
 
+    <!-- Modal -->
     <div id="confirmationModal" class="modal">
         <div class="modal-content">
             <h2>¿Estas seguro de realizar este pedido?</h2>
@@ -298,13 +284,19 @@ $turnos_menus = [
     </div>
 
     <script>
+        // Mostrar el modal
         function showModal() {
             document.getElementById('confirmationModal').style.display = 'block';
         }
+
+        // Cerrar el modal
         function closeModal() {
             document.getElementById('confirmationModal').style.display = 'none';
         }
+
+        // Enviar el formulario
         function submitForm() {
+            document.getElementById('enviarCorreo').value = "1";
             document.getElementById('pedidoForm').submit();
         }
     </script>
