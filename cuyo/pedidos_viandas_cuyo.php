@@ -10,7 +10,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 // Prueba de envío directo
-$to = 'tu_correo_ejemplo@gmail.com'; // Usa tu correo para la prueba
+$to = 'fernandosalguero685@gmail.com'; // Usa tu correo para la prueba
 $subject = 'Prueba de correo - Verificación directa';
 $message = 'Este es un correo de prueba para verificar la configuración SMTP.';
 
