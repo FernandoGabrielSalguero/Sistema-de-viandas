@@ -54,7 +54,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 foreach ($menus as $menu => $cantidad) {
                     $stmt = $pdo->prepare("INSERT INTO Detalle_Pedidos_Cuyo_Placa (pedido_id, planta, turno, menu, cantidad) VALUES (?, ?, ?, ?, ?)");
                     $stmt->execute([$pedido_id, $planta, $turno, $menu, $cantidad]);
-
+                    
                     $detallePedido .= "Planta: $planta\nTurno: $turno\nMenú: $menu\nCantidad: $cantidad\n\n";
                 }
             }
@@ -70,7 +70,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $asunto = "Detalle del Pedido - Viandas Cuyo Placa";
         $mensaje = "Gracias por tu pedido. Aquí tienes el detalle:\n\n" . $detallePedido;
-        
+
         enviarCorreo($correoCliente, $asunto, $mensaje);
 
     } catch (Exception $e) {
@@ -283,15 +283,12 @@ $turnos_menus = [
                     <?php foreach ($plantas as $planta) : ?>
                         <tr>
                             <td><?php echo htmlspecialchars($planta); ?></td>
-                            <!-- Mañana -->
                             <td><input type="number" name="pedidos[Mañana][<?php echo $planta; ?>][Desayuno día siguiente]" min="0" value="0"></td>
                             <td><input type="number" name="pedidos[Mañana][<?php echo $planta; ?>][Almuerzo Caliente]" min="0" value="0"></td>
                             <td><input type="number" name="pedidos[Mañana][<?php echo $planta; ?>][Refrigerio sandwich almuerzo]" min="0" value="0"></td>
-                            <!-- Tarde -->
                             <td><input type="number" name="pedidos[Tarde][<?php echo $planta; ?>][Media tarde]" min="0" value="0"></td>
                             <td><input type="number" name="pedidos[Tarde][<?php echo $planta; ?>][Cena caliente]" min="0" value="0"></td>
                             <td><input type="number" name="pedidos[Tarde][<?php echo $planta; ?>][Refrigerio sandwich cena]" min="0" value="0"></td>
-                            <!-- Noche -->
                             <td><input type="number" name="pedidos[Noche][<?php echo $planta; ?>][Desayuno noche]" min="0" value="0"></td>
                             <td><input type="number" name="pedidos[Noche][<?php echo $planta; ?>][Sandwich noche]" min="0" value="0"></td>
                         </tr>
@@ -299,35 +296,8 @@ $turnos_menus = [
                 </tbody>
             </table>
 
-            <button type="button" onclick="showModal()">Guardar Pedidos</button>
+            <button type="submit">Guardar Pedidos</button>
         </form>
     </div>
-
-    <div id="confirmationModal" class="modal">
-        <div class="modal-content">
-            <h2>¿Estas seguro de realizar este pedido?</h2>
-            <div class="modal-buttons">
-                <button class="yes-button" onclick="submitForm()">SI</button>
-                <button class="no-button" onclick="closeModal()">NO</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Mostrar el modal
-        function showModal() {
-            document.getElementById('confirmationModal').style.display = 'block';
-        }
-
-        // Cerrar el modal
-        function closeModal() {
-            document.getElementById('confirmationModal').style.display = 'none';
-        }
-
-        // Enviar el formulario
-        function submitForm() {
-            document.getElementById('pedidoForm').submit();
-        }
-    </script>
 </body>
 </html>
