@@ -2,11 +2,29 @@
 session_start();
 include '../includes/header_cuyo_placa.php';
 include '../includes/db.php';
+include '../includes/load_env.php';
 
 // Habilitar la muestra de errores
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
+
+// Cargar variables del archivo .env
+loadEnv(__DIR__ . '/../.env');
+
+// Función para enviar correo electrónico usando SMTP y HTML
+function enviarCorreo($to, $subject, $message) {
+    $headers = "From: " . getenv('SMTP_USERNAME') . "\r\n" .
+               "Reply-To: " . getenv('SMTP_USERNAME') . "\r\n" .
+               "Content-Type: text/html; charset=UTF-8\r\n" .
+               "X-Mailer: PHP/" . phpversion();
+
+    ini_set('SMTP', getenv('SMTP_HOST'));
+    ini_set('smtp_port', getenv('SMTP_PORT'));
+    ini_set('sendmail_from', getenv('SMTP_USERNAME'));
+
+    return mail($to, $subject, $message, $headers);
+}
 
 // Verificar si el usuario está autenticado y tiene el rol correcto
 if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'cuyo_placa') {
@@ -14,66 +32,96 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'cuyo_placa') {
     exit();
 }
 
-$fecha_inicio = '';
-$fecha_fin = '';
-$pedidos_agrupados = [];
-$total_viandas = 0;
-$totales_por_menu = [];
-$pedido_ids = [];
+$resumen_pedido = [];
+$fecha_pedido = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $fecha_inicio = $_POST['fecha_inicio'];
-    $fecha_fin = $_POST['fecha_fin'];
+    $fecha = $_POST['fecha'];
+    $fecha_pedido = $fecha;
+    $pedidos = $_POST['pedidos'];
 
-    // Validar fechas
-    if ($fecha_inicio && $fecha_fin && strtotime($fecha_fin) >= strtotime($fecha_inicio)) {
-        // Obtener los pedidos y detalles de la base de datos
-        $stmt = $pdo->prepare("SELECT p.id, p.fecha, d.planta, d.menu, d.turno, SUM(d.cantidad) as cantidad 
-                               FROM Pedidos_Cuyo_Placa p 
-                               JOIN Detalle_Pedidos_Cuyo_Placa d ON p.id = d.pedido_id 
-                               WHERE p.fecha BETWEEN ? AND ? 
-                               GROUP BY p.id, p.fecha, d.planta, d.menu, d.turno
-                               ORDER BY p.fecha, d.planta, d.turno");
-        $stmt->execute([$fecha_inicio, $fecha_fin]);
-        $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // Iniciar transacción
+    $pdo->beginTransaction();
 
-        // Agrupar los pedidos por fecha, planta, y turno
-        foreach ($pedidos as $pedido) {
-            $fecha = date("d/m/Y", strtotime($pedido['fecha']));
-            $planta = $pedido['planta'];
-            $turno = $pedido['turno'];
-            $menu = $pedido['menu'];
-            $cantidad = $pedido['cantidad'];
-            $pedido_id = $pedido['id'];
+    try {
+        // Insertar el nuevo pedido en la tabla Pedidos_Cuyo_Placa
+        $stmt = $pdo->prepare("INSERT INTO Pedidos_Cuyo_Placa (usuario_id, fecha, created_at) VALUES (?, ?, NOW())");
+        $stmt->execute([$_SESSION['usuario_id'], $fecha]);
 
-            if (!isset($pedidos_agrupados[$fecha])) {
-                $pedidos_agrupados[$fecha] = [];
-            }
-            if (!isset($pedidos_agrupados[$fecha][$planta])) {
-                $pedidos_agrupados[$fecha][$planta] = [
-                    'Mañana' => [],
-                    'Tarde' => [],
-                    'Noche' => [],
-                ];
-            }
-            $pedidos_agrupados[$fecha][$planta][$turno][] = $pedido;
-            $total_viandas += $cantidad;
+        // Obtener el ID del pedido recién insertado
+        $pedido_id = $pdo->lastInsertId();
 
-            if (!isset($totales_por_menu[$menu])) {
-                $totales_por_menu[$menu] = 0;
-            }
-            $totales_por_menu[$menu] += $cantidad;
+        foreach ($pedidos as $turno => $plantas) {
+            foreach ($plantas as $planta => $menus) {
+                foreach ($menus as $menu => $cantidad) {
+                    if ($cantidad > 0) {  // Solo guardar cantidades mayores a 0
+                        // Insertar cada detalle del pedido en la tabla Detalle_Pedidos_Cuyo_Placa
+                        $stmt = $pdo->prepare("INSERT INTO Detalle_Pedidos_Cuyo_Placa (pedido_id, planta, turno, menu, cantidad)
+                                               VALUES (?, ?, ?, ?, ?)");
+                        $stmt->execute([$pedido_id, $planta, $turno, $menu, $cantidad]);
 
-            if (!in_array($pedido_id, $pedido_ids)) {
-                $pedido_ids[] = $pedido_id;
+                        // Agregar detalle al resumen
+                        $resumen_pedido[] = [
+                            'planta' => $planta,
+                            'turno' => $turno,
+                            'menu' => $menu,
+                            'cantidad' => $cantidad
+                        ];
+                    }
+                }
             }
         }
-    } else {
-        $error = "Por favor, seleccione un rango de fechas válido.";
+
+        // Confirmar la transacción
+        $pdo->commit();
+        $success = true; // Indicar que el pedido se guardó con éxito
+
+        // Construir el mensaje del correo en HTML
+        $subject = "Resumen de Pedido de Viandas - ID Pedido: " . $pedido_id;
+        $message = "<html><body>";
+        $message .= "<h1>Resumen de Pedido de Viandas - ID Pedido: " . $pedido_id . "</h1>";
+        $message .= "<p><strong>Fecha del Pedido:</strong> $fecha_pedido</p>";
+        $message .= "<table border='1' cellpadding='8' cellspacing='0' style='border-collapse: collapse; width: 100%;'>";
+        $message .= "<thead><tr>";
+        $message .= "<th>Planta</th><th>Turno</th><th>Menú</th><th>Cantidad</th>";
+        $message .= "</tr></thead><tbody>";
+
+        foreach ($resumen_pedido as $detalle) {
+            $message .= "<tr>";
+            $message .= "<td>{$detalle['planta']}</td>";
+            $message .= "<td>{$detalle['turno']}</td>";
+            $message .= "<td>{$detalle['menu']}</td>";
+            $message .= "<td>{$detalle['cantidad']}</td>";
+            $message .= "</tr>";
+        }
+
+        $message .= "</tbody></table>";
+        $message .= "</body></html>";
+
+        // Enviar correo a los destinatarios
+        $to = "fernandosalguero685@gmail.com, florenciaivonnediaz@gmail.com, asd@gmail.com, federicofigeroa400@gmail.com";
+        if (!enviarCorreo($to, $subject, $message)) {
+            echo "Error al enviar el correo.";
+        } else {
+            echo "Pedido realizado correctamente y correo enviado.";
+        }
+
+    } catch (Exception $e) {
+        // Revertir la transacción en caso de error
+        $pdo->rollBack();
+        $error = "Hubo un problema al guardar el pedido: " . $e->getMessage();
     }
 }
 
+// Definir las plantas, turnos y menús
+$plantas = ['Aglomerado', 'Revestimiento', 'Impregnacion', 'Muebles', 'Transporte (Revestimiento)'];
+$turnos_menus = [
+    'Mañana' => ['Desayuno día siguiente', 'Almuerzo Caliente', 'Refrigerio sandwich almuerzo'],
+    'Tarde' => ['Media tarde', 'Cena caliente', 'Refrigerio sandwich cena'],
+    'Noche' => ['Desayuno noche', 'Sandwich noche']
+];
 ?>
+
 
 <!DOCTYPE html>
 <html lang="es">

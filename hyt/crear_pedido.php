@@ -1,13 +1,18 @@
 <?php
 session_start();
-include '../includes/header_cuyo_placa.php';
-include '../includes/db.php';
-include '../includes/load_env.php';
+if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'hyt_agencia') {
+    header("Location: ../login.php");
+    exit();
+}
 
 // Habilitar la muestra de errores
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
+
+include '../includes/db.php';
+include '../includes/header_hyt_agencia.php';
+include '../includes/load_env.php';
 
 // Cargar variables del archivo .env
 loadEnv(__DIR__ . '/../.env');
@@ -25,88 +30,85 @@ function enviarCorreo($to, $subject, $message) {
     return mail($to, $subject, $message, $headers);
 }
 
-// Verificar si el usuario está autenticado y tiene el rol correcto
-if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'cuyo_placa') {
-    header("Location: ../index.php");
-    exit();
-}
+// Obtener el nombre y correo de la agencia (usuario actual)
+$agencia_id = $_SESSION['usuario_id'];
+$stmt_agencia = $pdo->prepare("SELECT Usuario, Correo FROM Usuarios WHERE Id = ?");
+$stmt_agencia->execute([$agencia_id]);
+$agencia_data = $stmt_agencia->fetch(PDO::FETCH_ASSOC);
+$nombre_agencia = $agencia_data['Usuario'];  
+$correo_agencia = $agencia_data['Correo'];  
 
-$resumen_pedido = [];
-$fecha_pedido = '';
+// Obtener destinos y productos
+$stmt_destinos = $pdo->prepare("SELECT id, nombre FROM destinos_hyt");
+$stmt_destinos->execute();
+$destinos = $stmt_destinos->fetchAll(PDO::FETCH_ASSOC);
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $fecha = $_POST['fecha'];
-    $fecha_pedido = $fecha;
-    $pedidos = $_POST['pedidos'];
+$stmt_precios = $pdo->prepare("SELECT id, nombre, precio FROM precios_hyt WHERE en_venta = 1");
+$stmt_precios->execute();
+$productos = $stmt_precios->fetchAll(PDO::FETCH_ASSOC);
 
-    // Iniciar transacción
-    $pdo->beginTransaction();
+// Obtener el hyt_admin asignado a esta agencia
+$stmt_admin = $pdo->prepare("SELECT hyt_admin_id FROM hyt_admin_agencia WHERE hyt_agencia_id = ?");
+$stmt_admin->execute([$agencia_id]);
+$hyt_admin = $stmt_admin->fetch(PDO::FETCH_ASSOC);
+$hyt_admin_id = $hyt_admin['hyt_admin_id'];
 
-    try {
-        // Insertar el nuevo pedido en la tabla Pedidos_Cuyo_Placa
-        $stmt = $pdo->prepare("INSERT INTO Pedidos_Cuyo_Placa (usuario_id, fecha, created_at) VALUES (?, ?, NOW())");
-        $stmt->execute([$_SESSION['usuario_id'], $fecha]);
+// Lógica para el formulario
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['realizar_pedido'])) {
+    $destino_id = $_POST['destino'];
+    $hora_salida = $_POST['hora_salida'];
+    $interno = $_POST['interno'];
+    $observaciones = $_POST['observaciones'];
+    $fecha_pedido = date('Y-m-d');
+    $estado = 'vigente';
+    $fecha_salida = $_POST['fecha_salida'];
 
-        // Obtener el ID del pedido recién insertado
-        $pedido_id = $pdo->lastInsertId();
+    // Insertar en pedidos_hyt
+    $stmt_pedido = $pdo->prepare("INSERT INTO pedidos_hyt (nombre_agencia, correo_electronico_agencia, fecha_pedido, estado, interno, hora_salida, destino_id, hyt_admin_id, observaciones, fecha_salida) 
+                              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
-        foreach ($pedidos as $turno => $plantas) {
-            foreach ($plantas as $planta => $menus) {
-                foreach ($menus as $menu => $cantidad) {
-                    if ($cantidad > 0) {  // Solo guardar cantidades mayores a 0
-                        // Insertar cada detalle del pedido en la tabla Detalle_Pedidos_Cuyo_Placa
-                        $stmt = $pdo->prepare("INSERT INTO Detalle_Pedidos_Cuyo_Placa (pedido_id, planta, turno, menu, cantidad)
-                                               VALUES (?, ?, ?, ?, ?)");
-                        $stmt->execute([$pedido_id, $planta, $turno, $menu, $cantidad]);
+    if (!$stmt_pedido->execute([$nombre_agencia, $correo_agencia, $fecha_pedido, $estado, $interno, $hora_salida, $destino_id, $hyt_admin_id, $observaciones, $fecha_salida])) {
+        $errorInfo = $stmt_pedido->errorInfo();
+        echo "Error al realizar el pedido: " . $errorInfo[2];
+        exit();
+    } else {
+        $pedido_id = $pdo->lastInsertId(); 
 
-                        // Agregar detalle al resumen
-                        $resumen_pedido[] = [
-                            'planta' => $planta,
-                            'turno' => $turno,
-                            'menu' => $menu,
-                            'cantidad' => $cantidad
-                        ];
-                    }
+        // Insertar detalle del pedido
+        $stmt_detalle = $pdo->prepare("INSERT INTO detalle_pedidos_hyt (pedido_id, nombre, precio, cantidad) VALUES (?, ?, ?, ?)");
+        foreach ($_POST['productos'] as $producto_id => $cantidad) {
+            if ($cantidad > 0) {
+                $stmt_producto = $pdo->prepare("SELECT nombre, precio FROM precios_hyt WHERE id = ?");
+                $stmt_producto->execute([$producto_id]);
+                $producto = $stmt_producto->fetch(PDO::FETCH_ASSOC);
+                if (!$stmt_detalle->execute([$pedido_id, $producto['nombre'], $producto['precio'], $cantidad])) {
+                    $errorInfo = $stmt_detalle->errorInfo();
+                    echo "Error al insertar el detalle del pedido: " . $errorInfo[2];
+                    exit();
                 }
             }
         }
 
-        // Confirmar la transacción
-        $pdo->commit();
-        $success = true; // Indicar que el pedido se guardó con éxito
-
-        // Preparar el mensaje del correo
-        $subject = "Resumen de Pedido de Viandas - ID Pedido: " . $pedido_id;
-        $message = "Fecha del Pedido: $fecha_pedido\n\n";
-        $message .= "Resumen de lo solicitado:\n";
-        foreach ($resumen_pedido as $detalle) {
-            $message .= "Planta: {$detalle['planta']}, Turno: {$detalle['turno']}, Menú: {$detalle['menu']}, Cantidad: {$detalle['cantidad']}\n";
+        // Enviar correo
+        $subject = "Detalle del Pedido Realizado - ID Pedido: " . $pedido_id;
+        $message = "Se ha realizado un pedido con los siguientes detalles:\n\n";
+        foreach ($_POST['productos'] as $producto_id => $cantidad) {
+            if ($cantidad > 0) {
+                $stmt_producto = $pdo->prepare("SELECT nombre FROM precios_hyt WHERE id = ?");
+                $stmt_producto->execute([$producto_id]);
+                $producto = $stmt_producto->fetch(PDO::FETCH_ASSOC);
+                $message .= "{$producto['nombre']}: $cantidad\n";
+            }
         }
 
-        // Enviar correo a los destinatarios
-        $to = "fernandosalguero685@gmail.com, florenciaivonnediaz@gmail.com, asd@gmail.com, federicofigeroa400@gmail.com";
-        if (!enviarCorreo($to, $subject, $message)) {
+        if (!enviarCorreo($correo_agencia, $subject, $message)) {
             echo "Error al enviar el correo.";
         } else {
             echo "Pedido realizado correctamente y correo enviado.";
         }
-
-    } catch (Exception $e) {
-        // Revertir la transacción en caso de error
-        $pdo->rollBack();
-        $error = "Hubo un problema al guardar el pedido: " . $e->getMessage();
     }
 }
-
-// Definir las plantas, turnos y menús
-$plantas = ['Aglomerado', 'Revestimiento', 'Impregnacion', 'Muebles', 'Transporte (Revestimiento)'];
-$turnos_menus = [
-    'Mañana' => ['Desayuno día siguiente', 'Almuerzo Caliente', 'Refrigerio sandwich almuerzo'],
-    'Tarde' => ['Media tarde', 'Cena caliente', 'Refrigerio sandwich cena'],
-    'Noche' => ['Desayuno noche', 'Sandwich noche']
-];
 ?>
-
 
 <!DOCTYPE html>
 <html lang="es">
@@ -165,4 +167,3 @@ $turnos_menus = [
 
 </body>
 </html>
-
