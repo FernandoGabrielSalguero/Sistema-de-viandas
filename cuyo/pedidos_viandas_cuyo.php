@@ -2,11 +2,28 @@
 session_start();
 include '../includes/header_cuyo_placa.php';
 include '../includes/db.php';
+include '../includes/load_env.php';
 
 // Habilitar la muestra de errores
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
+
+// Cargar variables del archivo .env
+loadEnv(__DIR__ . '/../.env');
+
+// Función para enviar correo electrónico usando SMTP
+function enviarCorreo($to, $subject, $message) {
+    $headers = "From: " . getenv('SMTP_USERNAME') . "\r\n" .
+               "Reply-To: " . getenv('SMTP_USERNAME') . "\r\n" .
+               "X-Mailer: PHP/" . phpversion();
+
+    ini_set('SMTP', getenv('SMTP_HOST'));
+    ini_set('smtp_port', getenv('SMTP_PORT'));
+    ini_set('sendmail_from', getenv('SMTP_USERNAME'));
+
+    return mail($to, $subject, $message, $headers);
+}
 
 // Verificar si el usuario está autenticado y tiene el rol correcto
 if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'cuyo_placa') {
@@ -57,6 +74,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Confirmar la transacción
         $pdo->commit();
         $success = true; // Indicar que el pedido se guardó con éxito
+
+        // Preparar el mensaje del correo
+        $subject = "Resumen de Pedido de Viandas - ID Pedido: " . $pedido_id;
+        $message = "Fecha del Pedido: $fecha_pedido\n\n";
+        $message .= "Resumen de lo solicitado:\n";
+        foreach ($resumen_pedido as $detalle) {
+            $message .= "Planta: {$detalle['planta']}, Turno: {$detalle['turno']}, Menú: {$detalle['menu']}, Cantidad: {$detalle['cantidad']}\n";
+        }
+
+        // Enviar correo a los destinatarios
+        $to = "fernandosalguero685@gmail.com, florenciaivonnediaz@gmail.com, asd@gmail.com, federicofigeroa400@gmail.com";
+        if (!enviarCorreo($to, $subject, $message)) {
+            echo "Error al enviar el correo.";
+        } else {
+            echo "Pedido realizado correctamente y correo enviado.";
+        }
 
     } catch (Exception $e) {
         // Revertir la transacción en caso de error
