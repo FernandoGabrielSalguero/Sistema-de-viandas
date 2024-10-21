@@ -99,7 +99,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $message .= "</body></html>";
 
         // Enviar correo a los destinatarios
-        $to = "fernandosalguero685@gmail.com, florenciaivonnediaz@gmail.com, asd@gmail.com, fede400@hotmail.com";
+        $to = "fernandosalguero685@gmail.com, florenciaivonnediaz@gmail.com, asd@gmail.com, fedegfigueroa@gmail.com";
         if (!enviarCorreo($to, $subject, $message)) {
             echo "Error al enviar el correo.";
         } else {
