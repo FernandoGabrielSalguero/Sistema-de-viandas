@@ -15,9 +15,11 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'cuyo_placa') {
 }
 
 $resumen_pedido = [];
+$fecha_pedido = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $fecha = $_POST['fecha'];
+    $fecha_pedido = $fecha;
     $pedidos = $_POST['pedidos'];
 
     // Iniciar transacción
@@ -174,7 +176,55 @@ $turnos_menus = [
             font-size: 1.2em;
         }
 
-        /* Resumen del pedido */
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+            border-radius: 10px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .modal-buttons button {
+            padding: 10px 20px;
+            font-size: 1em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .modal-buttons .yes-button {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .modal-buttons .no-button {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        /* Resumen del pedido en tabla */
         .resumen-container {
             margin-top: 40px;
             padding: 20px;
@@ -189,15 +239,21 @@ $turnos_menus = [
             color: #343a40;
         }
 
-        .resumen-container ul {
-            list-style-type: none;
-            padding: 0;
+        .resumen-container table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
         }
 
-        .resumen-container li {
-            margin: 10px 0;
-            font-size: 1em;
-            color: #333;
+        .resumen-container th, .resumen-container td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .resumen-container th {
+            background-color: #f2f2f2;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -260,7 +316,7 @@ $turnos_menus = [
         <!-- Modal -->
         <div id="confirmationModal" class="modal">
             <div class="modal-content">
-                <h2>¿Estas seguro de realizar este pedido?</h2>
+                <h2>¿Estás seguro de realizar este pedido?</h2>
                 <div class="modal-buttons">
                     <button class="yes-button" onclick="submitForm()">SI</button>
                     <button class="no-button" onclick="closeModal()">NO</button>
@@ -272,16 +328,27 @@ $turnos_menus = [
         <?php if (isset($success) && $success && !empty($resumen_pedido)) : ?>
             <div class="resumen-container">
                 <h2>Resumen de lo solicitado</h2>
-                <ul>
-                    <?php foreach ($resumen_pedido as $detalle) : ?>
-                        <li>
-                            Planta: <?php echo htmlspecialchars($detalle['planta']); ?>, 
-                            Turno: <?php echo htmlspecialchars($detalle['turno']); ?>, 
-                            Menú: <?php echo htmlspecialchars($detalle['menu']); ?>, 
-                            Cantidad: <?php echo htmlspecialchars($detalle['cantidad']); ?>
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
+                <p><strong>Fecha del pedido:</strong> <?php echo htmlspecialchars($fecha_pedido); ?></p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Planta</th>
+                            <th>Turno</th>
+                            <th>Menú</th>
+                            <th>Cantidad</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($resumen_pedido as $detalle) : ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($detalle['planta']); ?></td>
+                                <td><?php echo htmlspecialchars($detalle['turno']); ?></td>
+                                <td><?php echo htmlspecialchars($detalle['menu']); ?></td>
+                                <td><?php echo htmlspecialchars($detalle['cantidad']); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
             </div>
         <?php endif; ?>
     </div>
@@ -304,4 +371,7 @@ $turnos_menus = [
     </script>
 </body>
 </html>
+
+
+
 
