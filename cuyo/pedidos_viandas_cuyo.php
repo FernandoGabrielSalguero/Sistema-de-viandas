@@ -224,7 +224,7 @@ $turnos_menus = [
             color: white;
         }
 
-        /* Resumen del pedido en tabla */
+        /* Estilo del resumen */
         .resumen-container {
             margin-top: 40px;
             padding: 20px;
@@ -237,23 +237,6 @@ $turnos_menus = [
             text-align: center;
             font-size: 1.5em;
             color: #343a40;
-        }
-
-        .resumen-container table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        .resumen-container th, .resumen-container td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: center;
-        }
-
-        .resumen-container th {
-            background-color: #f2f2f2;
-            font-weight: bold;
         }
     </style>
 </head>
@@ -371,7 +354,4 @@ $turnos_menus = [
     </script>
 </body>
 </html>
-
-
-
 
