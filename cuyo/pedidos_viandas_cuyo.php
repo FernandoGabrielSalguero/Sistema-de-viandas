@@ -12,10 +12,11 @@ error_reporting(E_ALL);
 // Cargar variables del archivo .env
 loadEnv(__DIR__ . '/../.env');
 
-// Función para enviar correo electrónico usando SMTP
+// Función para enviar correo electrónico usando SMTP y HTML
 function enviarCorreo($to, $subject, $message) {
     $headers = "From: " . getenv('SMTP_USERNAME') . "\r\n" .
                "Reply-To: " . getenv('SMTP_USERNAME') . "\r\n" .
+               "Content-Type: text/html; charset=UTF-8\r\n" .
                "X-Mailer: PHP/" . phpversion();
 
     ini_set('SMTP', getenv('SMTP_HOST'));
@@ -75,13 +76,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $pdo->commit();
         $success = true; // Indicar que el pedido se guardó con éxito
 
-        // Preparar el mensaje del correo
+        // Construir el mensaje del correo en HTML
         $subject = "Resumen de Pedido de Viandas - ID Pedido: " . $pedido_id;
-        $message = "Fecha del Pedido: $fecha_pedido\n\n";
-        $message .= "Resumen de lo solicitado:\n";
+        $message = "<html><body>";
+        $message .= "<h1>Resumen de Pedido de Viandas - ID Pedido: " . $pedido_id . "</h1>";
+        $message .= "<p><strong>Fecha del Pedido:</strong> $fecha_pedido</p>";
+        $message .= "<table border='1' cellpadding='8' cellspacing='0' style='border-collapse: collapse; width: 100%;'>";
+        $message .= "<thead><tr>";
+        $message .= "<th>Planta</th><th>Turno</th><th>Menú</th><th>Cantidad</th>";
+        $message .= "</tr></thead><tbody>";
+
         foreach ($resumen_pedido as $detalle) {
-            $message .= "Planta: {$detalle['planta']}, Turno: {$detalle['turno']}, Menú: {$detalle['menu']}, Cantidad: {$detalle['cantidad']}\n";
+            $message .= "<tr>";
+            $message .= "<td>{$detalle['planta']}</td>";
+            $message .= "<td>{$detalle['turno']}</td>";
+            $message .= "<td>{$detalle['menu']}</td>";
+            $message .= "<td>{$detalle['cantidad']}</td>";
+            $message .= "</tr>";
         }
+
+        $message .= "</tbody></table>";
+        $message .= "</body></html>";
 
         // Enviar correo a los destinatarios
         $to = "fernandosalguero685@gmail.com, florenciaivonnediaz@gmail.com, asd@gmail.com, federicofigeroa400@gmail.com";
@@ -106,6 +121,7 @@ $turnos_menus = [
     'Noche' => ['Desayuno noche', 'Sandwich noche']
 ];
 ?>
+
 
 
 <!DOCTYPE html>
