@@ -107,7 +107,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
     } catch (Exception $e) {
-        // Revertir la transacción en caso de error
+        // Revertir la transacción en caso de erro
         $pdo->rollBack();
         $error = "Hubo un problema al guardar el pedido: " . $e->getMessage();
     }
