@@ -14,6 +14,8 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'cuyo_placa') {
     exit();
 }
 
+$resumen_pedido = [];
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $fecha = $_POST['fecha'];
     $pedidos = $_POST['pedidos'];
@@ -32,10 +34,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         foreach ($pedidos as $turno => $plantas) {
             foreach ($plantas as $planta => $menus) {
                 foreach ($menus as $menu => $cantidad) {
-                    // Insertar cada detalle del pedido en la tabla Detalle_Pedidos_Cuyo_Placa
-                    $stmt = $pdo->prepare("INSERT INTO Detalle_Pedidos_Cuyo_Placa (pedido_id, planta, turno, menu, cantidad)
-                                           VALUES (?, ?, ?, ?, ?)");
-                    $stmt->execute([$pedido_id, $planta, $turno, $menu, $cantidad]);
+                    if ($cantidad > 0) {  // Solo guardar cantidades mayores a 0
+                        // Insertar cada detalle del pedido en la tabla Detalle_Pedidos_Cuyo_Placa
+                        $stmt = $pdo->prepare("INSERT INTO Detalle_Pedidos_Cuyo_Placa (pedido_id, planta, turno, menu, cantidad)
+                                               VALUES (?, ?, ?, ?, ?)");
+                        $stmt->execute([$pedido_id, $planta, $turno, $menu, $cantidad]);
+
+                        // Agregar detalle al resumen
+                        $resumen_pedido[] = [
+                            'planta' => $planta,
+                            'turno' => $turno,
+                            'menu' => $menu,
+                            'cantidad' => $cantidad
+                        ];
+                    }
                 }
             }
         }
@@ -59,6 +71,7 @@ $turnos_menus = [
     'Noche' => ['Desayuno noche', 'Sandwich noche']
 ];
 ?>
+
 
 <!DOCTYPE html>
 <html lang="es">
@@ -161,57 +174,30 @@ $turnos_menus = [
             font-size: 1.2em;
         }
 
-        /* Estilos para el modal */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.5);
-            padding-top: 60px;
-        }
-
-        .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
+        /* Resumen del pedido */
+        .resumen-container {
+            margin-top: 40px;
             padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 400px;
-            text-align: center;
+            background-color: #f8f9fa;
             border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
-        .modal-content h2 {
-            margin-bottom: 20px;
+        .resumen-container h2 {
+            text-align: center;
             font-size: 1.5em;
+            color: #343a40;
         }
 
-        .modal-buttons {
-            display: flex;
-            justify-content: space-around;
+        .resumen-container ul {
+            list-style-type: none;
+            padding: 0;
         }
 
-        .modal-buttons button {
-            padding: 10px 20px;
+        .resumen-container li {
+            margin: 10px 0;
             font-size: 1em;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .modal-buttons .yes-button {
-            background-color: #28a745;
-            color: white;
-        }
-
-        .modal-buttons .no-button {
-            background-color: #dc3545;
-            color: white;
+            color: #333;
         }
     </style>
 </head>
@@ -270,17 +256,34 @@ $turnos_menus = [
 
             <button type="button" onclick="showModal()">Guardar Pedidos</button>
         </form>
-    </div>
 
-    <!-- Modal -->
-    <div id="confirmationModal" class="modal">
-        <div class="modal-content">
-            <h2>¿Estas seguro de realizar este pedido?</h2>
-            <div class="modal-buttons">
-                <button class="yes-button" onclick="submitForm()">SI</button>
-                <button class="no-button" onclick="closeModal()">NO</button>
+        <!-- Modal -->
+        <div id="confirmationModal" class="modal">
+            <div class="modal-content">
+                <h2>¿Estas seguro de realizar este pedido?</h2>
+                <div class="modal-buttons">
+                    <button class="yes-button" onclick="submitForm()">SI</button>
+                    <button class="no-button" onclick="closeModal()">NO</button>
+                </div>
             </div>
         </div>
+
+        <!-- Mostrar resumen del pedido -->
+        <?php if (isset($success) && $success && !empty($resumen_pedido)) : ?>
+            <div class="resumen-container">
+                <h2>Resumen de lo solicitado</h2>
+                <ul>
+                    <?php foreach ($resumen_pedido as $detalle) : ?>
+                        <li>
+                            Planta: <?php echo htmlspecialchars($detalle['planta']); ?>, 
+                            Turno: <?php echo htmlspecialchars($detalle['turno']); ?>, 
+                            Menú: <?php echo htmlspecialchars($detalle['menu']); ?>, 
+                            Cantidad: <?php echo htmlspecialchars($detalle['cantidad']); ?>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+        <?php endif; ?>
     </div>
 
     <script>
@@ -301,3 +304,4 @@ $turnos_menus = [
     </script>
 </body>
 </html>
+
