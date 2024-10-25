@@ -54,20 +54,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         foreach ($pedidos as $turno => $plantas) {
             foreach ($plantas as $planta => $menus) {
                 foreach ($menus as $menu => $cantidad) {
-                    if ($cantidad > 0) {  // Solo guardar cantidades mayores a 0
-                        // Insertar cada detalle del pedido en la tabla Detalle_Pedidos_Cuyo_Placa
-                        $stmt = $pdo->prepare("INSERT INTO Detalle_Pedidos_Cuyo_Placa (pedido_id, planta, turno, menu, cantidad)
-                                               VALUES (?, ?, ?, ?, ?)");
-                        $stmt->execute([$pedido_id, $planta, $turno, $menu, $cantidad]);
+                    // Aquí eliminamos la condición que evitaba guardar los campos con cantidad = 0
+                    // Insertar cada detalle del pedido en la tabla Detalle_Pedidos_Cuyo_Placa
+                    $stmt = $pdo->prepare("INSERT INTO Detalle_Pedidos_Cuyo_Placa (pedido_id, planta, turno, menu, cantidad)
+                                           VALUES (?, ?, ?, ?, ?)");
+                    $stmt->execute([$pedido_id, $planta, $turno, $menu, $cantidad]);
 
-                        // Agregar detalle al resumen
-                        $resumen_pedido[] = [
-                            'planta' => $planta,
-                            'turno' => $turno,
-                            'menu' => $menu,
-                            'cantidad' => $cantidad
-                        ];
-                    }
+                    // Agregar detalle al resumen
+                    $resumen_pedido[] = [
+                        'planta' => $planta,
+                        'turno' => $turno,
+                        'menu' => $menu,
+                        'cantidad' => $cantidad
+                    ];
                 }
             }
         }
@@ -107,12 +106,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
     } catch (Exception $e) {
-        // Revertir la transacción en caso de erro
+        // Revertir la transacción en caso de error
         $pdo->rollBack();
         $error = "Hubo un problema al guardar el pedido: " . $e->getMessage();
     }
 }
-
 // Definir las plantas, turnos y menús
 $plantas = ['Aglomerado', 'Revestimiento', 'Impregnacion', 'Muebles', 'Transporte (Revestimiento)'];
 $turnos_menus = [
@@ -121,7 +119,6 @@ $turnos_menus = [
     'Noche' => ['Desayuno noche', 'Sandwich noche']
 ];
 ?>
-
 
 
 <!DOCTYPE html>
