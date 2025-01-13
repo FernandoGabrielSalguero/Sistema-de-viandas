@@ -339,7 +339,7 @@ button[type="submit"]:hover {
                                                 <td>
                                                     <form method="post" action="control_pedidos_cuyo.php">
                                                         <input type="hidden" name="detalle_id" value="<?php echo $pedido['detalle_id']; ?>">
-                                                        <input type="number" name="cantidad" value="<?php echo $pedido['cantidad']; ?>" min="1">
+                                                        <input type="number" name="cantidad" value="<?php echo $pedido['cantidad']; ?>" min="0">
                                                         <button type="submit" name="actualizar_cantidad">Actualizar</button>
                                                     </form>
                                                 </td>
