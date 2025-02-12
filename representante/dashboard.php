@@ -72,7 +72,7 @@ $pedidos_viandas = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <link rel="stylesheet" href="../css/style_representante.css">
 </head>
 <body>
-    <h1>Bienvenido, Representante</h1>
+    <h1>¡Que gusto verte de nuevo!</h1>
 
     <form method="get" action="dashboard.php" class="filters">
         <div class="filter-item">
