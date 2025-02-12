@@ -25,7 +25,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] != 'representante') {
 <body>
     <nav>
         <ul>
-            <li><a href="dashboard.php">Inicio</a></li>
+            <li><a href="dashboard.php">Inicioo</a></li>
             <li><a href="gestion_alumnos.php">Gestión Alumnos</a></li>
             <li><a href="logout.php">Salir</a></li>
         </ul>
