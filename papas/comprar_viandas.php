@@ -181,36 +181,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         echo "<p class='success'>$success</p>";
     }
     ?>
-    <form method="post" action="comprar_viandas.php">
-        <label for="hijo_id">Seleccionar Hijo:</label>
-        <select id="hijo_id" name="hijo_id" required>
-            <option value="">Seleccione un hijo</option>
-            <?php foreach ($hijos as $hijo) : ?>
-                <option value="<?php echo $hijo['Id']; ?>"><?php echo htmlspecialchars($hijo['Nombre']); ?></option>
-            <?php endforeach; ?>
-        </select>
-        <br><br>
-        <div id="menus_disponibles"></div>
-        <?php
-        foreach ($menus_por_dia as $fecha => $menus) :
-            $date = new DateTime($fecha);
-            $formatter = new IntlDateFormatter('es_ES', IntlDateFormatter::FULL, IntlDateFormatter::NONE, 'Europe/Madrid', IntlDateFormatter::GREGORIAN, 'EEEE d/MM/yyyy');
-            $nombre_dia = $formatter->format($date);
-        ?>
-            <h2><?php echo htmlspecialchars(ucfirst($nombre_dia)); ?></h2>
-            <?php foreach ($menus as $menu) : ?>
-                <div>
-                    <label>
-                        <input type="checkbox" name="menu_ids[]" value="<?php echo $menu['Id']; ?>" data-precio="<?php echo $menu['Precio']; ?>" onchange="actualizarTotal()">
-                        <?php echo htmlspecialchars($menu['Nombre']) . " - " . number_format($menu['Precio'], 2) . " ARS"; ?>
-                    </label>
-                </div>
-            <?php endforeach; ?>
+<form method="post" action="comprar_viandas.php">
+    <label for="hijo_id">Seleccionar Hijo:</label>
+    <select id="hijo_id" name="hijo_id" required>
+        <option value="">Seleccione un hijo</option>
+        <?php foreach ($hijos as $hijo) : ?>
+            <option value="<?php echo $hijo['Id']; ?>"><?php echo htmlspecialchars($hijo['Nombre']); ?></option>
         <?php endforeach; ?>
-        <br>
-        <p>Total: <span id="total">0.00 ARS</span></p>
-        <button type="submit">Comprar Viandas</button>
-    </form>
+    </select>
+    <br><br>
+
+    <!-- Contenedor dinámico de menús -->
+    <div id="menus_disponibles"></div>
+
+    <br>
+    <p>Total: <span id="total">0.00 ARS</span></p>
+    <button type="submit">Comprar Viandas</button>
+</form>
 </body>
 
 </html>
