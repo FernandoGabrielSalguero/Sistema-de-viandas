@@ -23,7 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['crear_menu'])) {
     } else {
         // Insertar el nuevo menú en la base de datos
         $stmt = $pdo->prepare("INSERT INTO Menú (Nombre, Fecha_entrega, Fecha_hora_compra, Fecha_hora_cancelacion, Precio, Estado, Nivel_Educativo) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        if ($stmt->execute([$nombre_menu, $fecha_entrega, $fecha_hora_compra, $fecha_hora_cancelacion, $precio, $estado])) {
+        if ($stmt->execute([$nombre_menu, $fecha_entrega, $fecha_hora_compra, $fecha_hora_cancelacion, $precio, $estado, $nivel_educativo])) {
             $success = "Menú creado con éxito.";
         } else {
             $error = "Hubo un error al crear el menú.";
@@ -67,7 +67,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['actualizar_menu'])) {
     } else {
         // Actualizar el menú en la base de datos
         $stmt = $pdo->prepare("UPDATE Menú SET Nombre = ?, Fecha_entrega = ?, Fecha_hora_compra = ?, Fecha_hora_cancelacion = ?, Precio = ?, Estado = ?, Nivel_Educativo = ? WHERE Id = ?");
-        if ($stmt->execute([$nombre_menu, $fecha_entrega, $fecha_hora_compra, $fecha_hora_cancelacion, $precio, $estado, $nivel_educativo])) {
+        if ($stmt->execute([$nombre_menu, $fecha_entrega, $fecha_hora_compra, $fecha_hora_cancelacion, $precio, $estado, $nivel_educativo, $menu_id])) {
+
             $success = "Menú actualizado con éxito.";
         } else {
             $error = "Hubo un error al actualizar el menú.";
