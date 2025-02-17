@@ -135,7 +135,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             // Mostrar los menús disponibles agrupados por fecha
             for (let fecha in menusAgrupados) {
-                let fechaFormato = new Date(fecha).toLocaleDateString('es-ES', {
+                let fechaFormato = new Date(fecha + "T00:00:00").toLocaleDateString('es-ES', {
                     weekday: 'long',
                     year: 'numeric',
                     month: 'long',
@@ -192,6 +192,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <br><br>
 
         <?php
+        
         foreach ($menus_por_dia as $fecha => $menus) :
             $date = new DateTime($fecha);
             $formatter = new IntlDateFormatter('es_ES', IntlDateFormatter::FULL, IntlDateFormatter::NONE, 'Europe/Madrid', IntlDateFormatter::GREGORIAN, 'EEEE d/MM/yyyy');
@@ -207,6 +208,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
             <?php endforeach; ?>
         <?php endforeach; ?>
+
+
         <br>
 
         <!-- Contenedor dinámico de menús -->
