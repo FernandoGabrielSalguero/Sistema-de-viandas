@@ -174,6 +174,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <?php endforeach; ?>
         </select>
         <br><br>
+        <div id="menus_disponibles"></div>
         <?php
         foreach ($menus_por_dia as $fecha => $menus) :
             $date = new DateTime($fecha);
