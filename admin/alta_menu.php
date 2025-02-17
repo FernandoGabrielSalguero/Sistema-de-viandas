@@ -15,6 +15,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['crear_menu'])) {
     $fecha_hora_cancelacion = $_POST['fecha_hora_cancelacion'];
     $precio = $_POST['precio'];
     $estado = $_POST['estado'];
+    $nivel_educativo = $_POST['nivel_educativo'];
 
     // Validar que todos los campos estén llenos
     if (empty($nombre_menu) || empty($fecha_entrega) || empty($fecha_hora_compra) || empty($fecha_hora_cancelacion) || empty($precio) || empty($estado)) {
@@ -58,14 +59,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['actualizar_menu'])) {
     $fecha_hora_cancelacion = $_POST['fecha_hora_cancelacion'];
     $precio = $_POST['precio'];
     $estado = $_POST['estado'];
+    $nivel_educativo = $_POST['nivel_educativo'];
 
     // Validar que todos los campos estén llenos
-    if (empty($nombre_menu) || empty($fecha_entrega) || empty($fecha_hora_compra) || empty($fecha_hora_cancelacion) || empty($precio) || empty($estado)) {
+    if (empty($nombre_menu) || empty($fecha_entrega) || empty($fecha_hora_compra) || empty($fecha_hora_cancelacion) || empty($precio) || empty($estado) || empty($nivel_educativo)) {
         $error = "Todos los campos son obligatorios.";
     } else {
         // Actualizar el menú en la base de datos
-        $stmt = $pdo->prepare("UPDATE Menú SET Nombre = ?, Fecha_entrega = ?, Fecha_hora_compra = ?, Fecha_hora_cancelacion = ?, Precio = ?, Estado = ? WHERE Id = ?");
-        if ($stmt->execute([$nombre_menu, $fecha_entrega, $fecha_hora_compra, $fecha_hora_cancelacion, $precio, $estado, $menu_id])) {
+        $stmt = $pdo->prepare("UPDATE Menú SET Nombre = ?, Fecha_entrega = ?, Fecha_hora_compra = ?, Fecha_hora_cancelacion = ?, Precio = ?, Estado = ?, Nivel_Educativo = ? WHERE Id = ?");
+        if ($stmt->execute([$nombre_menu, $fecha_entrega, $fecha_hora_compra, $fecha_hora_cancelacion, $precio, $estado, $nivel_educativo, $menu_id])) {
             $success = "Menú actualizado con éxito.";
         } else {
             $error = "Hubo un error al actualizar el menú.";
@@ -100,43 +102,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['actualizar_menu'])) {
         echo "<p class='success'>$success</p>";
     }
     ?>
-    <form method="post" action="alta_menu.php">
-        <div>
-            <label for="nombre_menu">Nombre del Menú</label>
-            <input type="text" id="nombre_menu" name="nombre_menu" required>
-        </div>
+<form method="post" action="alta_menu.php">
+        <label for="nombre_menu">Nombre del Menú</label>
+        <input type="text" id="nombre_menu" name="nombre_menu" required>
 
-        <div>
-            <label for="fecha_entrega">Fecha de Entrega</label>
-            <input type="date" id="fecha_entrega" name="fecha_entrega" required>
-        </div>
+        <label for="fecha_entrega">Fecha de Entrega</label>
+        <input type="date" id="fecha_entrega" name="fecha_entrega" required>
 
-        <div>
-            <label for="fecha_hora_compra">Fecha y Hora Límite de Compra</label>
-            <input type="datetime-local" id="fecha_hora_compra" name="fecha_hora_compra" required>
-        </div>
+        <label for="fecha_hora_compra">Fecha y Hora Límite de Compra</label>
+        <input type="datetime-local" id="fecha_hora_compra" name="fecha_hora_compra" required>
 
-        <div>
-            <label for="fecha_hora_cancelacion">Fecha y Hora Límite de Cancelación</label>
-            <input type="datetime-local" id="fecha_hora_cancelacion" name="fecha_hora_cancelacion" required>
-        </div>
+        <label for="fecha_hora_cancelacion">Fecha y Hora Límite de Cancelación</label>
+        <input type="datetime-local" id="fecha_hora_cancelacion" name="fecha_hora_cancelacion" required>
 
-        <div>
-            <label for="precio">Precio</label>
-            <input type="number" id="precio" name="precio" step="0.01" required>
-        </div>
+        <label for="precio">Precio</label>
+        <input type="number" id="precio" name="precio" step="0.01" required>
 
-        <div>
-            <label for="estado">Estado</label>
-            <select id="estado" name="estado" required>
-                <option value="En venta">En venta</option>
-                <option value="Sin stock">Sin stock</option>
-            </select>
-        </div>
+        <label for="estado">Estado</label>
+        <select id="estado" name="estado" required>
+            <option value="En venta">En venta</option>
+            <option value="Sin stock">Sin stock</option>
+        </select>
 
-        <div style="width: 100%;">
-            <button type="submit" name="crear_menu">Crear Menú</button>
-        </div>
+        <label for="nivel_educativo">Nivel Educativo</label>
+        <select id="nivel_educativo" name="nivel_educativo" required>
+            <option value="Inicial">Nivel Inicial</option>
+            <option value="Primaria">Primaria</option>
+            <option value="Secundaria">Secundaria</option>
+        </select>
+
+        <button type="submit" name="crear_menu">Crear Menú</button>
     </form>
 
     <h2>Lista de Menús</h2>
