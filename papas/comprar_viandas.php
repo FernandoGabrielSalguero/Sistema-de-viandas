@@ -109,7 +109,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="../css/styles.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script>
-        date_default_timezone_set('America/Argentina/Buenos_Aires');
         let menus = <?php echo json_encode($menus); ?>;
         let hijos = <?php echo json_encode($hijos); ?>;
 
@@ -136,7 +135,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             // Mostrar los menús disponibles agrupados por fecha
             for (let fecha in menusAgrupados) {
-                let fechaFormato = new Date(fecha + "T00:00:00").toLocaleDateString('es-ES', {
+                let fechaFormato = new Date(fecha).toLocaleDateString('es-ES', {
                     weekday: 'long',
                     year: 'numeric',
                     month: 'long',
@@ -192,8 +191,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </select>
         <br><br>
 
+
         <!-- Contenedor dinámico de menús -->
         <div id="menus_disponibles"></div>
+
 
         <p>Total: <span id="total">0.00 ARS</span></p>
         <button type="submit">Comprar Viandas</button>
