@@ -136,33 +136,47 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['actualizar_menu'])) {
 
     <h2>Lista de Menús</h2>
     <div class="table-container">
-    <table>
-        <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Fecha de Entrega</th>
-            <th>Fecha Límite Compra</th>
-            <th>Fecha Límite Cancelación</th>
-            <th>Precio</th>
-            <th>Estado</th>
-            <th>Nivel Educativo</th>
-            <th>Acción</th>
-        </tr>
-        <?php foreach ($menus as $menu) : ?>
-        <tr>
-            <form method="post" action="alta_menu.php">
-                <td><?php echo htmlspecialchars($menu['Id']); ?></td>
-                <td><input type="text" name="nombre_menu" value="<?php echo htmlspecialchars($menu['Nombre']); ?>" required></td>
-                <td><input type="date" name="fecha_entrega" value="<?php echo htmlspecialchars($menu['Fecha_entrega']); ?>" required></td>
-                <td><input type="datetime-local" name="fecha_hora_compra" value="<?php echo htmlspecialchars($menu['Fecha_hora_compra']); ?>" required></td>
-                <td><input type="datetime-local" name="fecha_hora_cancelacion" value="<?php echo htmlspecialchars($menu['Fecha_hora_cancelacion']); ?>" required></td>
-                <td><input type="number" name="precio" step="0.01" value="<?php echo htmlspecialchars($menu['Precio']); ?>" required></td>
-                <td><?php echo htmlspecialchars($menu['Estado']); ?></td>
-                <td><?php echo htmlspecialchars($menu['Nivel_Educativo']); ?></td>
-            </form>
-        </tr>
-        <?php endforeach; ?>
-    </table>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Fecha de Entrega</th>
+                <th>Fecha y Hora Límite de Compra</th>
+                <th>Fecha y Hora Límite de Cancelación</th>
+                <th>Precio</th>
+                <th>Estado</th>
+                <th>Nivel Educativo</th>
+                <th>Acción</th>
+            </tr>
+            <?php foreach ($menus as $menu) : ?>
+                <tr class="estado-<?php echo strtolower(str_replace(' ', '-', $menu['Estado'])); ?>">
+                    <form method="post" action="alta_menu.php">
+                        <td><?php echo htmlspecialchars($menu['Id']); ?></td>
+                        <td><input type="text" name="nombre_menu" value="<?php echo htmlspecialchars($menu['Nombre']); ?>" required></td>
+                        <td><input type="date" name="fecha_entrega" value="<?php echo htmlspecialchars($menu['Fecha_entrega']); ?>" required></td>
+                        <td><input type="datetime-local" name="fecha_hora_compra" value="<?php echo date('Y-m-d\TH:i', strtotime($menu['Fecha_hora_compra'])); ?>" required></td>
+                        <td><input type="datetime-local" name="fecha_hora_cancelacion" value="<?php echo date('Y-m-d\TH:i', strtotime($menu['Fecha_hora_cancelacion'])); ?>" required></td>
+                        <td><input type="number" name="precio" step="0.01" value="<?php echo htmlspecialchars($menu['Precio']); ?>" required></td>
+                        <td>
+                            <select name="estado" required>
+                                <option value="En venta" <?php echo ($menu['Estado'] == 'En venta') ? 'selected' : ''; ?>>En venta</option>
+                                <option value="Sin stock" <?php echo ($menu['Estado'] == 'Sin stock') ? 'selected' : ''; ?>>Sin stock</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select name="estado" required>
+                                <option value="En venta" <?php echo ($menu['Estado'] == 'En venta') ? 'selected' : ''; ?>>En venta</option>
+                                <option value="Sin stock" <?php echo ($menu['Estado'] == 'Sin stock') ? 'selected' : ''; ?>>Sin stock</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input type="hidden" name="menu_id" value="<?php echo htmlspecialchars($menu['Id']); ?>">
+                            <button type="submit" name="actualizar_menu">Actualizar</button>
+                        </td>
+                    </form>
+                </tr>
+            <?php endforeach; ?>
+        </table>
     </div>
 
     <!-- Bloque de paginación debe estar fuera de la tabla -->
