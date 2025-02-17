@@ -109,6 +109,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="../css/styles.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script>
+        date_default_timezone_set('America/Argentina/Buenos_Aires');
         let menus = <?php echo json_encode($menus); ?>;
         let hijos = <?php echo json_encode($hijos); ?>;
 
@@ -135,7 +136,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             // Mostrar los menús disponibles agrupados por fecha
             for (let fecha in menusAgrupados) {
-                let fechaFormato = new Date(fecha).toLocaleDateString('es-ES', {
+                let fechaFormato = new Date(fecha + "T00:00:00").toLocaleDateString('es-ES', {
                     weekday: 'long',
                     year: 'numeric',
                     month: 'long',
@@ -191,27 +192,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </select>
         <br><br>
 
-        <?php
-        foreach ($menus_por_dia as $fecha => $menus) :
-            $date = new DateTime($fecha);
-            $formatter = new IntlDateFormatter('es_ES', IntlDateFormatter::FULL, IntlDateFormatter::NONE, 'Europe/Madrid', IntlDateFormatter::GREGORIAN, 'EEEE d/MM/yyyy');
-            $nombre_dia = $formatter->format($date);
-        ?>
-            <h2><?php echo htmlspecialchars(ucfirst($nombre_dia)); ?></h2>
-            <?php foreach ($menus as $menu) : ?>
-                <div>
-                    <label>
-                        <input type="checkbox" name="menu_ids[]" value="<?php echo $menu['Id']; ?>" data-precio="<?php echo $menu['Precio']; ?>" onchange="actualizarTotal()">
-                        <?php echo htmlspecialchars($menu['Nombre']) . " - " . number_format($menu['Precio'], 2) . " ARS"; ?>
-                    </label>
-                </div>
-            <?php endforeach; ?>
-        <?php endforeach; ?>
-        <br>
-
         <!-- Contenedor dinámico de menús -->
         <div id="menus_disponibles"></div>
-
 
         <p>Total: <span id="total">0.00 ARS</span></p>
         <button type="submit">Comprar Viandas</button>
