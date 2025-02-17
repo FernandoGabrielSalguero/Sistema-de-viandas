@@ -22,7 +22,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['crear_menu'])) {
         $error = "Todos los campos son obligatorios.";
     } else {
         // Insertar el nuevo menú en la base de datos
-        $stmt = $pdo->prepare("INSERT INTO Menú (Nombre, Fecha_entrega, Fecha_hora_compra, Fecha_hora_cancelacion, Precio, Estado) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt = $pdo->prepare("INSERT INTO Menú (Nombre, Fecha_entrega, Fecha_hora_compra, Fecha_hora_cancelacion, Precio, Estado, Nivel_Educativo) VALUES (?, ?, ?, ?, ?, ?, ?)");
         if ($stmt->execute([$nombre_menu, $fecha_entrega, $fecha_hora_compra, $fecha_hora_cancelacion, $precio, $estado])) {
             $success = "Menú creado con éxito.";
         } else {
@@ -42,7 +42,7 @@ $pagina_actual = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
 $inicio = ($pagina_actual - 1) * $menus_por_pagina;
 
 // Obtener menús con límite y orden descendente por ID
-$stmt = $pdo->prepare("SELECT * FROM Menú ORDER BY Id DESC LIMIT :inicio, :menus_por_pagina");
+$stmt = $pdo->prepare("SELECT Id, Nombre, Fecha_entrega, Fecha_hora_compra, Fecha_hora_cancelacion, Precio, Estado, Nivel_Educativo FROM Menú ORDER BY Id DESC LIMIT :inicio, :menus_por_pagina");
 $stmt->bindParam(':inicio', $inicio, PDO::PARAM_INT);
 $stmt->bindParam(':menus_por_pagina', $menus_por_pagina, PDO::PARAM_INT);
 $stmt->execute();
@@ -67,7 +67,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['actualizar_menu'])) {
     } else {
         // Actualizar el menú en la base de datos
         $stmt = $pdo->prepare("UPDATE Menú SET Nombre = ?, Fecha_entrega = ?, Fecha_hora_compra = ?, Fecha_hora_cancelacion = ?, Precio = ?, Estado = ?, Nivel_Educativo = ? WHERE Id = ?");
-        if ($stmt->execute([$nombre_menu, $fecha_entrega, $fecha_hora_compra, $fecha_hora_cancelacion, $precio, $estado, $nivel_educativo, $menu_id])) {
+        if ($stmt->execute([$nombre_menu, $fecha_entrega, $fecha_hora_compra, $fecha_hora_cancelacion, $precio, $estado, $nivel_educativo])) {
             $success = "Menú actualizado con éxito.";
         } else {
             $error = "Hubo un error al actualizar el menú.";
@@ -79,7 +79,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['actualizar_menu'])) {
 // $stmt = $pdo->prepare("SELECT * FROM Menú");
 // $stmt->execute();
 // $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
-// ?>
+// 
+?>
 
 
 <!DOCTYPE html>
@@ -102,7 +103,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['actualizar_menu'])) {
         echo "<p class='success'>$success</p>";
     }
     ?>
-<form method="post" action="alta_menu.php">
+    <form method="post" action="alta_menu.php">
         <label for="nombre_menu">Nombre del Menú</label>
         <input type="text" id="nombre_menu" name="nombre_menu" required>
 
@@ -164,11 +165,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['actualizar_menu'])) {
                             </select>
                         </td>
                         <td>
-                            <select name="estado" required>
+                            <select name="nivel_educativo" required>
                                 <option value="Inicial" <?php echo ($menu['Nivel_Educativo'] == 'Inicial') ? 'selected' : ''; ?>>Inicial</option>
                                 <option value="Primaria" <?php echo ($menu['Nivel_Educativo'] == 'Primaria') ? 'selected' : ''; ?>>Primaria</option>
                                 <option value="Secundaria" <?php echo ($menu['Nivel_Educativo'] == 'Secundaria') ? 'selected' : ''; ?>>Secundaria</option>
                             </select>
+
                         </td>
                         <td>
                             <input type="hidden" name="menu_id" value="<?php echo htmlspecialchars($menu['Id']); ?>">
