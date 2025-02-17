@@ -32,7 +32,7 @@ $stmt->execute([$usuario_id]);
 $hijos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Obtener menús disponibles
-$stmt = $pdo->prepare("SELECT m.Id, m.Nombre, m.Fecha_entrega, m.Precio
+$stmt = $pdo->prepare("SELECT m.Id, m.Nombre, m.Fecha_entrega, m.Precio, m.Nivel_Educativo
                     FROM `Menú` m
                     WHERE m.Estado = 'En venta'
                     ORDER BY m.Fecha_entrega ASC");
