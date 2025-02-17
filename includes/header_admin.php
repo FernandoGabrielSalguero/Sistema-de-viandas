@@ -164,7 +164,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
                 <ul>
                     <li><a href="gestion_pedidos_cuyo.php" class="tagus">Reporte de Viandas</a></li>
                     <li><a href="control_pedidos_cuyo.php" class="tagus">Control pedidos</a></li>
-                    <li><a href="historial_pedidos.php" class="tagus">Historial pedidos</a></li>
+                    <li><a href="" class="tagus">Historial pedidos (revisar)</a></li>
                 </ul>
             </li>
 
