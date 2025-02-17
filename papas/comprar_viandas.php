@@ -23,10 +23,10 @@ $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 $saldo_disponible = $usuario['Saldo'];
 
 // Obtener hijos del usuario
-$stmt = $pdo->prepare("SELECT h.Id, h.Nombre, h.Preferencias_Alimenticias, c.Nivel_Educativo
+$stmt = $pdo->prepare("SELECT h.Id, h.Nombre, h.Preferencias_Alimenticias, cu.Nivel_Educativo
                     FROM Hijos h
-                    JOIN Usuarios_Hijos uh
-                    ON h.Id = uh.Hijo_Id
+                    JOIN Usuarios_Hijos uh ON h.Id = uh.Hijo_Id
+                    JOIN Cursos cu ON h.Curso_Id = cu.Id
                     WHERE uh.Usuario_Id = ?");
 $stmt->execute([$usuario_id]);
 $hijos = $stmt->fetchAll(PDO::FETCH_ASSOC);
