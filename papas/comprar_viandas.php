@@ -108,6 +108,43 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="../css/styles.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script>
+        let menus = <?php echo json_encode($menus); ?>; // Pasar los menús a JavaScript
+
+        function actualizarMenus() {
+            let hijoId = document.getElementById('hijo_id').value;
+            let hijoSeleccionado = <?php echo json_encode($hijos); ?>.find(hijo => hijo.Id == hijoId);
+
+            let contenedorMenus = document.getElementById('menus_disponibles');
+            contenedorMenus.innerHTML = '';
+
+            if (!hijoSeleccionado) return;
+
+            let menusFiltrados = menus.filter(menu => menu.Nivel_Educativo === hijoSeleccionado.Nivel_Educativo);
+            
+            let menusAgrupados = {};
+            menusFiltrados.forEach(menu => {
+                if (!menusAgrupados[menu.Fecha_entrega]) {
+                    menusAgrupados[menu.Fecha_entrega] = [];
+                }
+                menusAgrupados[menu.Fecha_entrega].push(menu);
+            });
+
+            for (let fecha in menusAgrupados) {
+                let fechaFormato = new Date(fecha).toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                let fechaHtml = `<h2>${fechaFormato}</h2>`;
+                let itemsHtml = menusAgrupados[fecha].map(menu => `
+                    <div>
+                        <label>
+                            <input type="checkbox" name="menu_ids[]" value="${menu.Id}" data-precio="${menu.Precio}" onchange="actualizarTotal()">
+                            ${menu.Nombre} - ${parseFloat(menu.Precio).toFixed(2)} ARS
+                        </label>
+                    </div>
+                `).join('');
+
+                contenedorMenus.innerHTML += fechaHtml + itemsHtml;
+            }
+        }
+
         function actualizarTotal() {
             let total = 0;
             document.querySelectorAll('input[name="menu_ids[]"]:checked').forEach((checkbox) => {
