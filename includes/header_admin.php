@@ -174,4 +174,5 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'administrador') {
         </ul>
     </nav>
 </body>
+
 </html>
