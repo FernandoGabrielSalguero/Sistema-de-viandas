@@ -165,8 +165,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['actualizar_menu'])) {
                         </td>
                         <td>
                             <select name="estado" required>
-                                <option value="En venta" <?php echo ($menu['Estado'] == 'En venta') ? 'selected' : ''; ?>>En venta</option>
-                                <option value="Sin stock" <?php echo ($menu['Estado'] == 'Sin stock') ? 'selected' : ''; ?>>Sin stock</option>
+                                <option value="Inicial" <?php echo ($menu['Nivel_Educativo'] == 'Inicial') ? 'selected' : ''; ?>>Inicial</option>
+                                <option value="Primaria" <?php echo ($menu['Nivel_Educativo'] == 'Primaria') ? 'selected' : ''; ?>>Primaria</option>
+                                <option value="Secundaria" <?php echo ($menu['Nivel_Educativo'] == 'Secundaria') ? 'selected' : ''; ?>>Secundaria</option>
                             </select>
                         </td>
                         <td>
