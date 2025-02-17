@@ -1,4 +1,5 @@
 <?php
+ob_start(); // Inicia el almacenamiento en búfer de salida
 
 // Habilitar la muestra de errores
 ini_set('display_errors', 1);
@@ -26,6 +27,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['eliminar_pedido'])) {
         $error = "Hubo un error al eliminar el pedido.";
     }
 }
+
+$stmt = $pdo->query("SELECT * FROM Pedidos_Cuyo_Placa ORDER BY fecha DESC");
+$pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+ob_end_flush(); // Finaliza el almacenamiento en búfer y envía la salida al navegador
+?>
 
 // Obtener todos los pedidos
 $stmt = $pdo->query("SELECT * FROM Pedidos_Cuyo_Placa ORDER BY fecha DESC");
