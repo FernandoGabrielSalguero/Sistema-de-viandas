@@ -22,75 +22,28 @@ $stmt->execute([$usuario_id]);
 $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 $saldo_disponible = $usuario['Saldo'];
 
-// Obtener hijos del usuario
-$stmt = $pdo->prepare("SELECT h.Id, h.Nombre, h.Preferencias_Alimenticias FROM Hijos h JOIN Usuarios_Hijos uh ON h.Id = uh.Hijo_Id WHERE uh.Usuario_Id = ?");
+// Obtener hijos del usuario con su nivel educativo
+$stmt = $pdo->prepare("SELECT h.Id, h.Nombre, h.Preferencias_Alimenticias, c.Nivel_Educativo 
+                      FROM Hijos h 
+                      JOIN Usuarios_Hijos uh ON h.Id = uh.Hijo_Id 
+                      JOIN Cursos c ON h.Curso_Id = c.Id
+                      WHERE uh.Usuario_Id = ?");
 $stmt->execute([$usuario_id]);
 $hijos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Obtener menús disponibles
-$stmt = $pdo->prepare("SELECT m.Id, m.Nombre, m.Fecha_entrega, m.Precio FROM `Menú` m WHERE m.Estado = 'En venta'");
+// Obtener menús disponibles agrupados por fecha
+$stmt = $pdo->prepare("SELECT m.Id, m.Nombre, m.Fecha_entrega, m.Precio, m.Nivel_Educativo 
+                      FROM `Menú` m 
+                      WHERE m.Estado = 'En venta' 
+                      ORDER BY m.Fecha_entrega ASC");
 $stmt->execute();
 $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$menus_por_dia = [];
+$menus_por_fecha = [];
 foreach ($menus as $menu) {
-    $fecha_entrega = DateTime::createFromFormat('Y-m-d', $menu['Fecha_entrega'])->format('Y-m-d');
-    $menus_por_dia[$fecha_entrega][] = $menu;
+    $menus_por_fecha[$menu['Fecha_entrega']][] = $menu;
 }
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $hijo_id = $_POST['hijo_id'];
-    $menu_ids = $_POST['menu_ids'];
-    $total_precio = 0;
-
-    // Calcular el precio total de los menús seleccionados y obtener sus fechas de entrega
-    $menus_seleccionados = [];
-    foreach ($menu_ids as $menu_id) {
-        $stmt = $pdo->prepare("SELECT Id, Precio, Fecha_entrega FROM `Menú` WHERE Id = ?");
-        $stmt->execute([$menu_id]);
-        $menu = $stmt->fetch(PDO::FETCH_ASSOC);
-        $total_precio += $menu['Precio'];
-        $menus_seleccionados[] = $menu;
-    }
-
-    // Verificar si el usuario tiene saldo suficiente
-    if ($saldo_disponible >= $total_precio) {
-        // Iniciar una transacción
-        $pdo->beginTransaction();
-
-        try {
-            foreach ($menus_seleccionados as $menu) {
-                // Obtener las preferencias alimenticias del hijo
-                $stmt = $pdo->prepare("SELECT Preferencias_Alimenticias FROM Hijos WHERE Id = ?");
-                $stmt->execute([$hijo_id]);
-                $preferencias_alimenticias = $stmt->fetchColumn();
-
-                // Realizar el pedido
-                $stmt = $pdo->prepare("INSERT INTO Pedidos_Comida (Hijo_Id, Menú_Id, Fecha_pedido, Estado, Fecha_entrega, Preferencias_Alimenticias) VALUES (?, ?, NOW(), 'Procesando', ?, ?)");
-                $stmt->execute([$hijo_id, $menu['Id'], $menu['Fecha_entrega'], $preferencias_alimenticias]);
-
-                // Guardar notificación para cocina
-                $descripcion = "Pedido para hijo con ID $hijo_id: Menú " . $menu['Id'];
-                $stmt_notificacion = $pdo->prepare("INSERT INTO notificaciones_cocina (usuario_id, tipo, descripcion) VALUES (?, 'pedido', ?)");
-                $stmt_notificacion->execute([$usuario_id, $descripcion]);
-            }
-
-            // Actualizar el saldo del usuario una sola vez
-            $stmt = $pdo->prepare("UPDATE Usuarios SET Saldo = Saldo - ? WHERE Id = ?");
-            $stmt->execute([$total_precio, $usuario_id]);
-
-            // Confirmar la transacción
-            $pdo->commit();
-            $success = "Pedido realizado con éxito.";
-        } catch (Exception $e) {
-            // Revertir la transacción en caso de error
-            $pdo->rollBack();
-            $error = "Error al realizar el pedido: " . $e->getMessage();
-        }
-    } else {
-        $error = "Saldo insuficiente.";
-    }
-}
 ?>
 
 <!DOCTYPE html>
@@ -101,6 +54,50 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="../css/styles.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script>
+        let menusPorFecha = <?php echo json_encode($menus_por_fecha); ?>;
+
+        function actualizarMenus() {
+            let hijoSeleccionado = document.getElementById('hijo_id').value;
+            let nivelHijo = document.querySelector(`#hijo_id option[value="${hijoSeleccionado}"]`).dataset.nivel;
+            let contenedorMenus = document.getElementById('menus_disponibles');
+
+            contenedorMenus.innerHTML = ""; // Limpiar menús previos
+
+            if (!hijoSeleccionado) {
+                contenedorMenus.innerHTML = "<p>Seleccione un hijo para ver los menús disponibles.</p>";
+                return;
+            }
+
+            let fechas = Object.keys(menusPorFecha);
+            fechas.forEach(fecha => {
+                let menusFiltrados = menusPorFecha[fecha].filter(menu => menu.Nivel_Educativo === nivelHijo);
+                if (menusFiltrados.length > 0) {
+                    let date = new Date(fecha);
+                    let opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                    let nombreFecha = date.toLocaleDateString('es-ES', opciones);
+
+                    let fechaDiv = document.createElement('h2');
+                    fechaDiv.innerText = nombreFecha;
+                    contenedorMenus.appendChild(fechaDiv);
+
+                    menusFiltrados.forEach(menu => {
+                        let div = document.createElement('div');
+                        div.innerHTML = `
+                            <label>
+                                <input type="checkbox" name="menu_ids[]" value="${menu.Id}" data-precio="${menu.Precio}" onchange="actualizarTotal()">
+                                ${menu.Nombre} - ${menu.Precio} ARS
+                            </label>
+                        `;
+                        contenedorMenus.appendChild(div);
+                    });
+                }
+            });
+
+            if (contenedorMenus.innerHTML === "") {
+                contenedorMenus.innerHTML = "<p>No hay menús disponibles para este nivel educativo.</p>";
+            }
+        }
+
         function actualizarTotal() {
             let total = 0;
             document.querySelectorAll('input[name="menu_ids[]"]:checked').forEach((checkbox) => {
@@ -123,29 +120,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     ?>
     <form method="post" action="comprar_viandas.php">
         <label for="hijo_id">Seleccionar Hijo:</label>
-        <select id="hijo_id" name="hijo_id" required>
+        <select id="hijo_id" name="hijo_id" required onchange="actualizarMenus()">
             <option value="">Seleccione un hijo</option>
             <?php foreach ($hijos as $hijo) : ?>
-                <option value="<?php echo $hijo['Id']; ?>"><?php echo htmlspecialchars($hijo['Nombre']); ?></option>
+                <option value="<?php echo $hijo['Id']; ?>" data-nivel="<?php echo $hijo['Nivel_Educativo']; ?>">
+                    <?php echo htmlspecialchars($hijo['Nombre']); ?>
+                </option>
             <?php endforeach; ?>
         </select>
         <br><br>
-        <?php
-        foreach ($menus_por_dia as $fecha => $menus) :
-            $date = new DateTime($fecha);
-            $formatter = new IntlDateFormatter('es_ES', IntlDateFormatter::FULL, IntlDateFormatter::NONE, 'Europe/Madrid', IntlDateFormatter::GREGORIAN, 'EEEE d/MM/yyyy');
-            $nombre_dia = $formatter->format($date);
-        ?>
-            <h2><?php echo htmlspecialchars(ucfirst($nombre_dia)); ?></h2>
-            <?php foreach ($menus as $menu) : ?>
-                <div>
-                    <label>
-                        <input type="checkbox" name="menu_ids[]" value="<?php echo $menu['Id']; ?>" data-precio="<?php echo $menu['Precio']; ?>" onchange="actualizarTotal()">
-                        <?php echo htmlspecialchars($menu['Nombre']) . " - " . number_format($menu['Precio'], 2) . " ARS"; ?>
-                    </label>
-                </div>
-            <?php endforeach; ?>
-        <?php endforeach; ?>
+
+        <h2>Menús Disponibles</h2>
+        <div id="menus_disponibles">
+            <p>Seleccione un hijo para ver los menús disponibles.</p>
+        </div>
+
         <br>
         <p>Total: <span id="total">0.00 ARS</span></p>
         <button type="submit">Comprar Viandas</button>
