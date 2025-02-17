@@ -191,25 +191,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </select>
         <br><br>
 
-        <?php
-        
-        foreach ($menus_por_dia as $fecha => $menus) :
-            $date = new DateTime($fecha);
-            $formatter = new IntlDateFormatter('es_ES', IntlDateFormatter::FULL, IntlDateFormatter::NONE, 'Europe/Madrid', IntlDateFormatter::GREGORIAN, 'EEEE d/MM/yyyy');
-            $nombre_dia = $formatter->format($date);
-        ?>
-            <h2><?php echo htmlspecialchars(ucfirst($nombre_dia)); ?></h2>
-            <?php foreach ($menus as $menu) : ?>
-                <div>
-                    <label>
-                        <input type="checkbox" name="menu_ids[]" value="<?php echo $menu['Id']; ?>" data-precio="<?php echo $menu['Precio']; ?>" onchange="actualizarTotal()">
-                        <?php echo htmlspecialchars($menu['Nombre']) . " - " . number_format($menu['Precio'], 2) . " ARS"; ?>
-                    </label>
-                </div>
-            <?php endforeach; ?>
-        <?php endforeach; ?>
-
-
         <br>
 
         <!-- Contenedor dinámico de menús -->
