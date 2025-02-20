@@ -37,10 +37,12 @@ $query = "
         m.Nombre as Menu, 
         pc.Fecha_entrega, 
         pc.Estado, 
+        cu.Nombre as Curso,  -- 🚀 Se agregó el curso del alumno
         COALESCE(pa.Nombre, 'Sin preferencias alimenticias') as Preferencias_alimenticias
     FROM 
         Pedidos_Comida pc
     JOIN Hijos h ON pc.Hijo_Id = h.Id
+    JOIN Cursos cu ON h.Curso_Id = cu.Id  -- 🚀 Se une con la tabla Cursos para obtener el nombre del curso
     JOIN `Menú` m ON pc.Menú_Id = m.Id
     LEFT JOIN Preferencias_Alimenticias pa ON pc.Preferencias_alimenticias = pa.Id
     WHERE 
@@ -101,6 +103,7 @@ $pedidos_viandas = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <tr>
             <th>ID Pedido</th>
             <th>Hijo</th>
+            <th>Curso</th>  <!-- 🚀 Nueva columna agregada -->
             <th>Menú</th>
             <th>Fecha de Entrega</th>
             <th>Estado</th>
@@ -110,6 +113,7 @@ $pedidos_viandas = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <tr>
             <td><?php echo htmlspecialchars($pedido['Pedido_Id']); ?></td>
             <td><?php echo htmlspecialchars($pedido['Hijo']); ?></td>
+            <td><?php echo htmlspecialchars($pedido['Curso']); ?></td>  <!-- 🚀 Nueva columna en la tabla -->
             <td><?php echo htmlspecialchars($pedido['Menu']); ?></td>
             <td><?php echo htmlspecialchars($pedido['Fecha_entrega'] ?? ''); ?></td>
             <td><?php echo htmlspecialchars($pedido['Estado']); ?></td>
