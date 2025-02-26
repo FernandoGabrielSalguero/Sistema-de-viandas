@@ -13,7 +13,7 @@ $colegio_filtro = isset($_GET['colegio']) ? $_GET['colegio'] : '';
 
 // -------------------- OBTENER MENÚS --------------------
 $query_menus = "
-    SELECT m.Nombre AS MenuNombre, m.Nivel_Educativo, COUNT(*) AS Cantidad, pc.Fecha_entrega 
+    SELECT m.Nombre AS MenuNombre, COUNT(*) AS Cantidad, pc.Fecha_entrega 
     FROM Pedidos_Comida pc
     JOIN Menú m ON pc.Menú_Id = m.Id
     JOIN Hijos h ON pc.Hijo_Id = h.Id
@@ -22,7 +22,6 @@ $query_menus = "
 
 $params_menus = [];
 
-// ✅ Agregar filtros SOLO UNA VEZ
 if (!empty($fecha_filtro)) {
     $query_menus .= " AND pc.Fecha_entrega = ?";
     $params_menus[] = $fecha_filtro;
@@ -32,13 +31,13 @@ if (!empty($colegio_filtro)) {
     $params_menus[] = $colegio_filtro;
 }
 
-// ✅ AGRUPAR correctamente
-$query_menus .= " GROUP BY m.Nombre, m.Nivel_Educativo, pc.Fecha_entrega";
+// ✅ AGRUPAR SOLO POR MENÚ, eliminamos Nivel_Educativo
+$query_menus .= " GROUP BY m.Nombre, pc.Fecha_entrega";
 
-// ✅ Preparar y ejecutar consulta
 $stmt = $pdo->prepare($query_menus);
 $stmt->execute($params_menus);
 $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 
 
 // -------------------- OBTENER PREFERENCIAS ALIMENTICIAS --------------------
@@ -201,33 +200,34 @@ foreach ($menues as $menu => $niveles_data) {
     </form>
 
     <h2>Total de Menús</h2>
-    <div class="card-container">
-        <?php foreach ($menus as $menu) : ?>
-            <?php
-            $fechaEntrega = htmlspecialchars($menu['Fecha_entrega']);
-            $menuNombre = htmlspecialchars($menu['MenuNombre']);
-            $cantidad = htmlspecialchars($menu['Cantidad']);
-            $prefCount = isset($preferencias_por_menu[$menuNombre]) ? count($preferencias_por_menu[$menuNombre]) : 0;
-            $cardClass = $prefCount > 0 ? ($prefCount > 2 ? 'danger' : 'warning') : '';
-            ?>
-            <div class="card <?php echo $cardClass; ?>">
-                <h3><?php echo $menuNombre; ?></h3>
-                <h2><strong>Cantidad:</strong> <?php echo $cantidad; ?></h2>
-                <p><strong>Fecha de entrega:</strong> <?php echo $fechaEntrega; ?></p>
-                <?php if ($prefCount > 0) : ?>
-                    <p><strong>⚠ <?php echo $prefCount; ?> alumno(s) con preferencias alimenticias</strong></p>
-                    <ul>
-                        <?php foreach ($preferencias_por_menu[$menuNombre] as $pref) : ?>
-                            <li><strong>Alumno:</strong> <?php echo htmlspecialchars($pref['Alumno']); ?></li>
-                            <li><strong>Curso:</strong> <?php echo htmlspecialchars($pref['Curso']); ?></li>
-                            <li><strong>Preferencia:</strong> <?php echo htmlspecialchars($pref['Preferencia']); ?></li>
-                            <hr>
-                        <?php endforeach; ?>
-                    </ul>
-                <?php endif; ?>
-            </div>
-        <?php endforeach; ?>
-    </div>
+<div class="card-container">
+    <?php foreach ($menus as $menu) : ?>
+        <?php
+        $fechaEntrega = htmlspecialchars($menu['Fecha_entrega']);
+        $menuNombre = htmlspecialchars($menu['MenuNombre']);
+        $cantidad = htmlspecialchars($menu['Cantidad']);
+        $prefCount = isset($preferencias_por_menu[$menuNombre]) ? count($preferencias_por_menu[$menuNombre]) : 0;
+        $cardClass = $prefCount > 0 ? ($prefCount > 2 ? 'danger' : 'warning') : '';
+        ?>
+        <div class="card <?php echo $cardClass; ?>">
+            <h3><?php echo $menuNombre; ?></h3>
+            <h2><strong>Cantidad:</strong> <?php echo $cantidad; ?></h2>
+            <p><strong>Fecha de entrega:</strong> <?php echo $fechaEntrega; ?></p>
+            <?php if ($prefCount > 0) : ?>
+                <p><strong>⚠ <?php echo $prefCount; ?> alumno(s) con preferencias alimenticias</strong></p>
+                <ul>
+                    <?php foreach ($preferencias_por_menu[$menuNombre] as $pref) : ?>
+                        <li><strong>Alumno:</strong> <?php echo htmlspecialchars($pref['Alumno']); ?></li>
+                        <li><strong>Curso:</strong> <?php echo htmlspecialchars($pref['Curso']); ?></li>
+                        <li><strong>Preferencia:</strong> <?php echo htmlspecialchars($pref['Preferencia']); ?></li>
+                        <hr>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+        </div>
+    <?php endforeach; ?>
+</div>
+
 
 
     <!-- TABLA DE TOTALIDAD DE VIANDAS POR NIVEL -->
