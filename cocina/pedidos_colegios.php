@@ -35,13 +35,14 @@ $query_menus .= " GROUP BY m.Nombre, pc.Fecha_entrega";
 
 $params_niveles = [];
 
+// ✅ Asegurar que los filtros se añaden ANTES del GROUP BY
 if (!empty($fecha_filtro)) {
     $query_menus .= " AND pc.Fecha_entrega = ?";
     $params_menus[] = $fecha_filtro;
 }
 if (!empty($colegio_filtro)) {
     $query_menus .= " AND h.Colegio_Id = ?";
-    $params_niveles[] = $colegio_filtro;
+    $params_menus[] = $colegio_filtro;
 }
 
 // ✅ ELIMINAR duplicación de filtros y preparar la consulta
