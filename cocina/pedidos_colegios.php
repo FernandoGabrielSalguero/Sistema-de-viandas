@@ -31,14 +31,17 @@ if (!empty($colegio_filtro)) {
     $params_menus[] = $colegio_filtro;
 }
 
-// ✅ Asegurar que los filtros se añaden ANTES del GROUP BY
+$query_menus .= " GROUP BY m.Nombre, pc.Fecha_entrega";
+
+$params_niveles = [];
+
 if (!empty($fecha_filtro)) {
     $query_menus .= " AND pc.Fecha_entrega = ?";
     $params_menus[] = $fecha_filtro;
 }
 if (!empty($colegio_filtro)) {
     $query_menus .= " AND h.Colegio_Id = ?";
-    $params_menus[] = $colegio_filtro;
+    $params_niveles[] = $colegio_filtro;
 }
 
 // ✅ ELIMINAR duplicación de filtros y preparar la consulta
@@ -48,8 +51,6 @@ $stmt = $pdo->prepare($query_menus);
 $stmt->execute(array_values($params_menus));  // ✅ Convertimos a array limpio
 $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-
-$menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // -------------------- OBTENER PREFERENCIAS ALIMENTICIAS --------------------
 $query_preferencias = "
