@@ -101,7 +101,7 @@ foreach ($preferencias as $pref) {
 <body>
     <h1>Dashboard Cocina</h1>
     
-    <form method="get" action="dashboard_cocina.php">
+    <form method="GET" action="dashboard_cocina.php">
         <label for="fecha_entrega">Filtrar por Fecha de Entrega:</label>
         <input type="date" id="fecha_entrega" name="fecha_entrega" value="<?php echo htmlspecialchars($fecha_filtro); ?>">
         
