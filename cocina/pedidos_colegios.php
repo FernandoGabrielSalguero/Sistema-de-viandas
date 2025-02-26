@@ -26,6 +26,7 @@ $query_niveles = "
     JOIN Cursos cu ON h.Curso_Id = cu.Id
     WHERE pc.Estado = 'Procesando'
     GROUP BY Nivel
+    ORDER BY FIELD(Nivel, 'Nivel Inicial', 'Primaria', 'Secundaria', 'Otro')
 ";
 $params_niveles = [];
 
