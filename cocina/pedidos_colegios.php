@@ -111,7 +111,7 @@ $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Organizar los datos por nivel y menú
 $niveles = [
-    'Nivel Inicial' => ['Nivel Inicial Sala 3A', 'Nivel Inicial Sala 3B', 'Nivel Inicial Sala 4A', 'Nivel Inicial Sala 4B', 'Nivel Inicial Sala 4C','Nivel Inicial Sala 5A', 'Nivel Inicial Sala 5B'],
+    'Nivel Inicial' => ['Nivel Inicial Sala 3A', 'Nivel Inicial Sala 3B', 'Nivel Inicial Sala 4A', 'Nivel Inicial Sala 4B', 'Nivel Inicial Sala 4C', 'Nivel Inicial Sala 5A', 'Nivel Inicial Sala 5B'],
     'Primaria' => ['Primaria Primer Grado A', 'Primaria Primer Grado B', 'Primaria Segundo Grado', 'Primaria Segundo Grado B', 'Primaria Tercer Grado', 'Primaria cuarto Grado', 'Primaria Quinto Grado', 'Primaria Sexto Grado', 'Primaria Septimo Grado'],
     'Secundaria' => ['Secundaria Primer Año', 'Secundaria Segundo Año', 'Secundaria Tercer año']
 ];
@@ -141,6 +141,7 @@ foreach ($colegios as $colegio) {
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Dashboard Cocina</title>
@@ -151,6 +152,7 @@ foreach ($colegios as $colegio) {
             flex-wrap: wrap;
             justify-content: space-between;
         }
+
         .kpi {
             border: 1px solid #000;
             border-radius: 5px;
@@ -159,21 +161,24 @@ foreach ($colegios as $colegio) {
             text-align: center;
             width: 200px;
         }
+
         .filter-container {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
             margin-bottom: 20px;
         }
+
         .filter-item {
             flex: 1 1 200px;
         }
     </style>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
+
 <body>
     <h1>Dashboard Cocina</h1>
-    
+
     <form method="post" action="pedidos_colegios.php" class="filter-container">
         <div class="filter-item">
             <label for="fecha_entrega">Filtrar por Fecha de Entrega:</label>
@@ -190,7 +195,7 @@ foreach ($colegios as $colegio) {
             <button type="submit" name="eliminar_filtro">Eliminar Filtro</button>
         </div>
     </form>
-    
+
     <h2>Total de Menús</h2>
     <div class="kpi-container">
         <?php
@@ -209,6 +214,14 @@ foreach ($colegios as $colegio) {
             <p><?php echo $total_viandas; ?></p>
         </div>
     </div>
+
+    <!-- DESCARGAR MENÚ -->
+    <form method="post" action="descargar_resumen.php">
+        <input type="hidden" name="fecha_filtro" value="<?php echo htmlspecialchars($fecha_filtro); ?>">
+        <input type="hidden" name="colegio_filtro" value="<?php echo htmlspecialchars($colegio_filtro); ?>">
+        <button type="submit" name="descargar_csv">Descargar Resumen</button>
+    </form>
+    <!-- END DESCARGAR MENÚ -->
 
     <h2>Totalidad de Viandas por Colegio y Nivel</h2>
     <?php foreach ($niveles_data as $nivel => $menus) : ?>
@@ -262,4 +275,5 @@ foreach ($colegios as $colegio) {
         <?php endforeach; ?>
     </table>
 </body>
+
 </html>
