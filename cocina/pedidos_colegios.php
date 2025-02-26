@@ -35,41 +35,29 @@ $stmt = $pdo->prepare($query_menus);
 $stmt->execute($params_menus);
 $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// -------------------- OBTENER PREFERENCIAS ALIMENTICIAS --------------------
-$query_preferencias = "
-    SELECT h.Nombre AS Alumno, cu.Nombre AS Curso, m.Nombre AS MenuNombre, pa.Nombre AS Preferencia
+// -------------------- OBTENER TOTAL DE VIANDAS POR NIVEL --------------------
+$query_niveles = "
+    SELECT m.Nivel_Educativo, COUNT(*) AS Cantidad
     FROM Pedidos_Comida pc
-    JOIN Hijos h ON pc.Hijo_Id = h.Id
-    JOIN Cursos cu ON h.Curso_Id = cu.Id
     JOIN Menú m ON pc.Menú_Id = m.Id
-    JOIN Preferencias_Alimenticias pa ON pc.Preferencias_alimenticias = pa.Id
-    WHERE pc.Estado = 'Procesando' AND pa.Nombre != 'Sin preferencias'
+    JOIN Hijos h ON pc.Hijo_Id = h.Id
+    WHERE pc.Estado = 'Procesando'
 ";
-
-$params_preferencias = []; // Nuevo array de parámetros
+$params_niveles = [];
 
 if (!empty($fecha_filtro)) {
-    $query_preferencias .= " AND pc.Fecha_entrega = ?";
-    $params_preferencias[] = $fecha_filtro;
+    $query_niveles .= " AND pc.Fecha_entrega = ?";
+    $params_niveles[] = $fecha_filtro;
 }
 if (!empty($colegio_filtro)) {
-    $query_preferencias .= " AND h.Colegio_Id = ?";
-    $params_preferencias[] = $colegio_filtro;
+    $query_niveles .= " AND h.Colegio_Id = ?";
+    $params_niveles[] = $colegio_filtro;
 }
 
-$stmt = $pdo->prepare($query_preferencias);
-$stmt->execute($params_preferencias);
-$preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Organizar preferencias por menú
-$preferencias_por_menu = [];
-foreach ($preferencias as $pref) {
-    $menu = $pref['MenuNombre'];
-    if (!isset($preferencias_por_menu[$menu])) {
-        $preferencias_por_menu[$menu] = [];
-    }
-    $preferencias_por_menu[$menu][] = $pref;
-}
+$query_niveles .= " GROUP BY m.Nivel_Educativo ORDER BY FIELD(m.Nivel_Educativo, 'Inicial', 'Primaria', 'Secundaria')";
+$stmt = $pdo->prepare($query_niveles);
+$stmt->execute($params_niveles);
+$niveles_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -112,6 +100,20 @@ foreach ($preferencias as $pref) {
         .card p {
             margin: 5px 0;
         }
+        .tabla-niveles {
+            margin-top: 30px;
+            width: 50%;
+            border-collapse: collapse;
+        }
+        .tabla-niveles th, .tabla-niveles td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        .tabla-niveles th {
+            background-color: #007BFF;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -141,26 +143,29 @@ foreach ($preferencias as $pref) {
             $fechaEntrega = htmlspecialchars($menu['Fecha_entrega']);
             $menuNombre = htmlspecialchars($menu['MenuNombre']);
             $cantidad = htmlspecialchars($menu['Cantidad']);
-            $prefCount = isset($preferencias_por_menu[$menuNombre]) ? count($preferencias_por_menu[$menuNombre]) : 0;
-            $cardClass = $prefCount > 0 ? ($prefCount > 2 ? 'danger' : 'warning') : '';
             ?>
-            <div class="card <?php echo $cardClass; ?>">
+            <div class="card">
                 <h3><?php echo $menuNombre; ?></h3>
                 <h2><strong>Cantidad:</strong> <?php echo $cantidad; ?></h2>
                 <p><strong>Fecha de entrega:</strong> <?php echo $fechaEntrega; ?></p>
-                <?php if ($prefCount > 0) : ?>
-                    <p><strong>⚠ <?php echo $prefCount; ?> alumno(s) con preferencias alimenticias</strong></p>
-                    <ul>
-                        <?php foreach ($preferencias_por_menu[$menuNombre] as $pref) : ?>
-                            <li><strong>Alumno:</strong> <?php echo htmlspecialchars($pref['Alumno']); ?></li>
-                            <li><strong>Curso:</strong> <?php echo htmlspecialchars($pref['Curso']); ?></li>
-                            <li><strong>Preferencia:</strong> <?php echo htmlspecialchars($pref['Preferencia']); ?></li>
-                            <hr>
-                        <?php endforeach; ?>
-                    </ul>
-                <?php endif; ?>
             </div>
         <?php endforeach; ?>
     </div>
+
+    <!-- Tabla de viandas por nivel -->
+    <h2>Totalidad de Viandas por Nivel</h2>
+    <table class="tabla-niveles">
+        <tr>
+            <th>Nivel Educativo</th>
+            <th>Total de Viandas</th>
+        </tr>
+        <?php foreach ($niveles_data as $nivel) : ?>
+            <tr>
+                <td><?php echo htmlspecialchars($nivel['Nivel_Educativo']); ?></td>
+                <td><?php echo htmlspecialchars($nivel['Cantidad']); ?></td>
+            </tr>
+        <?php endforeach; ?>
+    </table>
+
 </body>
 </html>
