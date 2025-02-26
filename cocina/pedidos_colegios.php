@@ -87,7 +87,7 @@ foreach ($preferencias as $pref) {
             border: 2px solid #ddd;
             border-radius: 8px;
             padding: 15px;
-            width: 250px;
+            width: 450px;
             text-align: center;
             background-color: #f8f8f8;
         }
