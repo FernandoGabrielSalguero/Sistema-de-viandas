@@ -105,7 +105,7 @@ $query_menus .= " GROUP BY m.Nombre, m.Nivel_Educativo, pc.Fecha_entrega";
 $stmt = $pdo->prepare($query_menus);
 $stmt->execute($params_niveles);
 
-$menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 
 // Organizar datos para la tabla
 $niveles = ['Inicial', 'Primaria', 'Secundaria'];
