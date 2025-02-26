@@ -16,7 +16,7 @@ $query = "
     JOIN Cursos cu ON h.Curso_Id = cu.Id
     JOIN Menú m ON pc.Menú_Id = m.Id
     JOIN Preferencias_Alimenticias pa ON pc.Preferencias_alimenticias = pa.Id
-    WHERE pc.Estado = 'Procesando' AND cu.Nivel = ?
+    WHERE pc.Estado = 'Procesando' AND cu.Nivel_Educativo = ?
 ";
 
 $stmt = $pdo->prepare($query);
