@@ -101,16 +101,23 @@ foreach ($preferencias as $pref) {
 <body>
     <h1>Dashboard Cocina</h1>
     
-    <form method="GET" action="dashboard_cocina.php">
-        <label for="fecha_entrega">Filtrar por Fecha de Entrega:</label>
-        <input type="date" id="fecha_entrega" name="fecha_entrega" value="<?php echo htmlspecialchars($fecha_filtro); ?>">
-        
-        <label for="colegio">Filtrar por Colegio:</label>
-        <input type="text" id="colegio" name="colegio" value="<?php echo htmlspecialchars($colegio_filtro); ?>">
-        
-        <button type="submit">Filtrar</button>
-        <button type="submit" name="reset">Eliminar Filtro</button>
+    <form method="post" action="pedidos_colegios.php" class="filter-container">
+        <div class="filter-item">
+            <label for="fecha_entrega">Filtrar por Fecha de Entrega:</label>
+            <input type="date" id="fecha_entrega" name="fecha_entrega" value="<?php echo htmlspecialchars($fecha_filtro); ?>">
+        </div>
+        <div class="filter-item">
+            <label for="colegio">Filtrar por Colegio:</label>
+            <input type="text" id="colegio" name="colegio" value="<?php echo htmlspecialchars($colegio_filtro); ?>">
+        </div>
+        <div class="filter-item">
+            <button type="submit" name="filtrar_fecha">Filtrar</button>
+        </div>
+        <div class="filter-item">
+            <button type="submit" name="eliminar_filtro">Eliminar Filtro</button>
+        </div>
     </form>
+
 
     <h2>Total de Menús</h2>
     <div class="card-container">
