@@ -415,36 +415,37 @@ $menus_totales = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     <script>
         function cargarDetalle(nivel) {
-            // Simulación de datos traídos desde PHP con AJAX
-            fetch(`obtener_detalles.php?nivel=${nivel}`)
-                .then(response => response.json())
-                .then(data => {
-                    let contenido = '';
+    let fechaSeleccionada = document.getElementById("fecha_entrega").value; // Obtener fecha del input
 
-                    if (data.length === 0) {
-                        contenido = '<tr><td colspan="7">No hay datos disponibles para este nivel.</td></tr>';
-                    } else {
-                        data.forEach(pedido => {
-                            contenido += `
-                            <tr>
-                                <td>${pedido.id_pedido}</td>
-                                <td>${pedido.hijo}</td>
-                                <td>${pedido.curso}</td>
-                                <td>${pedido.menu}</td>
-                                <td>${pedido.fecha_entrega}</td>
-                                <td>${pedido.estado}</td>
-                                <td>${pedido.preferencias_alimenticias}</td>
-                            </tr>
-                        `;
-                        });
-                    }
+    fetch(`obtener_detalles.php?nivel=${nivel}&fecha=${fechaSeleccionada}`)
+        .then(response => response.json())
+        .then(data => {
+            let contenido = '';
 
-                    document.getElementById("detalleContenido").innerHTML = contenido;
-                    document.getElementById("modalNivel").innerText = nivel;
-                    document.getElementById("detalleModal").style.display = "block";
-                })
-                .catch(error => console.error("Error cargando los datos:", error));
-        }
+            if (data.length === 0) {
+                contenido = '<tr><td colspan="7">No hay datos disponibles para este nivel en la fecha seleccionada.</td></tr>';
+            } else {
+                data.forEach(pedido => {
+                    contenido += `
+                        <tr>
+                            <td>${pedido.id_pedido}</td>
+                            <td>${pedido.hijo}</td>
+                            <td>${pedido.curso}</td>
+                            <td>${pedido.menu}</td>
+                            <td>${pedido.Fecha_entrega}</td>  <!-- Ahora debe mostrarse correctamente -->
+                            <td>${pedido.Estado}</td>         <!-- Ahora debe mostrarse correctamente -->
+                            <td>${pedido.preferencias_alimenticias}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            document.getElementById("detalleContenido").innerHTML = contenido;
+            document.getElementById("modalNivel").innerText = nivel;
+            document.getElementById("detalleModal").style.display = "block";
+        })
+        .catch(error => console.error("Error cargando los datos:", error));
+}
 
         function cerrarModal() {
             document.getElementById("detalleModal").style.display = "none";
