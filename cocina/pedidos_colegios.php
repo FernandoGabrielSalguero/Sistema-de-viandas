@@ -14,7 +14,12 @@ $colegio_filtro = isset($_GET['colegio']) ? $_GET['colegio'] : '';
 // -------------------- OBTENER VIANDAS POR NIVEL --------------------
 $query_niveles = "
     SELECT 
-        cu.Nivel AS Nivel,
+        CASE 
+            WHEN cu.Nombre LIKE 'Nivel Inicial%' THEN 'Nivel Inicial'
+            WHEN cu.Nombre LIKE 'Primaria%' THEN 'Primaria'
+            WHEN cu.Nombre LIKE 'Secundaria%' THEN 'Secundaria'
+            ELSE 'Otro'
+        END AS Nivel,
         COUNT(*) AS Cantidad
     FROM Pedidos_Comida pc
     JOIN Hijos h ON pc.Hijo_Id = h.Id
