@@ -412,19 +412,19 @@ $menus_totales = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
     </style>
 
-<script>
-    function cargarDetalle(nivel) {
-        // Simulación de datos traídos desde PHP con AJAX
-        fetch(`obtener_detalles.php?nivel=${nivel}`)
-            .then(response => response.json())
-            .then(data => {
-                let contenido = '';
-                
-                if (data.length === 0) {
-                    contenido = '<tr><td colspan="7">No hay datos disponibles para este nivel.</td></tr>';
-                } else {
-                    data.forEach(pedido => {
-                        contenido += `
+    <script>
+        function cargarDetalle(nivel) {
+            // Simulación de datos traídos desde PHP con AJAX
+            fetch(`obtener_detalles.php?nivel=${nivel}`)
+                .then(response => response.json())
+                .then(data => {
+                    let contenido = '';
+
+                    if (data.length === 0) {
+                        contenido = '<tr><td colspan="7">No hay datos disponibles para este nivel.</td></tr>';
+                    } else {
+                        data.forEach(pedido => {
+                            contenido += `
                             <tr>
                                 <td>${pedido.id_pedido}</td>
                                 <td>${pedido.hijo}</td>
@@ -435,22 +435,20 @@ $menus_totales = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <td>${pedido.preferencias_alimenticias}</td>
                             </tr>
                         `;
-                    });
-                }
+                        });
+                    }
 
-                document.getElementById("detalleContenido").innerHTML = contenido;
-                document.getElementById("modalNivel").innerText = nivel;
-                document.getElementById("detalleModal").style.display = "block";
-            })
-            .catch(error => console.error("Error cargando los datos:", error));
-    }
+                    document.getElementById("detalleContenido").innerHTML = contenido;
+                    document.getElementById("modalNivel").innerText = nivel;
+                    document.getElementById("detalleModal").style.display = "block";
+                })
+                .catch(error => console.error("Error cargando los datos:", error));
+        }
 
-    function cerrarModal() {
-        document.getElementById("detalleModal").style.display = "none";
-    }
-</script>
-
-
+        function cerrarModal() {
+            document.getElementById("detalleModal").style.display = "none";
+        }
+    </script>
 </body>
 
 </html>
