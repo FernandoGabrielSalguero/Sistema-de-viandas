@@ -25,6 +25,7 @@ $query_niveles = "
     JOIN Hijos h ON pc.Hijo_Id = h.Id
     JOIN Cursos cu ON h.Curso_Id = cu.Id
     WHERE pc.Estado = 'Procesando'
+    GROUP BY Nivel
 ";
 $params_niveles = [];
 
