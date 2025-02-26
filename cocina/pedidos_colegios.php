@@ -46,7 +46,7 @@ $query_preferencias = "
     WHERE pc.Estado = 'Procesando' AND pa.Nombre != 'Sin preferencias'
 ";
 
-$params_preferencias = [];
+$params_preferencias = []; // Nuevo array de parámetros
 
 if (!empty($fecha_filtro)) {
     $query_preferencias .= " AND pc.Fecha_entrega = ?";
@@ -61,6 +61,7 @@ $stmt = $pdo->prepare($query_preferencias);
 $stmt->execute($params_preferencias);
 $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// Organizar preferencias por menú
 $preferencias_por_menu = [];
 foreach ($preferencias as $pref) {
     $menu = $pref['MenuNombre'];
@@ -69,36 +70,10 @@ foreach ($preferencias as $pref) {
     }
     $preferencias_por_menu[$menu][] = $pref;
 }
-
-// -------------------- OBTENER VIANDAS POR NIVEL --------------------
-$query_viandas_nivel = "
-    SELECT c.Nivel_Educativo AS Nivel, COUNT(*) AS Cantidad
-    FROM Pedidos_Comida pc
-    JOIN Hijos h ON pc.Hijo_Id = h.Id
-    JOIN Cursos c ON h.Curso_Id = c.Id
-    WHERE pc.Estado = 'Procesando'
-";
-
-$params_viandas_nivel = [];
-
-if (!empty($fecha_filtro)) {
-    $query_viandas_nivel .= " AND pc.Fecha_entrega = ?";
-    $params_viandas_nivel[] = $fecha_filtro;
-}
-if (!empty($colegio_filtro)) {
-    $query_viandas_nivel .= " AND h.Colegio_Id = ?";
-    $params_viandas_nivel[] = $colegio_filtro;
-}
-
-$query_viandas_nivel .= " GROUP BY c.Nivel_Educativo";
-$stmt = $pdo->prepare($query_viandas_nivel);
-$stmt->execute($params_viandas_nivel);
-$viandas_por_nivel = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <title>Dashboard Cocina</title>
@@ -109,7 +84,6 @@ $viandas_por_nivel = $stmt->fetchAll(PDO::FETCH_ASSOC);
             flex-wrap: wrap;
             gap: 20px;
         }
-
         .card {
             border: 2px solid #ddd;
             border-radius: 8px;
@@ -118,61 +92,31 @@ $viandas_por_nivel = $stmt->fetchAll(PDO::FETCH_ASSOC);
             text-align: left;
             background-color: #f8f8f8;
         }
-
         .warning {
             background-color: #ffeb3b;
         }
-
         .danger {
             background-color: #f44336;
             color: white;
         }
-
         .card h3 {
             margin-bottom: 10px;
         }
-
         .card ul {
             list-style: none;
             padding: 0;
         }
-
         .card ul li {
             margin-bottom: 5px;
         }
-
         .card p {
             margin: 5px 0;
         }
-
-        .table-container {
-            margin-top: 20px;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-        }
-
-        table {
-            width: 60%;
-            border-collapse: collapse;
-            text-align: center;
-        }
-
-        th,
-        td {
-            border: 1px solid #ddd;
-            padding: 10px;
-        }
-
-        th {
-            background-color: #f4f4f4;
-        }
     </style>
 </head>
-
 <body>
     <h1>Dashboard Cocina</h1>
-
+    
     <form method="get" action="pedidos_colegios.php" class="filter-container">
         <div class="filter-item">
             <label for="fecha_entrega">Filtrar por Fecha de Entrega:</label>
@@ -193,29 +137,30 @@ $viandas_por_nivel = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <h2>Total de Menús</h2>
     <div class="card-container">
         <?php foreach ($menus as $menu) : ?>
-            <div class="card">
-                <h3><?php echo htmlspecialchars($menu['MenuNombre']); ?></h3>
-                <h2><strong>Cantidad:</strong> <?php echo htmlspecialchars($menu['Cantidad']); ?></h2>
-                <p><strong>Fecha de entrega:</strong> <?php echo htmlspecialchars($menu['Fecha_entrega']); ?></p>
+            <?php 
+            $fechaEntrega = htmlspecialchars($menu['Fecha_entrega']);
+            $menuNombre = htmlspecialchars($menu['MenuNombre']);
+            $cantidad = htmlspecialchars($menu['Cantidad']);
+            $prefCount = isset($preferencias_por_menu[$menuNombre]) ? count($preferencias_por_menu[$menuNombre]) : 0;
+            $cardClass = $prefCount > 0 ? ($prefCount > 2 ? 'danger' : 'warning') : '';
+            ?>
+            <div class="card <?php echo $cardClass; ?>">
+                <h3><?php echo $menuNombre; ?></h3>
+                <h2><strong>Cantidad:</strong> <?php echo $cantidad; ?></h2>
+                <p><strong>Fecha de entrega:</strong> <?php echo $fechaEntrega; ?></p>
+                <?php if ($prefCount > 0) : ?>
+                    <p><strong>⚠ <?php echo $prefCount; ?> alumno(s) con preferencias alimenticias</strong></p>
+                    <ul>
+                        <?php foreach ($preferencias_por_menu[$menuNombre] as $pref) : ?>
+                            <li><strong>Alumno:</strong> <?php echo htmlspecialchars($pref['Alumno']); ?></li>
+                            <li><strong>Curso:</strong> <?php echo htmlspecialchars($pref['Curso']); ?></li>
+                            <li><strong>Preferencia:</strong> <?php echo htmlspecialchars($pref['Preferencia']); ?></li>
+                            <hr>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
             </div>
         <?php endforeach; ?>
     </div>
-
-    <h2>Viandas por Nivel Educativo</h2>
-    <div class="table-container">
-        <table>
-            <tr>
-                <th>Nivel Educativo</th>
-                <th>Cantidad de Viandas</th>
-            </tr>
-            <?php foreach ($viandas_por_nivel as $nivel) : ?>
-                <tr>
-                    <td><?php echo htmlspecialchars($nivel['Nivel']); ?></td>
-                    <td><?php echo htmlspecialchars($nivel['Cantidad']); ?></td>
-                </tr>
-            <?php endforeach; ?>
-        </table>
-    </div>
 </body>
-
 </html>
