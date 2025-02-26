@@ -13,7 +13,7 @@ $colegio_filtro = isset($_GET['colegio']) ? $_GET['colegio'] : '';
 
 // -------------------- OBTENER MENÚS --------------------
 $query_menus = "
-    SELECT m.Nombre AS MenuNombre, COUNT(*) AS Cantidad, pc.Fecha_entrega 
+    SELECT m.Nombre AS MenuNombre, m.Nivel_Educativo, COUNT(*) AS Cantidad, pc.Fecha_entrega 
     FROM Pedidos_Comida pc
     JOIN Menú m ON pc.Menú_Id = m.Id
     JOIN Hijos h ON pc.Hijo_Id = h.Id
@@ -22,6 +22,7 @@ $query_menus = "
 
 $params_menus = [];
 
+// ✅ Agregar filtros SOLO UNA VEZ
 if (!empty($fecha_filtro)) {
     $query_menus .= " AND pc.Fecha_entrega = ?";
     $params_menus[] = $fecha_filtro;
@@ -31,13 +32,13 @@ if (!empty($colegio_filtro)) {
     $params_menus[] = $colegio_filtro;
 }
 
-// ✅ AGRUPAR SOLO POR MENÚ, eliminamos Nivel_Educativo
-$query_menus .= " GROUP BY m.Nombre, pc.Fecha_entrega";
+// ✅ AGRUPAR correctamente
+$query_menus .= " GROUP BY m.Nombre, m.Nivel_Educativo, pc.Fecha_entrega";
 
+// ✅ Preparar y ejecutar consulta
 $stmt = $pdo->prepare($query_menus);
 $stmt->execute($params_menus);
 $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
 
 
 // -------------------- OBTENER PREFERENCIAS ALIMENTICIAS --------------------
