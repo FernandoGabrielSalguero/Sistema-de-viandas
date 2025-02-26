@@ -13,12 +13,13 @@ $colegio_filtro = isset($_GET['colegio']) ? $_GET['colegio'] : '';
 
 // -------------------- OBTENER MENÚS --------------------
 $query_menus = "
-    SELECT m.Nombre AS MenuNombre, COUNT(*) AS Cantidad, pc.Fecha_entrega 
+    SELECT m.Nombre AS MenuNombre, m.Nivel_Educativo, COUNT(*) AS Cantidad, pc.Fecha_entrega 
     FROM Pedidos_Comida pc
     JOIN Menú m ON pc.Menú_Id = m.Id
     JOIN Hijos h ON pc.Hijo_Id = h.Id
     WHERE pc.Estado = 'Procesando'
 ";
+
 $params_menus = [];
 
 if (!empty($fecha_filtro)) {
@@ -31,6 +32,7 @@ if (!empty($colegio_filtro)) {
 }
 
 $query_menus .= " GROUP BY m.Nombre, pc.Fecha_entrega";
+
 $params_niveles = [];
 
 if (!empty($fecha_filtro)) {
@@ -41,10 +43,6 @@ if (!empty($colegio_filtro)) {
     $query_menus .= " AND h.Colegio_Id = ?";
     $params_niveles[] = $colegio_filtro;
 }
-
-$query_menus .= " GROUP BY m.Nombre, m.Nivel_Educativo, pc.Fecha_entrega";
-$stmt = $pdo->prepare($query_menus);
-$stmt->execute($params_niveles);
 
 $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
