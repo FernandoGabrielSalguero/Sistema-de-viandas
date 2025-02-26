@@ -103,7 +103,6 @@ if (!empty($colegio_filtro)) {
 }
 
 $query_menus .= " GROUP BY m.Nombre, m.Nivel_Educativo, pc.Fecha_entrega";
-$stmt = $pdo->prepare($query_menus);
 $stmt->execute(array_values($params_niveles));  // Convertimos a array con valores correctos
 
 // Organizar datos para la tabla
