@@ -11,7 +11,7 @@ include '../includes/db.php';
 $fecha_filtro = isset($_GET['fecha_entrega']) ? $_GET['fecha_entrega'] : '';
 $colegio_filtro = isset($_GET['colegio']) ? $_GET['colegio'] : '';
 
-// Obtener la cantidad total de viandas por menú y sus preferencias alimenticias
+// -------------------- OBTENER MENÚS --------------------
 $query_menus = "
     SELECT m.Nombre AS MenuNombre, COUNT(*) AS Cantidad, pc.Fecha_entrega 
     FROM Pedidos_Comida pc
@@ -19,23 +19,23 @@ $query_menus = "
     JOIN Hijos h ON pc.Hijo_Id = h.Id
     WHERE pc.Estado = 'Procesando'
 ";
-$params = [];
+$params_menus = [];
 
 if (!empty($fecha_filtro)) {
     $query_menus .= " AND pc.Fecha_entrega = ?";
-    $params[] = $fecha_filtro;
+    $params_menus[] = $fecha_filtro;
 }
 if (!empty($colegio_filtro)) {
     $query_menus .= " AND h.Colegio_Id = ?";
-    $params[] = $colegio_filtro;
+    $params_menus[] = $colegio_filtro;
 }
 
 $query_menus .= " GROUP BY m.Nombre, pc.Fecha_entrega";
 $stmt = $pdo->prepare($query_menus);
-$stmt->execute($params);
+$stmt->execute($params_menus);
 $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Obtener alumnos con preferencias alimenticias
+// -------------------- OBTENER PREFERENCIAS ALIMENTICIAS --------------------
 $query_preferencias = "
     SELECT h.Nombre AS Alumno, m.Nombre AS MenuNombre, pa.Nombre AS Preferencia
     FROM Pedidos_Comida pc
@@ -45,17 +45,19 @@ $query_preferencias = "
     WHERE pc.Estado = 'Procesando' AND pa.Nombre != 'Sin preferencias'
 ";
 
+$params_preferencias = []; // Nuevo array de parámetros
+
 if (!empty($fecha_filtro)) {
     $query_preferencias .= " AND pc.Fecha_entrega = ?";
-    $params[] = $fecha_filtro;
+    $params_preferencias[] = $fecha_filtro;
 }
 if (!empty($colegio_filtro)) {
     $query_preferencias .= " AND h.Colegio_Id = ?";
-    $params[] = $colegio_filtro;
+    $params_preferencias[] = $colegio_filtro;
 }
 
 $stmt = $pdo->prepare($query_preferencias);
-$stmt->execute($params);
+$stmt->execute($params_preferencias);
 $preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Organizar preferencias por menú
@@ -117,7 +119,6 @@ foreach ($preferencias as $pref) {
             <button type="submit" name="eliminar_filtro">Eliminar Filtro</button>
         </div>
     </form>
-
 
     <h2>Total de Menús</h2>
     <div class="card-container">
