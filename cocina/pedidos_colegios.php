@@ -273,7 +273,8 @@ $menus_totales = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <td><?php echo isset($data_niveles[$nivel][$menu]) ? $data_niveles[$nivel][$menu] : 0; ?></td>
                 <?php endforeach; ?>
                 <td><strong><?php echo array_sum($data_niveles[$nivel] ?? []); ?></strong></td>
-                <td><button onclick="cargarDetalle('<?php echo $nivel; ?>')">Detalle</button></td>
+                <td><button class="detalle-btn" data-nivel="<?php echo $nivel; ?>">Detalle</button></td>
+
             </tr>
         <?php endforeach; ?>
         <tr style="background-color: #d0e7ff;">
@@ -448,6 +449,15 @@ $menus_totales = $stmt->fetchAll(PDO::FETCH_ASSOC);
         function cerrarModal() {
             document.getElementById("detalleModal").style.display = "none";
         }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll(".detalle-btn").forEach(button => {
+                button.addEventListener("click", function() {
+                    let nivel = this.getAttribute("data-nivel");
+                    cargarDetalle(nivel);
+                });
+            });
+        });
     </script>
 </body>
 
