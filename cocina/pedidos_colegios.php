@@ -72,7 +72,13 @@ foreach ($preferencias as $pref) {
 }
 
 
-$query_menus .= " GROUP BY m.Nombre, m.Nivel_Educativo, pc.Fecha_entrega";
+$query_menus = "
+    SELECT m.Nombre AS MenuNombre, m.Nivel_Educativo, COUNT(*) AS Cantidad, pc.Fecha_entrega 
+    FROM Pedidos_Comida pc
+    JOIN Menú m ON pc.Menú_Id = m.Id
+    JOIN Hijos h ON pc.Hijo_Id = h.Id
+    WHERE pc.Estado = 'Procesando'
+";
 $stmt = $pdo->prepare($query_menus);
 $stmt->execute($params_menus);
 $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
