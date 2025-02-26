@@ -31,8 +31,21 @@ if (!empty($colegio_filtro)) {
 }
 
 $query_menus .= " GROUP BY m.Nombre, pc.Fecha_entrega";
+$params_niveles = [];
+
+if (!empty($fecha_filtro)) {
+    $query_menus .= " AND pc.Fecha_entrega = ?";
+    $params_niveles[] = $fecha_filtro;
+}
+if (!empty($colegio_filtro)) {
+    $query_menus .= " AND h.Colegio_Id = ?";
+    $params_niveles[] = $colegio_filtro;
+}
+
+$query_menus .= " GROUP BY m.Nombre, m.Nivel_Educativo, pc.Fecha_entrega";
 $stmt = $pdo->prepare($query_menus);
-$stmt->execute($params_menus);
+$stmt->execute($params_niveles);
+
 $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // -------------------- OBTENER PREFERENCIAS ALIMENTICIAS --------------------
@@ -79,8 +92,21 @@ $query_menus = "
     JOIN Hijos h ON pc.Hijo_Id = h.Id
     WHERE pc.Estado = 'Procesando'
 ";
+$params_niveles = [];
+
+if (!empty($fecha_filtro)) {
+    $query_menus .= " AND pc.Fecha_entrega = ?";
+    $params_niveles[] = $fecha_filtro;
+}
+if (!empty($colegio_filtro)) {
+    $query_menus .= " AND h.Colegio_Id = ?";
+    $params_niveles[] = $colegio_filtro;
+}
+
+$query_menus .= " GROUP BY m.Nombre, m.Nivel_Educativo, pc.Fecha_entrega";
 $stmt = $pdo->prepare($query_menus);
-$stmt->execute($params_menus);
+$stmt->execute($params_niveles);
+
 $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Organizar datos para la tabla
