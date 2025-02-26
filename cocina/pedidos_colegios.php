@@ -35,40 +35,65 @@ $stmt = $pdo->prepare($query_menus);
 $stmt->execute($params_menus);
 $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// -------------------- OBTENER PREFERENCIAS ALIMENTICIAS --------------------
-$query_preferencias = "
-    SELECT h.Nombre AS Alumno, cu.Nombre AS Curso, m.Nombre AS MenuNombre, pa.Nombre AS Preferencia
+// -------------------- OBTENER DETALLE DE VIANDAS POR NIVEL --------------------
+$query_niveles = "
+    SELECT m.Nivel_Educativo, m.Nombre AS MenuNombre, COUNT(*) AS Cantidad
+    FROM Pedidos_Comida pc
+    JOIN Menú m ON pc.Menú_Id = m.Id
+    JOIN Hijos h ON pc.Hijo_Id = h.Id
+    WHERE pc.Estado = 'Procesando'
+";
+$params_niveles = [];
+
+if (!empty($fecha_filtro)) {
+    $query_niveles .= " AND pc.Fecha_entrega = ?";
+    $params_niveles[] = $fecha_filtro;
+}
+if (!empty($colegio_filtro)) {
+    $query_niveles .= " AND h.Colegio_Id = ?";
+    $params_niveles[] = $colegio_filtro;
+}
+
+$query_niveles .= " GROUP BY m.Nivel_Educativo, m.Nombre ORDER BY FIELD(m.Nivel_Educativo, 'Inicial', 'Primaria', 'Secundaria')";
+$stmt = $pdo->prepare($query_niveles);
+$stmt->execute($params_niveles);
+$niveles_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Organizar por nivel
+$niveles = ['Inicial' => [], 'Primaria' => [], 'Secundaria' => []];
+foreach ($niveles_data as $nivel) {
+    $niveles[$nivel['Nivel_Educativo']][] = $nivel;
+}
+
+// -------------------- OBTENER DETALLE DE PEDIDOS --------------------
+$query_detalle = "
+    SELECT pc.Id AS PedidoId, h.Nombre AS Alumno, cu.Nombre AS Curso, m.Nombre AS MenuNombre, pc.Fecha_entrega, pc.Estado, m.Nivel_Educativo
     FROM Pedidos_Comida pc
     JOIN Hijos h ON pc.Hijo_Id = h.Id
     JOIN Cursos cu ON h.Curso_Id = cu.Id
     JOIN Menú m ON pc.Menú_Id = m.Id
-    JOIN Preferencias_Alimenticias pa ON pc.Preferencias_alimenticias = pa.Id
-    WHERE pc.Estado = 'Procesando' AND pa.Nombre != 'Sin preferencias'
+    WHERE pc.Estado = 'Procesando'
 ";
-
-$params_preferencias = []; // Nuevo array de parámetros
+$params_detalle = [];
 
 if (!empty($fecha_filtro)) {
-    $query_preferencias .= " AND pc.Fecha_entrega = ?";
-    $params_preferencias[] = $fecha_filtro;
+    $query_detalle .= " AND pc.Fecha_entrega = ?";
+    $params_detalle[] = $fecha_filtro;
 }
 if (!empty($colegio_filtro)) {
-    $query_preferencias .= " AND h.Colegio_Id = ?";
-    $params_preferencias[] = $colegio_filtro;
+    $query_detalle .= " AND h.Colegio_Id = ?";
+    $params_detalle[] = $colegio_filtro;
 }
 
-$stmt = $pdo->prepare($query_preferencias);
-$stmt->execute($params_preferencias);
-$preferencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$query_detalle .= " ORDER BY m.Nivel_Educativo, cu.Nombre";
+$stmt = $pdo->prepare($query_detalle);
+$stmt->execute($params_detalle);
+$detalle_pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Organizar preferencias por menú
-$preferencias_por_menu = [];
-foreach ($preferencias as $pref) {
-    $menu = $pref['MenuNombre'];
-    if (!isset($preferencias_por_menu[$menu])) {
-        $preferencias_por_menu[$menu] = [];
-    }
-    $preferencias_por_menu[$menu][] = $pref;
+// Organizar detalles por nivel
+$detalles_por_nivel = ['Inicial' => [], 'Primaria' => [], 'Secundaria' => []];
+foreach ($detalle_pedidos as $detalle) {
+    $detalles_por_nivel[$detalle['Nivel_Educativo']][] = $detalle;
 }
 ?>
 
@@ -77,90 +102,82 @@ foreach ($preferencias as $pref) {
 <head>
     <meta charset="UTF-8">
     <title>Dashboard Cocina</title>
-    <link rel="stylesheet" href="../css/styles.css">
-    <style>
-        .card-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
+    <script>
+        function mostrarModal(nivel) {
+            document.getElementById('modal-' + nivel).style.display = 'block';
         }
-        .card {
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            padding: 15px;
-            width: 600px;
-            text-align: left;
-            background-color: #f8f8f8;
+        function cerrarModal(nivel) {
+            document.getElementById('modal-' + nivel).style.display = 'none';
         }
-        .warning {
-            background-color: #ffeb3b;
+        function descargarCSV(nivel) {
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Pedido ID,Alumno,Curso,Menú,Fecha de Entrega,Estado\n";
+
+            let filas = document.querySelectorAll(`#tabla-${nivel} tbody tr`);
+            filas.forEach(fila => {
+                let columnas = fila.querySelectorAll("td");
+                let filaTexto = [];
+                columnas.forEach(columna => filaTexto.push(columna.innerText));
+                csvContent += filaTexto.join(",") + "\n";
+            });
+
+            let encodedUri = encodeURI(csvContent);
+            let link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "detalle_pedidos_" + nivel + ".csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
-        .danger {
-            background-color: #f44336;
-            color: white;
-        }
-        .card h3 {
-            margin-bottom: 10px;
-        }
-        .card ul {
-            list-style: none;
-            padding: 0;
-        }
-        .card ul li {
-            margin-bottom: 5px;
-        }
-        .card p {
-            margin: 5px 0;
-        }
-    </style>
+    </script>
 </head>
 <body>
     <h1>Dashboard Cocina</h1>
-    
-    <form method="get" action="pedidos_colegios.php" class="filter-container">
-        <div class="filter-item">
-            <label for="fecha_entrega">Filtrar por Fecha de Entrega:</label>
-            <input type="date" id="fecha_entrega" name="fecha_entrega" value="<?php echo htmlspecialchars($fecha_filtro); ?>">
-        </div>
-        <div class="filter-item">
-            <label for="colegio">Filtrar por Colegio:</label>
-            <input type="text" id="colegio" name="colegio" value="<?php echo htmlspecialchars($colegio_filtro); ?>">
-        </div>
-        <div class="filter-item">
-            <button type="submit" name="filtrar_fecha">Filtrar</button>
-        </div>
-        <div class="filter-item">
-            <button type="submit" name="eliminar_filtro">Eliminar Filtro</button>
-        </div>
-    </form>
 
-    <h2>Total de Menús</h2>
-    <div class="card-container">
-        <?php foreach ($menus as $menu) : ?>
-            <?php 
-            $fechaEntrega = htmlspecialchars($menu['Fecha_entrega']);
-            $menuNombre = htmlspecialchars($menu['MenuNombre']);
-            $cantidad = htmlspecialchars($menu['Cantidad']);
-            $prefCount = isset($preferencias_por_menu[$menuNombre]) ? count($preferencias_por_menu[$menuNombre]) : 0;
-            $cardClass = $prefCount > 0 ? ($prefCount > 2 ? 'danger' : 'warning') : '';
-            ?>
-            <div class="card <?php echo $cardClass; ?>">
-                <h3><?php echo $menuNombre; ?></h3>
-                <h2><strong>Cantidad:</strong> <?php echo $cantidad; ?></h2>
-                <p><strong>Fecha de entrega:</strong> <?php echo $fechaEntrega; ?></p>
-                <?php if ($prefCount > 0) : ?>
-                    <p><strong>⚠ <?php echo $prefCount; ?> alumno(s) con preferencias alimenticias</strong></p>
-                    <ul>
-                        <?php foreach ($preferencias_por_menu[$menuNombre] as $pref) : ?>
-                            <li><strong>Alumno:</strong> <?php echo htmlspecialchars($pref['Alumno']); ?></li>
-                            <li><strong>Curso:</strong> <?php echo htmlspecialchars($pref['Curso']); ?></li>
-                            <li><strong>Preferencia:</strong> <?php echo htmlspecialchars($pref['Preferencia']); ?></li>
-                            <hr>
-                        <?php endforeach; ?>
-                    </ul>
-                <?php endif; ?>
+    <h2>Totalidad de Viandas por Nivel</h2>
+    <?php foreach ($niveles as $nivel => $menus): ?>
+        <h3><?php echo $nivel; ?> <button onclick="mostrarModal('<?php echo $nivel; ?>')">Ver Detalle</button></h3>
+        <table border="1">
+            <tr>
+                <th>Menú</th>
+                <th>Cantidad</th>
+            </tr>
+            <?php foreach ($menus as $menu): ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($menu['MenuNombre']); ?></td>
+                    <td><?php echo htmlspecialchars($menu['Cantidad']); ?></td>
+                </tr>
+            <?php endforeach; ?>
+        </table>
+
+        <!-- Modal de Detalle -->
+        <div id="modal-<?php echo $nivel; ?>" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);">
+            <div style="background: white; padding: 20px; margin: 10% auto; width: 80%;">
+                <h2>Detalle de <?php echo $nivel; ?></h2>
+                <table id="tabla-<?php echo $nivel; ?>" border="1">
+                    <tr>
+                        <th>Pedido ID</th>
+                        <th>Alumno</th>
+                        <th>Curso</th>
+                        <th>Menú</th>
+                        <th>Fecha de Entrega</th>
+                        <th>Estado</th>
+                    </tr>
+                    <?php foreach ($detalles_por_nivel[$nivel] as $detalle): ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($detalle['PedidoId']); ?></td>
+                            <td><?php echo htmlspecialchars($detalle['Alumno']); ?></td>
+                            <td><?php echo htmlspecialchars($detalle['Curso']); ?></td>
+                            <td><?php echo htmlspecialchars($detalle['MenuNombre']); ?></td>
+                            <td><?php echo htmlspecialchars($detalle['Fecha_entrega']); ?></td>
+                            <td><?php echo htmlspecialchars($detalle['Estado']); ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </table>
+                <button onclick="descargarCSV('<?php echo $nivel; ?>')">Descargar CSV</button>
+                <button onclick="cerrarModal('<?php echo $nivel; ?>')">Cerrar</button>
             </div>
-        <?php endforeach; ?>
-    </div>
+        </div>
+    <?php endforeach; ?>
 </body>
 </html>
