@@ -31,21 +31,24 @@ if (!empty($colegio_filtro)) {
     $params_menus[] = $colegio_filtro;
 }
 
-$query_menus .= " GROUP BY m.Nombre, pc.Fecha_entrega";
-
-$params_niveles = [];
-
+// ✅ Asegurar que los filtros se añaden ANTES del GROUP BY
 if (!empty($fecha_filtro)) {
     $query_menus .= " AND pc.Fecha_entrega = ?";
-    $params_niveles[] = $fecha_filtro;
+    $params_menus[] = $fecha_filtro;
 }
 if (!empty($colegio_filtro)) {
     $query_menus .= " AND h.Colegio_Id = ?";
-    $params_niveles[] = $colegio_filtro;
+    $params_menus[] = $colegio_filtro;
 }
 
+// ✅ ELIMINAR duplicación de filtros y preparar la consulta
+$query_menus .= " GROUP BY m.Nombre, m.Nivel_Educativo, pc.Fecha_entrega";
+
 $stmt = $pdo->prepare($query_menus);
-$stmt->execute($params_menus);
+$stmt->execute(array_values($params_menus));  // ✅ Convertimos a array limpio
+$menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
 $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // -------------------- OBTENER PREFERENCIAS ALIMENTICIAS --------------------
@@ -141,6 +144,7 @@ foreach ($menues as $menu => $niveles_data) {
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Dashboard Cocina</title>
@@ -151,6 +155,7 @@ foreach ($menues as $menu => $niveles_data) {
             flex-wrap: wrap;
             gap: 20px;
         }
+
         .card {
             border: 2px solid #ddd;
             border-radius: 8px;
@@ -159,31 +164,38 @@ foreach ($menues as $menu => $niveles_data) {
             text-align: left;
             background-color: #f8f8f8;
         }
+
         .warning {
             background-color: #ffeb3b;
         }
+
         .danger {
             background-color: #f44336;
             color: white;
         }
+
         .card h3 {
             margin-bottom: 10px;
         }
+
         .card ul {
             list-style: none;
             padding: 0;
         }
+
         .card ul li {
             margin-bottom: 5px;
         }
+
         .card p {
             margin: 5px 0;
         }
     </style>
 </head>
+
 <body>
     <h1>Dashboard Cocina</h1>
-    
+
     <form method="get" action="pedidos_colegios.php" class="filter-container">
         <div class="filter-item">
             <label for="fecha_entrega">Filtrar por Fecha de Entrega:</label>
@@ -196,15 +208,12 @@ foreach ($menues as $menu => $niveles_data) {
         <div class="filter-item">
             <button type="submit" name="filtrar_fecha">Filtrar</button>
         </div>
-        <div class="filter-item">
-            <button type="submit" name="eliminar_filtro">Eliminar Filtro</button>
-        </div>
     </form>
 
     <h2>Total de Menús</h2>
     <div class="card-container">
         <?php foreach ($menus as $menu) : ?>
-            <?php 
+            <?php
             $fechaEntrega = htmlspecialchars($menu['Fecha_entrega']);
             $menuNombre = htmlspecialchars($menu['MenuNombre']);
             $cantidad = htmlspecialchars($menu['Cantidad']);
@@ -232,67 +241,75 @@ foreach ($menues as $menu => $niveles_data) {
 
 
     <!-- TABLA DE TOTALIDAD DE VIANDAS POR NIVEL -->
-<h2>Totalidad de Viandas por Nivel</h2>
-<table border="1" class="tabla-niveles">
-    <tr>
-        <th>Nivel</th>
-        <?php foreach ($menues as $menu => $val) : ?>
-            <th><?php echo htmlspecialchars($menu); ?></th>
-        <?php endforeach; ?>
-        <th>Total</th>
-        <th>Detalle</th>
-    </tr>
-    <?php foreach ($niveles as $nivel) : ?>
+    <h2>Totalidad de Viandas por Nivel</h2>
+    <table border="1" class="tabla-niveles">
         <tr>
-            <td><?php echo $nivel; ?></td>
+            <th>Nivel</th>
             <?php foreach ($menues as $menu => $val) : ?>
-                <td><?php echo isset($data_niveles[$nivel][$menu]) ? $data_niveles[$nivel][$menu] : 0; ?></td>
+                <th><?php echo htmlspecialchars($menu); ?></th>
             <?php endforeach; ?>
-            <td><strong><?php echo array_sum($data_niveles[$nivel] ?? []); ?></strong></td>
-            <td><button>Detalle</button></td>
+            <th>Total</th>
+            <th>Detalle</th>
         </tr>
-    <?php endforeach; ?>
-    <tr style="background-color: #d0e7ff;">
-        <td><strong>Total</strong></td>
-        <?php foreach ($totales_menus as $total) : ?>
-            <td><strong><?php echo $total; ?></strong></td>
+        <?php foreach ($niveles as $nivel) : ?>
+            <tr>
+                <td><?php echo $nivel; ?></td>
+                <?php foreach ($menues as $menu => $val) : ?>
+                    <td><?php echo isset($data_niveles[$nivel][$menu]) ? $data_niveles[$nivel][$menu] : 0; ?></td>
+                <?php endforeach; ?>
+                <td><strong><?php echo array_sum($data_niveles[$nivel] ?? []); ?></strong></td>
+                <td><button>Detalle</button></td>
+            </tr>
         <?php endforeach; ?>
-        <td><strong><?php echo $total_general; ?></strong></td>
-        <td></td>
-    </tr>
-</table>
+        <tr style="background-color: #d0e7ff;">
+            <td><strong>Total</strong></td>
+            <?php foreach ($totales_menus as $total) : ?>
+                <td><strong><?php echo $total; ?></strong></td>
+            <?php endforeach; ?>
+            <td><strong><?php echo $total_general; ?></strong></td>
+            <td></td>
+        </tr>
+    </table>
 
-<style>
-    .tabla-niveles {
-        width: 80%;
-        border-collapse: collapse;
-        margin-top: 20px;
-    }
-    .tabla-niveles th, .tabla-niveles td {
-        border: 1px solid #ddd;
-        padding: 8px;
-        text-align: center;
-    }
-    .tabla-niveles th {
-        background-color: #007BFF;
-        color: white;
-    }
-    .tabla-niveles tr:nth-child(even) {
-        background-color: #f2f2f2;
-    }
-    .tabla-niveles tr:hover {
-        background-color: #ddd;
-    }
-    .tabla-niveles button {
-        padding: 5px 10px;
-        background-color: #007BFF;
-        color: white;
-        border: none;
-        cursor: pointer;
-    }
-    .tabla-niveles button:hover {
-        background-color: #0056b3;
-    }
-</style>
+    <style>
+        .tabla-niveles {
+            width: 80%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .tabla-niveles th,
+        .tabla-niveles td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .tabla-niveles th {
+            background-color: #007BFF;
+            color: white;
+        }
+
+        .tabla-niveles tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .tabla-niveles tr:hover {
+            background-color: #ddd;
+        }
+
+        .tabla-niveles button {
+            padding: 5px 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .tabla-niveles button:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </body>
+
 </html>
