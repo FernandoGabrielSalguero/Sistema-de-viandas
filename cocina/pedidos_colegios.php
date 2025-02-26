@@ -37,9 +37,10 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // -------------------- OBTENER PREFERENCIAS ALIMENTICIAS --------------------
 $query_preferencias = "
-    SELECT h.Nombre AS Alumno, m.Nombre AS MenuNombre, pa.Nombre AS Preferencia
+    SELECT h.Nombre AS Alumno, cu.Nombre AS Curso, m.Nombre AS MenuNombre, pa.Nombre AS Preferencia
     FROM Pedidos_Comida pc
     JOIN Hijos h ON pc.Hijo_Id = h.Id
+    JOIN Cursos cu ON h.Curso_Id = cu.Id
     JOIN Menú m ON pc.Menú_Id = m.Id
     JOIN Preferencias_Alimenticias pa ON pc.Preferencias_alimenticias = pa.Id
     WHERE pc.Estado = 'Procesando' AND pa.Nombre != 'Sin preferencias'
@@ -87,8 +88,8 @@ foreach ($preferencias as $pref) {
             border: 2px solid #ddd;
             border-radius: 8px;
             padding: 15px;
-            width: 450px;
-            text-align: center;
+            width: 600px;
+            text-align: left;
             background-color: #f8f8f8;
         }
         .warning {
@@ -97,6 +98,19 @@ foreach ($preferencias as $pref) {
         .danger {
             background-color: #f44336;
             color: white;
+        }
+        .card h3 {
+            margin-bottom: 10px;
+        }
+        .card ul {
+            list-style: none;
+            padding: 0;
+        }
+        .card ul li {
+            margin-bottom: 5px;
+        }
+        .card p {
+            margin: 5px 0;
         }
     </style>
 </head>
@@ -138,7 +152,10 @@ foreach ($preferencias as $pref) {
                     <p><strong>⚠ <?php echo $prefCount; ?> alumno(s) con preferencias alimenticias</strong></p>
                     <ul>
                         <?php foreach ($preferencias_por_menu[$menuNombre] as $pref) : ?>
-                            <li><?php echo htmlspecialchars($pref['Alumno'] . ' - ' . $pref['Preferencia']); ?></li>
+                            <li><strong>Alumno:</strong> <?php echo htmlspecialchars($pref['Alumno']); ?></li>
+                            <li><strong>Curso:</strong> <?php echo htmlspecialchars($pref['Curso']); ?></li>
+                            <li><strong>Preferencia:</strong> <?php echo htmlspecialchars($pref['Preferencia']); ?></li>
+                            <hr>
                         <?php endforeach; ?>
                     </ul>
                 <?php endif; ?>
