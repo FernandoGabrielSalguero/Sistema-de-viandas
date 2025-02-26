@@ -22,6 +22,7 @@ $query_menus = "
 
 $params_menus = [];
 
+// ✅ Agregar filtros SOLO UNA VEZ
 if (!empty($fecha_filtro)) {
     $query_menus .= " AND pc.Fecha_entrega = ?";
     $params_menus[] = $fecha_filtro;
@@ -31,25 +32,12 @@ if (!empty($colegio_filtro)) {
     $params_menus[] = $colegio_filtro;
 }
 
-$query_menus .= " GROUP BY m.Nombre, pc.Fecha_entrega";
-
-$params_niveles = [];
-
-// ✅ Asegurar que los filtros se añaden ANTES del GROUP BY
-if (!empty($fecha_filtro)) {
-    $query_menus .= " AND pc.Fecha_entrega = ?";
-    $params_menus[] = $fecha_filtro;
-}
-if (!empty($colegio_filtro)) {
-    $query_menus .= " AND h.Colegio_Id = ?";
-    $params_menus[] = $colegio_filtro;
-}
-
-// ✅ ELIMINAR duplicación de filtros y preparar la consulta
+// ✅ AGRUPAR correctamente
 $query_menus .= " GROUP BY m.Nombre, m.Nivel_Educativo, pc.Fecha_entrega";
 
+// ✅ Preparar y ejecutar consulta
 $stmt = $pdo->prepare($query_menus);
-$stmt->execute(array_values($params_menus));  // ✅ Convertimos a array limpio
+$stmt->execute($params_menus);
 $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 
