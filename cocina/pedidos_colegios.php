@@ -146,7 +146,7 @@ foreach ($preferencias as $pref) {
             ?>
             <div class="card <?php echo $cardClass; ?>">
                 <h3><?php echo $menuNombre; ?></h3>
-                <p><strong>Cantidad:</strong> <?php echo $cantidad; ?></p>
+                <h2><strong>Cantidad:</strong> <?php echo $cantidad; ?></h2>
                 <p><strong>Fecha de entrega:</strong> <?php echo $fechaEntrega; ?></p>
                 <?php if ($prefCount > 0) : ?>
                     <p><strong>⚠ <?php echo $prefCount; ?> alumno(s) con preferencias alimenticias</strong></p>
