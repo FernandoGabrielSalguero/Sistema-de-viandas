@@ -223,9 +223,14 @@ foreach ($colegios as $colegio) {
     </form>
     <!-- END DESCARGAR MENÚ -->
 
+
+
+    <!-- Agregar botones "Ver Detalle" junto a cada nivel -->
     <h2>Totalidad de Viandas por Colegio y Nivel</h2>
     <?php foreach ($niveles_data as $nivel => $menus) : ?>
-        <h3><?php echo htmlspecialchars($nivel); ?></h3>
+        <h3><?php echo htmlspecialchars($nivel); ?>
+            <button onclick="mostrarDetalle('<?php echo htmlspecialchars($nivel); ?>')">Ver Detalle</button>
+        </h3>
         <table border="1">
             <tr>
                 <th>Colegio</th>
@@ -253,6 +258,124 @@ foreach ($colegios as $colegio) {
         </table>
     <?php endforeach; ?>
 
+    <!-- MODAL PARA MOSTRAR DETALLE -->
+    <div id="modalDetalle" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="cerrarModal()">&times;</span>
+            <h2 id="modalTitulo"></h2>
+            <table id="tablaDetalle" border="1">
+                <thead>
+                    <tr>
+                        <th>Alumno</th>
+                        <th>Colegio</th>
+                        <th>Curso</th>
+                        <th>Menú</th>
+                        <th>Fecha de Entrega</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <button onclick="descargarCSV()">Descargar CSV</button>
+        </div>
+    </div>
+
+    <script>
+        // Datos en JSON desde PHP para poder usarlos en JS
+        const pedidos = <?php echo json_encode($preferencias); ?>;
+
+        // Función para mostrar el modal con detalles
+        function mostrarDetalle(nivel) {
+            document.getElementById('modalTitulo').innerText = `Detalle de ${nivel}`;
+            let tbody = document.querySelector("#tablaDetalle tbody");
+            tbody.innerHTML = '';
+
+            let pedidosFiltrados = pedidos.filter(p => p.CursoNombre.includes(nivel));
+
+            pedidosFiltrados.forEach(pedido => {
+                let fila = `<tr>
+                        <td>${pedido.AlumnoNombre}</td>
+                        <td>${pedido.ColegioNombre}</td>
+                        <td>${pedido.CursoNombre}</td>
+                        <td>${pedido.MenuNombre}</td>
+                        <td>${pedido.FechaEntrega}</td>
+                        <td>${pedido.Estado}</td>
+                    </tr>`;
+                tbody.innerHTML += fila;
+            });
+
+            document.getElementById('modalDetalle').style.display = 'block';
+        }
+
+        // Función para cerrar el modal
+        function cerrarModal() {
+            document.getElementById('modalDetalle').style.display = 'none';
+        }
+
+        // Función para descargar en CSV
+        function descargarCSV() {
+            let filas = document.querySelectorAll("#tablaDetalle tr");
+            let csvContent = "data:text/csv;charset=utf-8,";
+
+            filas.forEach(fila => {
+                let cols = fila.querySelectorAll("td, th");
+                let dataFila = [];
+                cols.forEach(col => dataFila.push(col.innerText));
+                csvContent += dataFila.join(",") + "\n";
+            });
+
+            let link = document.createElement("a");
+            link.setAttribute("href", encodeURI(csvContent));
+            link.setAttribute("download", "detalle_pedidos.csv");
+            document.body.appendChild(link);
+            link.click();
+        }
+    </script>
+
+    <style>
+        /* Estilos del modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0, 0, 0);
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%;
+            text-align: center;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+
+
+
+
+
+    <!-- PREFERENCIAS ALIMENTICAS -->
     <h2>Preferencias Alimenticias</h2>
     <table border="1">
         <tr>
