@@ -44,10 +44,6 @@ if (!empty($colegio_filtro)) {
     $params_niveles[] = $colegio_filtro;
 }
 
-$stmt = $pdo->prepare($query_menus);
-$stmt->execute($params_menus);
-$menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
 // -------------------- OBTENER PREFERENCIAS ALIMENTICIAS --------------------
 $query_preferencias = "
     SELECT h.Nombre AS Alumno, cu.Nombre AS Curso, m.Nombre AS MenuNombre, pa.Nombre AS Preferencia
