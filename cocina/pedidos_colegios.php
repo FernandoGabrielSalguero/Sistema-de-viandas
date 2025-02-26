@@ -228,31 +228,31 @@ $menus_totales = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </form>
 
     <h2>Total de Menús</h2>
-<div class="card-container">
-    <?php foreach ($menus_totales as $menu) : ?>
-        <?php
-        $menuNombre = htmlspecialchars($menu['MenuNombre']);
-        $cantidad = htmlspecialchars($menu['Cantidad']);
-        $prefCount = isset($preferencias_por_menu[$menuNombre]) ? count($preferencias_por_menu[$menuNombre]) : 0;
-        $cardClass = $prefCount > 0 ? ($prefCount > 2 ? 'danger' : 'warning') : '';
-        ?>
-        <div class="card <?php echo $cardClass; ?>">
-            <h3><?php echo $menuNombre; ?></h3>
-            <h2><strong>Cantidad total:</strong> <?php echo $cantidad; ?></h2>
-            <?php if ($prefCount > 0) : ?>
-                <p><strong>⚠ <?php echo $prefCount; ?> alumno(s) con preferencias alimenticias</strong></p>
-                <ul>
-                    <?php foreach ($preferencias_por_menu[$menuNombre] as $pref) : ?>
-                        <li><strong>Alumno:</strong> <?php echo htmlspecialchars($pref['Alumno']); ?></li>
-                        <li><strong>Curso:</strong> <?php echo htmlspecialchars($pref['Curso']); ?></li>
-                        <li><strong>Preferencia:</strong> <?php echo htmlspecialchars($pref['Preferencia']); ?></li>
-                        <hr>
-                    <?php endforeach; ?>
-                </ul>
-            <?php endif; ?>
-        </div>
-    <?php endforeach; ?>
-</div>
+    <div class="card-container">
+        <?php foreach ($menus_totales as $menu) : ?>
+            <?php
+            $menuNombre = htmlspecialchars($menu['MenuNombre']);
+            $cantidad = htmlspecialchars($menu['Cantidad']);
+            $prefCount = isset($preferencias_por_menu[$menuNombre]) ? count($preferencias_por_menu[$menuNombre]) : 0;
+            $cardClass = $prefCount > 0 ? ($prefCount > 2 ? 'danger' : 'warning') : '';
+            ?>
+            <div class="card <?php echo $cardClass; ?>">
+                <h3><?php echo $menuNombre; ?></h3>
+                <h2><strong>Cantidad total:</strong> <?php echo $cantidad; ?></h2>
+                <?php if ($prefCount > 0) : ?>
+                    <p><strong>⚠ <?php echo $prefCount; ?> alumno(s) con preferencias alimenticias</strong></p>
+                    <ul>
+                        <?php foreach ($preferencias_por_menu[$menuNombre] as $pref) : ?>
+                            <li><strong>Alumno:</strong> <?php echo htmlspecialchars($pref['Alumno']); ?></li>
+                            <li><strong>Curso:</strong> <?php echo htmlspecialchars($pref['Curso']); ?></li>
+                            <li><strong>Preferencia:</strong> <?php echo htmlspecialchars($pref['Preferencia']); ?></li>
+                            <hr>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
+            </div>
+        <?php endforeach; ?>
+    </div>
 
 
     <!-- TABLA DE TOTALIDAD DE VIANDAS POR NIVEL -->
@@ -273,7 +273,7 @@ $menus_totales = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <td><?php echo isset($data_niveles[$nivel][$menu]) ? $data_niveles[$nivel][$menu] : 0; ?></td>
                 <?php endforeach; ?>
                 <td><strong><?php echo array_sum($data_niveles[$nivel] ?? []); ?></strong></td>
-                <td><button>Detalle</button></td>
+                <td><button onclick="cargarDetalle('<?php echo $nivel; ?>')">Detalle</button></td>
             </tr>
         <?php endforeach; ?>
         <tr style="background-color: #d0e7ff;">
@@ -325,6 +325,132 @@ $menus_totales = $stmt->fetchAll(PDO::FETCH_ASSOC);
             background-color: #0056b3;
         }
     </style>
+
+    <!-- MODAL PARA DETALLES -->
+    <div id="detalleModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="cerrarModal()">&times;</span>
+            <h2>Detalles de Viandas - <span id="modalNivel"></span></h2>
+            <table border="1" class="tabla-detalles">
+                <thead>
+                    <tr>
+                        <th>ID Pedido</th>
+                        <th>Hijo</th>
+                        <th>Curso</th>
+                        <th>Menú</th>
+                        <th>Fecha de Entrega</th>
+                        <th>Estado</th>
+                        <th>Preferencias Alimenticias</th>
+                    </tr>
+                </thead>
+                <tbody id="detalleContenido"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <style>
+        /* Estilos del modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            text-align: center;
+            box-shadow: 0px 0px 10px #00000050;
+            border-radius: 8px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: black;
+        }
+
+        .tabla-detalles {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .tabla-detalles th,
+        .tabla-detalles td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .tabla-detalles th {
+            background-color: #007BFF;
+            color: white;
+        }
+
+        .tabla-detalles tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .tabla-detalles tr:hover {
+            background-color: #ddd;
+        }
+    </style>
+
+<script>
+    function cargarDetalle(nivel) {
+        // Simulación de datos traídos desde PHP con AJAX
+        fetch(`obtener_detalles.php?nivel=${nivel}`)
+            .then(response => response.json())
+            .then(data => {
+                let contenido = '';
+                
+                if (data.length === 0) {
+                    contenido = '<tr><td colspan="7">No hay datos disponibles para este nivel.</td></tr>';
+                } else {
+                    data.forEach(pedido => {
+                        contenido += `
+                            <tr>
+                                <td>${pedido.id_pedido}</td>
+                                <td>${pedido.hijo}</td>
+                                <td>${pedido.curso}</td>
+                                <td>${pedido.menu}</td>
+                                <td>${pedido.fecha_entrega}</td>
+                                <td>${pedido.estado}</td>
+                                <td>${pedido.preferencias_alimenticias}</td>
+                            </tr>
+                        `;
+                    });
+                }
+
+                document.getElementById("detalleContenido").innerHTML = contenido;
+                document.getElementById("modalNivel").innerText = nivel;
+                document.getElementById("detalleModal").style.display = "block";
+            })
+            .catch(error => console.error("Error cargando los datos:", error));
+    }
+
+    function cerrarModal() {
+        document.getElementById("detalleModal").style.display = "none";
+    }
+</script>
+
+
 </body>
 
 </html>
